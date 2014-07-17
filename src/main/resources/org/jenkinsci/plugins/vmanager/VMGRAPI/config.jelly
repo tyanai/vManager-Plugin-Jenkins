@@ -1,0 +1,74 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+  <!--
+    This jelly script is used for per-project configuration.
+
+    See global.jelly for a general discussion about jelly script.
+  -->
+
+  <!--
+    Creates a text field that shows the value of the "name" property.
+    When submitted, it will be passed to the corresponding constructor parameter.
+  -->
+  
+  <f:block>
+  <table style="width: 100%">
+  
+  
+  <f:block>
+  <table style="width: 95% ; border: 1px solid black">
+  <f:entry title="vAPI HOST" field="vAPIUrl" description="vManager vAPI HTTP HOST"><f:textbox /></f:entry>
+  <f:entry title="vAPI PORT" field="vAPIPort" description="vManager vAPI HTTP PORT"><f:textbox /></f:entry>
+  
+    <f:block>
+      <table>
+ 
+    <f:optionalBlock name="authRequired"  title="Authentication Required" description="If checked, User/Password are required." checked="${instance.authRequired}" inline="true">
+     
+   		
+        <f:entry title="vAPI User" field="vAPIUser" description="vManager vAPI User"><f:textbox default="vAPI"/></f:entry>
+        <f:entry title="Pick User ID dynamically " field="dynamicUserId" description="If checked, the user id will get picked from the workspace"><f:checkbox name="dynamicUserId" checked="${it.dynamicUserId}"/></f:entry>
+        <f:entry title="vAPI Secret Key" field="vAPIPassword" description="vManager vAPI Secret Key"><f:password /></f:entry>
+     	
+      
+    </f:optionalBlock>
+     </table>
+      </f:block>
+  
+   <f:validateButton
+   title="${%Test Connection}" progress="${%Testing...}"
+   method="testConnection" with="vAPIUser,vAPIPassword,vAPIUrl,vAPIPort,authRequired" />
+  
+  </table>
+  </f:block>
+  
+  
+  <f:block>
+  <table style="width: 95% ; border: 1px solid black">
+  <f:entry title="vAPI URL" field="apiUrl" description="The actual API REST path"><f:textbox /></f:entry>
+  <f:radioBlock name="apiType" value="static" title="Static API Input" checked="${instance.apiType == 'static'}" inline="true">
+          <f:entry title="API Input (jSON format)" field="vAPIInput" description="API Input for vAPI in jSON format."><f:textarea style="width:70%" /></f:entry>
+  </f:radioBlock>
+       
+        
+  <f:radioBlock name="apiType" value="dynamic" title="Dynamic API Input" checked="${instance.apiType == 'dynamic'}" inline="true">
+    
+          <f:entry title="Name of input file" field="vJsonInputFile" description="Name of input file to contain the json input (not mandatory)"><f:textbox /></f:entry>
+          <f:entry title="Delete Input File" field="deleteInputFile" description="If checked, the job will delete the input file name after processing it."><f:checkbox name="deleteInputFile" checked="${it.deleteInputFile}"/></f:entry>
+   
+  </f:radioBlock>
+   </table>
+  </f:block>
+  
+  
+  
+   
+   
+   
+   
+   
+  
+   
+   </table>
+   </f:block>
+
+</j:jelly>
