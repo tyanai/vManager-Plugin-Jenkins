@@ -208,20 +208,17 @@ public class Utils {
 		return output;
 	}
 
-	public String checkVAPIConnection(String url, String port, boolean requireAuth, String user, String password) throws Exception {
+	public String checkVAPIConnection(String url, boolean requireAuth, String user, String password) throws Exception {
 
 		String textOut = null;
 		try {
 
-			url = url.toLowerCase().trim() + ":" + port.trim();
-			if (!("http".indexOf(url) > 0)) {
-				url = "http://" + url;
-			}
+			
 
 			System.out.println("Trying to connect with vManager vAPI " + url);
 			String input = "{}";
 
-			String apiURL = url + "/vmgr/rest/runs/count";
+			String apiURL = url + "/rest/runs/count";
 
 			HttpURLConnection conn = getVAPIConnection(apiURL, requireAuth, user, password, false, "", 0, null, null);
 			OutputStream os = null;
@@ -325,7 +322,7 @@ public class Utils {
 		return conn;
 	}
 
-	public String executeVSIFLaunch(String[] vsifs, String url, String port, boolean requireAuth, String user, String password, BuildListener listener, boolean dynamicUserId, String buildID,
+	public String executeVSIFLaunch(String[] vsifs, String url, boolean requireAuth, String user, String password, BuildListener listener, boolean dynamicUserId, String buildID,
 			int buildNumber, String workPlacePath) throws Exception {
 
 		boolean notInTestMode = true;
@@ -333,12 +330,9 @@ public class Utils {
 			notInTestMode = false;
 		}
 
-		url = url.toLowerCase().trim() + ":" + port.trim();
-		if (!("http".indexOf(url) > 0)) {
-			url = "http://" + url;
-		}
+		
 
-		String apiURL = url + "/vmgr/rest/sessions/launch";
+		String apiURL = url + "/rest/sessions/launch";
 
 		for (int i = 0; i < vsifs.length; i++) {
 
@@ -394,7 +388,7 @@ public class Utils {
 		return "success";
 	}
 
-	public String executeAPI(String jSON, String apiUrl, String url, String port, boolean requireAuth, String user, String password, BuildListener listener, boolean dynamicUserId, String buildID,
+	public String executeAPI(String jSON, String apiUrl, String url, boolean requireAuth, String user, String password, BuildListener listener, boolean dynamicUserId, String buildID,
 			int buildNumber, String workPlacePath) throws Exception {
 
 		boolean notInTestMode = true;
@@ -402,15 +396,11 @@ public class Utils {
 			notInTestMode = false;
 		}
 
-		url = url.toLowerCase().trim() + ":" + port.trim();
-		if (!("http".indexOf(url) > 0)) {
-			url = "http://" + url;
-		}
 
-		String apiURL = url + "/vmgr/rest" + apiUrl;
+		String apiURL = url + "/rest" + apiUrl;
 
 		if (notInTestMode) {
-			listener.getLogger().print("vManager vAPI - Trying to call vAPI '" + "/vmgr/rest" + apiUrl + "'\n");
+			listener.getLogger().print("vManager vAPI - Trying to call vAPI '" + "/rest" + apiUrl + "'\n");
 		}
 		String input = jSON;
 		HttpURLConnection conn = getVAPIConnection(apiURL, requireAuth, user, password, dynamicUserId, buildID, buildNumber, workPlacePath, listener);

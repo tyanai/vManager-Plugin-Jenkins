@@ -23,7 +23,6 @@ import org.kohsuke.stapler.StaplerRequest;
 public class VMGRAPI extends Builder {
 
 	private final String vAPIUrl;
-	private final String vAPIPort;
 	private final boolean authRequired;
 	private final String vAPIUser;
 	private final String vAPIPassword;
@@ -38,10 +37,9 @@ public class VMGRAPI extends Builder {
 	// Fields in config.jelly must match the parameter names in the
 	// "DataBoundConstructor"
 	@DataBoundConstructor
-	public VMGRAPI(String vAPIUrl, String vAPIPort, String vAPIUser, String vAPIPassword, String vAPIInput, String vJsonInputFile, boolean deleteInputFile, boolean authRequired, String apiType,
+	public VMGRAPI(String vAPIUrl, String vAPIUser, String vAPIPassword, String vAPIInput, String vJsonInputFile, boolean deleteInputFile, boolean authRequired, String apiType,
 			boolean dynamicUserId, String apiUrl) {
 		this.vAPIUrl = vAPIUrl;
-		this.vAPIPort = vAPIPort;
 		this.vAPIUser = vAPIUser;
 		this.vAPIPassword = vAPIPassword;
 		this.vAPIInput = vAPIInput;
@@ -58,10 +56,6 @@ public class VMGRAPI extends Builder {
 	 */
 	public String getVAPIUrl() {
 		return vAPIUrl;
-	}
-
-	public String getVAPIPort() {
-		return vAPIPort;
 	}
 
 	public String getApiUrl() {
@@ -104,7 +98,6 @@ public class VMGRAPI extends Builder {
 	public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
 
 		listener.getLogger().println("The HOST for vAPI is: " + vAPIUrl);
-		listener.getLogger().println("The PORT for vAPI is: " + vAPIPort);
 		listener.getLogger().println("The vAPIUser for vAPI is: " + vAPIUser);
 		listener.getLogger().println("The vAPIPassword for vAPI is: *******");
 		listener.getLogger().println("The Static jSON query for vAPI is: " + vAPIInput);
@@ -138,7 +131,7 @@ public class VMGRAPI extends Builder {
 
 			// Now call the actual launch
 			// ----------------------------------------------------------------------------------------------------------------
-			String output = utils.executeAPI(jSonInput, apiUrl, vAPIUrl, vAPIPort, authRequired, vAPIUser, vAPIPassword, listener, dynamicUserId, build.getId(), build.getNumber(),
+			String output = utils.executeAPI(jSonInput, apiUrl, vAPIUrl, authRequired, vAPIUser, vAPIPassword, listener, dynamicUserId, build.getId(), build.getNumber(),
 					"" + build.getWorkspace());
 			if (!"success".equals(output)) {
 				listener.getLogger().println("Failed to call vAPI for build " + build.getId() + " " + build.getNumber() + "\n");
@@ -221,13 +214,6 @@ public class VMGRAPI extends Builder {
 			return FormValidation.ok();
 		}
 
-		public FormValidation doCheckVAPIPort(@QueryParameter String value) throws IOException, ServletException {
-			if (value.length() == 0)
-				return FormValidation.error("Please set the vManager vAPI PORT ");
-			if (value.length() < 4)
-				return FormValidation.warning("Isn't the name too short?");
-			return FormValidation.ok();
-		}
 
 		public boolean isApplicable(Class<? extends AbstractProject> aClass) {
 			// Indicates that this builder can be used with all kinds of project
@@ -267,12 +253,12 @@ public class VMGRAPI extends Builder {
 		}
 
 		public FormValidation doTestConnection(@QueryParameter("vAPIUser") final String vAPIUser, @QueryParameter("vAPIPassword") final String vAPIPassword,
-				@QueryParameter("vAPIUrl") final String vAPIUrl, @QueryParameter("vAPIPort") final String vAPIPort, @QueryParameter("authRequired") final boolean authRequired) throws IOException,
+				@QueryParameter("vAPIUrl") final String vAPIUrl, @QueryParameter("authRequired") final boolean authRequired) throws IOException,
 				ServletException {
 			try {
 
 				Utils utils = new Utils();
-				String output = utils.checkVAPIConnection(vAPIUrl, vAPIPort, authRequired, vAPIUser, vAPIPassword);
+				String output = utils.checkVAPIConnection(vAPIUrl, authRequired, vAPIUser, vAPIPassword);
 				if (!output.startsWith("Failed")) {
 					return FormValidation.ok("Success. " + output);
 				} else {

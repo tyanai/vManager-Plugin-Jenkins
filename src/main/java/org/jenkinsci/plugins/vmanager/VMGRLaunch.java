@@ -19,7 +19,6 @@ import org.kohsuke.stapler.StaplerRequest;
 public class VMGRLaunch extends Builder {
 
 	private final String vAPIUrl;
-	private final String vAPIPort;
 	private final boolean authRequired;
 	private final String vAPIUser;
 	private final String vAPIPassword;
@@ -32,10 +31,9 @@ public class VMGRLaunch extends Builder {
 	// Fields in config.jelly must match the parameter names in the
 	// "DataBoundConstructor"
 	@DataBoundConstructor
-	public VMGRLaunch(String vAPIUrl, String vAPIPort, String vAPIUser, String vAPIPassword, String vSIFName, String vSIFInputFile, boolean deleteInputFile, boolean authRequired, String vsifType,
+	public VMGRLaunch(String vAPIUrl, String vAPIUser, String vAPIPassword, String vSIFName, String vSIFInputFile, boolean deleteInputFile, boolean authRequired, String vsifType,
 			boolean dynamicUserId) {
 		this.vAPIUrl = vAPIUrl;
-		this.vAPIPort = vAPIPort;
 		this.vAPIUser = vAPIUser;
 		this.vAPIPassword = vAPIPassword;
 		this.vSIFName = vSIFName;
@@ -53,9 +51,6 @@ public class VMGRLaunch extends Builder {
 		return vAPIUrl;
 	}
 
-	public String getVAPIPort() {
-		return vAPIPort;
-	}
 
 	public String getVAPIUser() {
 		return vAPIUser;
@@ -93,7 +88,6 @@ public class VMGRLaunch extends Builder {
 	public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
 
 		listener.getLogger().println("The HOST for vAPI is: " + vAPIUrl);
-		listener.getLogger().println("The PORT for vAPI is: " + vAPIPort);
 		listener.getLogger().println("The vAPIUser for vAPI is: " + vAPIUser);
 		listener.getLogger().println("The vAPIPassword for vAPI is: *******");
 		listener.getLogger().println("The vSIFName for vAPI is: " + vSIFName);
@@ -126,7 +120,7 @@ public class VMGRLaunch extends Builder {
 
 			// Now call the actual launch
 			// ----------------------------------------------------------------------------------------------------------------
-			String output = utils.executeVSIFLaunch(vsifFileNames, vAPIUrl, vAPIPort, authRequired, vAPIUser, vAPIPassword, listener, dynamicUserId, build.getId(), build.getNumber(),
+			String output = utils.executeVSIFLaunch(vsifFileNames, vAPIUrl, authRequired, vAPIUser, vAPIPassword, listener, dynamicUserId, build.getId(), build.getNumber(),
 					"" + build.getWorkspace());
 			if (!"success".equals(output)) {
 				listener.getLogger().println("Failed to launch vsifs for build " + build.getId() + " " + build.getNumber() + "\n");
@@ -201,13 +195,6 @@ public class VMGRLaunch extends Builder {
 			return FormValidation.ok();
 		}
 
-		public FormValidation doCheckVAPIPort(@QueryParameter String value) throws IOException, ServletException {
-			if (value.length() == 0)
-				return FormValidation.error("Please set the vManager vAPI PORT ");
-			if (value.length() < 4)
-				return FormValidation.warning("Isn't the name too short?");
-			return FormValidation.ok();
-		}
 
 		public boolean isApplicable(Class<? extends AbstractProject> aClass) {
 			// Indicates that this builder can be used with all kinds of project
@@ -247,12 +234,12 @@ public class VMGRLaunch extends Builder {
 		}
 
 		public FormValidation doTestConnection(@QueryParameter("vAPIUser") final String vAPIUser, @QueryParameter("vAPIPassword") final String vAPIPassword,
-				@QueryParameter("vAPIUrl") final String vAPIUrl, @QueryParameter("vAPIPort") final String vAPIPort, @QueryParameter("authRequired") final boolean authRequired) throws IOException,
+				@QueryParameter("vAPIUrl") final String vAPIUrl, @QueryParameter("authRequired") final boolean authRequired) throws IOException,
 				ServletException {
 			try {
 
 				Utils utils = new Utils();
-				String output = utils.checkVAPIConnection(vAPIUrl, vAPIPort, authRequired, vAPIUser, vAPIPassword);
+				String output = utils.checkVAPIConnection(vAPIUrl, authRequired, vAPIUser, vAPIPassword);
 				if (!output.startsWith("Failed")) {
 					return FormValidation.ok("Success. " + output);
 				} else {

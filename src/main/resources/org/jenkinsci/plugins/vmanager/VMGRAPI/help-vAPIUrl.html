@@ -1,4 +1,9 @@
 <div>
-  vManager expose a REST API inteface for API.  The REST API is a dedicated process, that need to be started manually for serving remote http requests.<br/>
-  The vAPI HOST is the host (or ip) in which the vAPI process was launched.
+  vManager expose a REST API interface for API.  The REST API is a dedicated process for serving remote http requests - vAPI.<br/>
+  Starting 14.1 s005 The vAPI process is served automatically by the vManager Server process, and as such you need to supply the following url:<br/>
+  <strong>http://[VMANAGER_HOST:VMANAGER_PORT]/vmgr/vapi</strong><br/>
+  For vmanager 14.1 s002, the vAPI process need to get started manually, as such, the url syntaxt is:<br/>
+  <strong>http://[VAPI_HOST:VAPI_PORT]/vmgr</strong><br/><br/>
+  <strong>Note:</strong><br/>
+  Please make sure you are running with a vManager Integration Server. vAPI will not work on vManager Project Server.
 </div>

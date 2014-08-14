@@ -16,8 +16,7 @@
   
   <f:block>
   <table style="width: 95% ; border: 1px solid black">
-  <f:entry title="vAPI HOST" field="vAPIUrl" description="vManager vAPI HTTP HOST"><f:textbox /></f:entry>
-  <f:entry title="vAPI PORT" field="vAPIPort" description="vManager vAPI HTTP PORT"><f:textbox /></f:entry>
+  <f:entry title="vManager Server Host" field="vAPIUrl" description="vManager Server HOST"><f:textbox /></f:entry>
   
     <f:block>
       <table>
@@ -36,7 +35,7 @@
   
    <f:validateButton
    title="${%Test Connection}" progress="${%Testing...}"
-   method="testConnection" with="vAPIUser,vAPIPassword,vAPIUrl,vAPIPort,authRequired" />
+   method="testConnection" with="vAPIUser,vAPIPassword,vAPIUrl,authRequired" />
   
   </table>
   </f:block>

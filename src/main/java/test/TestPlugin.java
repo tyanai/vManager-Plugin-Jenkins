@@ -8,11 +8,10 @@ import org.jenkinsci.plugins.vmanager.VMGRLaunch;
 public class TestPlugin {
 
 	
-	final String vAPIUrl = "vlnx277";
-    final String vAPIPort = "55000";
+	final String vAPIUrl = "http://vlnx277:7070/vmgr/vapi";
     final boolean authRequired = true;
-    final String vAPIUser = "vAPI";
-    final String vAPIPassword = "password";
+    final String vAPIUser = "tyanai";
+    final String vAPIPassword = "letmein";
     final String vSIFName = "/home/tyanai/vsif/vm_basic.vsif";
     final String vSIFInputFile  = "vsifs.input";
     final boolean deleteInputFile = false;
@@ -41,13 +40,13 @@ public class TestPlugin {
 		String[] vsifs = utils.loadVSIFFileNames(buildID, buildNumber, buildArtifactPath, vSIFInputFile, null,deleteInputFile);
 		
 		//Test connection testing
-		utils.checkVAPIConnection(vAPIUrl, vAPIPort, authRequired, vAPIUser, vAPIPassword);
+		utils.checkVAPIConnection(vAPIUrl, authRequired, vAPIUser, vAPIPassword);
 		
 		
-		utils.executeVSIFLaunch(vsifs, vAPIUrl, vAPIPort, authRequired, vAPIUser, vAPIPassword, null,true,buildID,buildNumber,buildArtifactPath);
+		utils.executeVSIFLaunch(vsifs, vAPIUrl, authRequired, vAPIUser, vAPIPassword, null,false,buildID,buildNumber,buildArtifactPath);
 		
 		
-		utils.executeAPI("{}", "/runs/count", vAPIUrl, vAPIPort, authRequired, vAPIUser, vAPIPassword,null, false, buildID, buildNumber, buildArtifactPath);
+		//utils.executeAPI("{}", "/runs/count", vAPIUrl, authRequired, vAPIUser, vAPIPassword,null, false, buildID, buildNumber, buildArtifactPath);
 	}
 	
 	
