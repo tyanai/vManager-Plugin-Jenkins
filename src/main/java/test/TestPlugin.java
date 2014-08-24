@@ -8,7 +8,7 @@ import org.jenkinsci.plugins.vmanager.VMGRLaunch;
 public class TestPlugin {
 
 	
-	final String vAPIUrl = "http://vlnx277:7070/vmgr/vapi";
+	final String vAPIUrl = "https://vlnx277:7070/vmgr/vapi";
     final boolean authRequired = true;
     final String vAPIUser = "tyanai";
     final String vAPIPassword = "letmein";

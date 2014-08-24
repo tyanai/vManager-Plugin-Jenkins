@@ -8,11 +8,17 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.net.HttpURLConnection;
 import java.net.URL;
+
+import javax.net.ssl.*;
 
 import org.apache.commons.codec.binary.Base64;
 
@@ -213,8 +219,6 @@ public class Utils {
 		String textOut = null;
 		try {
 
-			
-
 			System.out.println("Trying to connect with vManager vAPI " + url);
 			String input = "{}";
 
@@ -238,6 +242,8 @@ public class Utils {
 					reason = "vAPI process failed to connect to remote vManager server.";
 				if (conn.getResponseCode() == 401)
 					reason = "Authentication Error";
+				if (conn.getResponseCode() == 412)
+					reason = "vAPI requires vManager 'Integration Server' license.";
 				String errorMessage = "Failed : HTTP error code : " + conn.getResponseCode() + " (" + reason + ")";
 
 				return errorMessage;
@@ -259,7 +265,13 @@ public class Utils {
 			textOut = " The current number of runs held on this vManager server are: " + tmp.getString("count");
 
 		} catch (Exception e) {
-			String errorMessage = "Failed : HTTP error: " + e.getMessage();
+			
+			String errorMessage = "Failed : HTTP error: " + e.getMessage() ;
+			
+			if (e.getMessage().indexOf("Unexpected end of file from server") > -1) {
+				errorMessage = errorMessage + " (from Incisive 14.2 onward the connection is secured.  Verify your url is https://)";	
+			}
+			
 
 			System.out.println(errorMessage);
 			textOut = errorMessage;
@@ -276,8 +288,17 @@ public class Utils {
 			notInTestMode = false;
 		}
 
+		//In case this is an SSL connections
+		
+				
+
 		URL url = new URL(apiUrl);
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+		
+		if (apiUrl.indexOf("https://") > -1){
+			configureAllowAll((HttpsURLConnection) conn);
+		}
+		
 		conn.setDoOutput(true);
 		conn.setRequestMethod("POST");
 		conn.setRequestProperty("Content-Type", "application/json");
@@ -322,15 +343,13 @@ public class Utils {
 		return conn;
 	}
 
-	public String executeVSIFLaunch(String[] vsifs, String url, boolean requireAuth, String user, String password, BuildListener listener, boolean dynamicUserId, String buildID,
-			int buildNumber, String workPlacePath) throws Exception {
+	public String executeVSIFLaunch(String[] vsifs, String url, boolean requireAuth, String user, String password, BuildListener listener, boolean dynamicUserId, String buildID, int buildNumber,
+			String workPlacePath) throws Exception {
 
 		boolean notInTestMode = true;
 		if (listener == null) {
 			notInTestMode = false;
 		}
-
-		
 
 		String apiURL = url + "/rest/sessions/launch";
 
@@ -350,7 +369,9 @@ public class Utils {
 				if (conn.getResponseCode() == 503)
 					reason = "vAPI process failed to connect to remote vManager server.";
 				if (conn.getResponseCode() == 401)
-					reason = "Authentication Error\n";
+					reason = "Authentication Error";
+				if (conn.getResponseCode() == 412)
+					reason = "vAPI requires vManager 'Integration Server' license.";
 				if (conn.getResponseCode() == 406)
 					reason = "VSIF file '" + vsifs[i] + "' was not found on file system, or is not accessed by the vAPI process.\n";
 				String errorMessage = "Failed : HTTP error code : " + conn.getResponseCode() + " (" + reason + ")\n";
@@ -388,14 +409,13 @@ public class Utils {
 		return "success";
 	}
 
-	public String executeAPI(String jSON, String apiUrl, String url, boolean requireAuth, String user, String password, BuildListener listener, boolean dynamicUserId, String buildID,
-			int buildNumber, String workPlacePath) throws Exception {
+	public String executeAPI(String jSON, String apiUrl, String url, boolean requireAuth, String user, String password, BuildListener listener, boolean dynamicUserId, String buildID, int buildNumber,
+			String workPlacePath) throws Exception {
 
 		boolean notInTestMode = true;
 		if (listener == null) {
 			notInTestMode = false;
 		}
-
 
 		String apiURL = url + "/rest" + apiUrl;
 
@@ -413,7 +433,9 @@ public class Utils {
 			if (conn.getResponseCode() == 503)
 				reason = "vAPI process failed to connect to remote vManager server.";
 			if (conn.getResponseCode() == 401)
-				reason = "Authentication Error\n";
+				reason = "Authentication Error";
+			if (conn.getResponseCode() == 412)
+				reason = "vAPI requires vManager 'Integration Server' license.";
 			String errorMessage = "Failed : HTTP error code : " + conn.getResponseCode() + " (" + reason + ")\n";
 			if (notInTestMode) {
 				listener.getLogger().print(errorMessage);
@@ -454,4 +476,49 @@ public class Utils {
 		return "success";
 	}
 
+	
+	
+	
+	
+	
+	
+	private static void configureAllowAll(HttpsURLConnection connection) {
+		connection.setHostnameVerifier(new HostnameVerifier() {
+	           @Override
+	           public boolean verify(String s, SSLSession sslSession) {
+	               return true;
+	           }
+	       });
+
+	       try {
+	    	   connection.setSSLSocketFactory(getSocketFactory());
+	       } catch (Exception e) {
+	           throw new RuntimeException("XTrust Failed to set SSL Socket factory", e);
+	       }
+
+	   }
+
+
+	    private static SSLSocketFactory getSocketFactory() throws NoSuchAlgorithmException, KeyManagementException {
+	        SSLContext sslContext = SSLContext.getInstance("TLS");
+	        TrustManager tm = new X509TrustManager() {
+	            public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+	            }
+
+	            public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+	            }
+
+	            public X509Certificate[] getAcceptedIssuers() {
+	                return null;
+	            }
+	        };
+	        sslContext.init(null, new TrustManager[] { tm }, null);
+	        return sslContext.getSocketFactory();
+	    }
+	
+	
+	
+	
+	
+	
 }
