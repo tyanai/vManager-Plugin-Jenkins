@@ -222,9 +222,9 @@ public class Utils {
 			System.out.println("Trying to connect with vManager vAPI " + url);
 			String input = "{}";
 
-			String apiURL = url + "/rest/runs/count";
+			String apiURL = url + "/rest/sessions/count";
 
-			HttpURLConnection conn = getVAPIConnection(apiURL, requireAuth, user, password, false, "", 0, null, null);
+			HttpURLConnection conn = getVAPIConnection(apiURL, requireAuth, user, password, "POST", false, "", 0, null, null);
 			OutputStream os = null;
 			try {
 				os = conn.getOutputStream();
@@ -262,7 +262,7 @@ public class Utils {
 
 			JSONObject tmp = JSONObject.fromObject(result.toString());
 
-			textOut = " The current number of runs held on this vManager server are: " + tmp.getString("count");
+			textOut = " The current number of sessions held on this vManager server are: " + tmp.getString("count");
 
 		} catch (Exception e) {
 			
@@ -280,7 +280,7 @@ public class Utils {
 		return textOut;
 	}
 
-	public HttpURLConnection getVAPIConnection(String apiUrl, boolean requireAuth, String user, String password, boolean dynamicUserId, String buildID, int buildNumber, String workPlacePath,
+	public HttpURLConnection getVAPIConnection(String apiUrl, boolean requireAuth, String user, String password, String requestMethod, boolean dynamicUserId, String buildID, int buildNumber, String workPlacePath,
 			BuildListener listener) throws Exception {
 
 		boolean notInTestMode = true;
@@ -300,8 +300,11 @@ public class Utils {
 		}
 		
 		conn.setDoOutput(true);
-		conn.setRequestMethod("POST");
-		conn.setRequestProperty("Content-Type", "application/json");
+		conn.setRequestMethod(requestMethod);
+		if ("PUT".equals(requestMethod) || "POST".equals(requestMethod)){
+			conn.setRequestProperty("Content-Type", "application/json");
+		} 
+		
 
 		if (requireAuth) {
 			// ----------------------------------------------------------------------------------------
@@ -339,7 +342,7 @@ public class Utils {
 			conn.setRequestProperty("Authorization", "Basic " + authStringEnc);
 			// ----------------------------------------------------------------------------------------
 		}
-
+		
 		return conn;
 	}
 
@@ -359,12 +362,12 @@ public class Utils {
 				listener.getLogger().print("vManager vAPI - Trying to launch vsif file: '" + vsifs[i] + "'\n");
 			}
 			String input = "{\"vsif\":\"" + vsifs[i] + "\"}";
-			HttpURLConnection conn = getVAPIConnection(apiURL, requireAuth, user, password, dynamicUserId, buildID, buildNumber, workPlacePath, listener);
+			HttpURLConnection conn = getVAPIConnection(apiURL, requireAuth, user, password, "POST", dynamicUserId, buildID, buildNumber, workPlacePath, listener);
 			OutputStream os = conn.getOutputStream();
 			os.write(input.getBytes());
 			os.flush();
 
-			if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
+			if (conn.getResponseCode() != HttpURLConnection.HTTP_OK && conn.getResponseCode() != HttpURLConnection.HTTP_NO_CONTENT && conn.getResponseCode() != HttpURLConnection.HTTP_ACCEPTED && conn.getResponseCode() != HttpURLConnection.HTTP_CREATED && conn.getResponseCode() != HttpURLConnection.HTTP_PARTIAL && conn.getResponseCode() != HttpURLConnection.HTTP_RESET ) {
 				String reason = "";
 				if (conn.getResponseCode() == 503)
 					reason = "vAPI process failed to connect to remote vManager server.";
@@ -409,9 +412,11 @@ public class Utils {
 		return "success";
 	}
 
-	public String executeAPI(String jSON, String apiUrl, String url, boolean requireAuth, String user, String password, BuildListener listener, boolean dynamicUserId, String buildID, int buildNumber,
+	public String executeAPI(String jSON, String apiUrl, String url, boolean requireAuth, String user, String password, String requestMethod, BuildListener listener, boolean dynamicUserId, String buildID, int buildNumber,
 			String workPlacePath) throws Exception {
-
+		
+		try{
+		
 		boolean notInTestMode = true;
 		if (listener == null) {
 			notInTestMode = false;
@@ -423,17 +428,24 @@ public class Utils {
 			listener.getLogger().print("vManager vAPI - Trying to call vAPI '" + "/rest" + apiUrl + "'\n");
 		}
 		String input = jSON;
-		HttpURLConnection conn = getVAPIConnection(apiURL, requireAuth, user, password, dynamicUserId, buildID, buildNumber, workPlacePath, listener);
-		OutputStream os = conn.getOutputStream();
-		os.write(input.getBytes());
-		os.flush();
+		HttpURLConnection conn = getVAPIConnection(apiURL, requireAuth, user, password, requestMethod, dynamicUserId, buildID, buildNumber, workPlacePath, listener);
+		
+		if ("PUT".equals(requestMethod) || "POST".equals(requestMethod)){
+			OutputStream os = conn.getOutputStream();
+			os.write(input.getBytes());
+			os.flush();
+		}
 
-		if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
+		if (conn.getResponseCode() != HttpURLConnection.HTTP_OK && conn.getResponseCode() != HttpURLConnection.HTTP_NO_CONTENT && conn.getResponseCode() != HttpURLConnection.HTTP_ACCEPTED && conn.getResponseCode() != HttpURLConnection.HTTP_CREATED && conn.getResponseCode() != HttpURLConnection.HTTP_PARTIAL && conn.getResponseCode() != HttpURLConnection.HTTP_RESET ) {
 			String reason = "";
 			if (conn.getResponseCode() == 503)
 				reason = "vAPI process failed to connect to remote vManager server.";
 			if (conn.getResponseCode() == 401)
 				reason = "Authentication Error";
+			if (conn.getResponseCode() == 415)
+				reason = "The server is refusing to service the request because the entity of the request is in a format not supported by the requested resource for the requested method.  Check if you selected the right request method (GET/POST/DELETE/PUT).";
+			if (conn.getResponseCode() == 405)
+				reason = "The method specified in the Request-Line is not allowed for the resource identified by the Request-URI. The response MUST include an Allow header containing a list of valid methods for the requested resource.  Check if you selected the right request method (GET/POST/DELETE/PUT).";
 			if (conn.getResponseCode() == 412)
 				reason = "vAPI requires vManager 'Integration Server' license.";
 			String errorMessage = "Failed : HTTP error code : " + conn.getResponseCode() + " (" + reason + ")\n";
@@ -474,6 +486,11 @@ public class Utils {
 		}
 
 		return "success";
+		
+		}catch (Exception e){
+			listener.getLogger().print("Filed: Error: " + e.getMessage() );
+			return e.getMessage();
+		}
 	}
 
 	

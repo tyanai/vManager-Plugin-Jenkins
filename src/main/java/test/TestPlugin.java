@@ -8,7 +8,7 @@ import org.jenkinsci.plugins.vmanager.VMGRLaunch;
 public class TestPlugin {
 
 	
-	final String vAPIUrl = "https://vlnx277:7070/vmgr/vapi";
+	final String vAPIUrl = "https://vlnx277:8000/vmgr/vapi";
     final boolean authRequired = true;
     final String vAPIUser = "tyanai";
     final String vAPIPassword = "letmein";
@@ -46,7 +46,8 @@ public class TestPlugin {
 		utils.executeVSIFLaunch(vsifs, vAPIUrl, authRequired, vAPIUser, vAPIPassword, null,false,buildID,buildNumber,buildArtifactPath);
 		
 		
-		//utils.executeAPI("{}", "/runs/count", vAPIUrl, authRequired, vAPIUser, vAPIPassword,null, false, buildID, buildNumber, buildArtifactPath);
+		utils.executeAPI("{}", "/sessions/count", vAPIUrl, authRequired, vAPIUser, vAPIPassword, "POST", null, false, buildID+"-1", buildNumber, buildArtifactPath);
+		utils.executeAPI("{}", "/runs/get?id=5", vAPIUrl, authRequired, vAPIUser, vAPIPassword, "GET", null, false, buildID+"-2", buildNumber, buildArtifactPath);
 	}
 	
 	

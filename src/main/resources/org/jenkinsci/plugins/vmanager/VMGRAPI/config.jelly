@@ -16,7 +16,7 @@
   
   <f:block>
   <table style="width: 95% ; border: 1px solid black">
-  <f:entry title="vManager Server Host" field="vAPIUrl" description="vManager Server HOST"><f:textbox /></f:entry>
+  <f:entry title="vManager Server API Url" field="vAPIUrl" description="vManager Server API Url"><f:textbox /></f:entry>
   
     <f:block>
       <table>
@@ -44,6 +44,18 @@
   <f:block>
   <table style="width: 95% ; border: 1px solid black">
   <f:entry title="vAPI URL" field="apiUrl" description="The actual API REST path"><f:textbox /></f:entry>
+  <f:entry title="Choose Request Method" field="requestMethod" >
+  	<f:select />
+  <!--
+    <select name="requestMethod">
+        <option selected="${group.requestMethod == 'POST'}" value="POST">POST</option>
+        <option selected="${group.requestMethod == 'GET'}" value="GET">GET</option>
+        <option selected="${group.requestMethod == 'DELETE'}" value="DELETE">DELETE</option>
+        <option selected="${group.requestMethod == 'PUT'}" value="PUT">PUT</option>
+        
+    </select>
+   -->
+  </f:entry>
   <f:radioBlock name="apiType" value="static" title="Static API Input" checked="${instance.apiType == 'static'}" inline="true">
           <f:entry title="API Input (jSON format)" field="vAPIInput" description="API Input for vAPI in jSON format."><f:textarea style="width:70%" /></f:entry>
   </f:radioBlock>

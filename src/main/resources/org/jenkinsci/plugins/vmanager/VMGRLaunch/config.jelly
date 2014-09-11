@@ -16,7 +16,7 @@
   
   <f:block>
   <table style="width: 95% ; border: 1px solid black">
-  <f:entry title="vManager Server Host" field="vAPIUrl" description="vManager Server HOST"><f:textbox /></f:entry>
+  <f:entry title="vManager Server API Url" field="vAPIUrl" description="vManager Server API Url"><f:textbox /></f:entry>
   
     <f:block>
       <table>

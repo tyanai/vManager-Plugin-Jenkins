@@ -8,6 +8,8 @@ import hudson.model.AbstractProject;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
+import hudson.util.ListBoxModel.Option;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,13 +34,14 @@ public class VMGRAPI extends Builder {
 	private final boolean dynamicUserId;
 	private final String apiType;
 	private final String apiUrl;
+	private final String requestMethod;
 
 
 	// Fields in config.jelly must match the parameter names in the
 	// "DataBoundConstructor"
 	@DataBoundConstructor
 	public VMGRAPI(String vAPIUrl, String vAPIUser, String vAPIPassword, String vAPIInput, String vJsonInputFile, boolean deleteInputFile, boolean authRequired, String apiType,
-			boolean dynamicUserId, String apiUrl) {
+			boolean dynamicUserId, String apiUrl, String requestMethod) {
 		this.vAPIUrl = vAPIUrl;
 		this.vAPIUser = vAPIUser;
 		this.vAPIPassword = vAPIPassword;
@@ -49,6 +52,7 @@ public class VMGRAPI extends Builder {
 		this.apiType = apiType;
 		this.dynamicUserId = dynamicUserId;
 		this.apiUrl = apiUrl;
+		this.requestMethod = requestMethod;
 	}
 
 	/**
@@ -93,6 +97,21 @@ public class VMGRAPI extends Builder {
 	public String getApiType() {
 		return apiType;
 	}
+	
+	public String getRequestMethod(){
+		return requestMethod;
+	}
+	/*
+	public ListBoxModel doFillRequestMethodItems(){
+
+	    return new ListBoxModel(
+	        new Option("POST", "POST", "POST".equals(requestMethod)),
+	        new Option("GET", "GET", "GET".equals(requestMethod)),
+	        new Option("PUT", "PUT", "PUT".equals(requestMethod)),
+	    	new Option("DELETE", "DELETE", "DELETE".equals(requestMethod)));
+	}
+	*/
+	
 
 	@Override
 	public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
@@ -109,6 +128,7 @@ public class VMGRAPI extends Builder {
 		listener.getLogger().println("The id is: " + build.getId());
 		listener.getLogger().println("The number is: " + build.getNumber());
 		listener.getLogger().println("The workspace dir is: " + build.getWorkspace());
+		listener.getLogger().println("The request method dir is: " + requestMethod);
 
 		try {
 			Utils utils = new Utils();
@@ -131,7 +151,7 @@ public class VMGRAPI extends Builder {
 
 			// Now call the actual launch
 			// ----------------------------------------------------------------------------------------------------------------
-			String output = utils.executeAPI(jSonInput, apiUrl, vAPIUrl, authRequired, vAPIUser, vAPIPassword, listener, dynamicUserId, build.getId(), build.getNumber(),
+			String output = utils.executeAPI(jSonInput, apiUrl, vAPIUrl, authRequired, vAPIUser, vAPIPassword,requestMethod, listener, dynamicUserId, build.getId(), build.getNumber(),
 					"" + build.getWorkspace());
 			if (!"success".equals(output)) {
 				listener.getLogger().println("Failed to call vAPI for build " + build.getId() + " " + build.getNumber() + "\n");
@@ -213,6 +233,25 @@ public class VMGRAPI extends Builder {
 				return FormValidation.warning("Isn't the name too short?");
 			return FormValidation.ok();
 		}
+		
+		public FormValidation doCheckRequestMethod(@QueryParameter String value) throws IOException, ServletException {
+			if (value == null || "".equals(value))
+				return FormValidation.error("Please choose the REST API request method (POST/GET/DELETE/PUT)");
+			return FormValidation.ok();
+		}
+		
+		public ListBoxModel doFillRequestMethodItems() {
+	        ListBoxModel items = new ListBoxModel();
+	        
+	         items.add("POST", "POST");
+	         items.add("GET", "GET");
+	         items.add("PUT", "PUT");
+	         items.add("DELETE", "DELETE");
+	        
+	        return items;
+	    }
+		
+		
 
 
 		public boolean isApplicable(Class<? extends AbstractProject> aClass) {
