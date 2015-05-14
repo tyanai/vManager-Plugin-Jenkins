@@ -224,7 +224,7 @@ public class Utils {
 
 			String apiURL = url + "/rest/sessions/count";
 
-			HttpURLConnection conn = getVAPIConnection(apiURL, requireAuth, user, password, "POST", false, "", 0, null, null);
+			HttpURLConnection conn = getVAPIConnection(apiURL, requireAuth, user, password, "POST", false, "", 0, null, null,0,0,false);
 			OutputStream os = null;
 			try {
 				os = conn.getOutputStream();
@@ -281,7 +281,7 @@ public class Utils {
 	}
 
 	public HttpURLConnection getVAPIConnection(String apiUrl, boolean requireAuth, String user, String password, String requestMethod, boolean dynamicUserId, String buildID, int buildNumber, String workPlacePath,
-			BuildListener listener) throws Exception {
+			BuildListener listener,int connConnTimeOut, int connReadTimeout,boolean advConfig) throws Exception {
 
 		boolean notInTestMode = true;
 		if (listener == null) {
@@ -304,6 +304,21 @@ public class Utils {
 		if ("PUT".equals(requestMethod) || "POST".equals(requestMethod)){
 			conn.setRequestProperty("Content-Type", "application/json");
 		} 
+		
+		 // set the connection timeouts to one minute and the read timeout to 30 minutes by default
+		if (advConfig){
+			conn.setConnectTimeout(connConnTimeOut * 60 * 1000);
+		} else {
+			conn.setConnectTimeout(60000);
+		}
+		
+		if (advConfig){
+			conn.setReadTimeout(connReadTimeout * 60 * 1000);
+		} else {
+			conn.setReadTimeout(1800000);
+		}
+		
+		
 		
 
 		if (requireAuth) {
@@ -347,7 +362,7 @@ public class Utils {
 	}
 
 	public String executeVSIFLaunch(String[] vsifs, String url, boolean requireAuth, String user, String password, BuildListener listener, boolean dynamicUserId, String buildID, int buildNumber,
-			String workPlacePath) throws Exception {
+			String workPlacePath,int connConnTimeOut, int connReadTimeout, boolean advConfig) throws Exception {
 
 		boolean notInTestMode = true;
 		if (listener == null) {
@@ -362,7 +377,7 @@ public class Utils {
 				listener.getLogger().print("vManager vAPI - Trying to launch vsif file: '" + vsifs[i] + "'\n");
 			}
 			String input = "{\"vsif\":\"" + vsifs[i] + "\"}";
-			HttpURLConnection conn = getVAPIConnection(apiURL, requireAuth, user, password, "POST", dynamicUserId, buildID, buildNumber, workPlacePath, listener);
+			HttpURLConnection conn = getVAPIConnection(apiURL, requireAuth, user, password, "POST", dynamicUserId, buildID, buildNumber, workPlacePath, listener, connConnTimeOut,  connReadTimeout,advConfig);
 			OutputStream os = conn.getOutputStream();
 			os.write(input.getBytes());
 			os.flush();
@@ -413,7 +428,7 @@ public class Utils {
 	}
 
 	public String executeAPI(String jSON, String apiUrl, String url, boolean requireAuth, String user, String password, String requestMethod, BuildListener listener, boolean dynamicUserId, String buildID, int buildNumber,
-			String workPlacePath) throws Exception {
+			String workPlacePath,int connConnTimeOut, int connReadTimeout, boolean advConfig) throws Exception {
 		
 		try{
 		
@@ -428,7 +443,7 @@ public class Utils {
 			listener.getLogger().print("vManager vAPI - Trying to call vAPI '" + "/rest" + apiUrl + "'\n");
 		}
 		String input = jSON;
-		HttpURLConnection conn = getVAPIConnection(apiURL, requireAuth, user, password, requestMethod, dynamicUserId, buildID, buildNumber, workPlacePath, listener);
+		HttpURLConnection conn = getVAPIConnection(apiURL, requireAuth, user, password, requestMethod, dynamicUserId, buildID, buildNumber, workPlacePath, listener, connConnTimeOut,  connReadTimeout, advConfig);
 		
 		if ("PUT".equals(requestMethod) || "POST".equals(requestMethod)){
 			OutputStream os = conn.getOutputStream();

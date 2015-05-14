@@ -35,13 +35,16 @@ public class VMGRAPI extends Builder {
 	private final String apiType;
 	private final String apiUrl;
 	private final String requestMethod;
+	private final boolean advConfig;
+	private int connTimeout = 1;
+	private int readTimeout = 30;
 
 
 	// Fields in config.jelly must match the parameter names in the
 	// "DataBoundConstructor"
 	@DataBoundConstructor
 	public VMGRAPI(String vAPIUrl, String vAPIUser, String vAPIPassword, String vAPIInput, String vJsonInputFile, boolean deleteInputFile, boolean authRequired, String apiType,
-			boolean dynamicUserId, String apiUrl, String requestMethod) {
+			boolean dynamicUserId, String apiUrl, String requestMethod, boolean advConfig, int connTimeout, int readTimeout) {
 		this.vAPIUrl = vAPIUrl;
 		this.vAPIUser = vAPIUser;
 		this.vAPIPassword = vAPIPassword;
@@ -53,6 +56,9 @@ public class VMGRAPI extends Builder {
 		this.dynamicUserId = dynamicUserId;
 		this.apiUrl = apiUrl;
 		this.requestMethod = requestMethod;
+		this.advConfig = advConfig;
+		this.connTimeout = connTimeout;
+		this.readTimeout = readTimeout;
 	}
 
 	/**
@@ -101,6 +107,18 @@ public class VMGRAPI extends Builder {
 	public String getRequestMethod(){
 		return requestMethod;
 	}
+	
+	public boolean isAdvConfig() {
+		return advConfig;
+	}
+	
+	public int getConnTimeout() {
+		return connTimeout;
+	}
+
+	public int getReadTimeout() {
+		return readTimeout;
+	}
 	/*
 	public ListBoxModel doFillRequestMethodItems(){
 
@@ -129,6 +147,14 @@ public class VMGRAPI extends Builder {
 		listener.getLogger().println("The number is: " + build.getNumber());
 		listener.getLogger().println("The workspace dir is: " + build.getWorkspace());
 		listener.getLogger().println("The request method dir is: " + requestMethod);
+		if (advConfig){
+			listener.getLogger().println("The connection timeout is: " + connTimeout + " minutes");
+			listener.getLogger().println("The read api timeout is: " + readTimeout + " minutes");
+		} else {
+			listener.getLogger().println("The connection timeout is: 1 minutes");
+			listener.getLogger().println("The read api timeout is: 30 minutes");
+		}
+
 
 		try {
 			Utils utils = new Utils();
@@ -152,7 +178,7 @@ public class VMGRAPI extends Builder {
 			// Now call the actual launch
 			// ----------------------------------------------------------------------------------------------------------------
 			String output = utils.executeAPI(jSonInput, apiUrl, vAPIUrl, authRequired, vAPIUser, vAPIPassword,requestMethod, listener, dynamicUserId, build.getId(), build.getNumber(),
-					"" + build.getWorkspace());
+					"" + build.getWorkspace(),connTimeout,readTimeout,advConfig);
 			if (!"success".equals(output)) {
 				listener.getLogger().println("Failed to call vAPI for build " + build.getId() + " " + build.getNumber() + "\n");
 				listener.getLogger().println(output + "\n");

@@ -20,6 +20,7 @@ public class VMGRLaunch extends Builder {
 
 	private final String vAPIUrl;
 	private final boolean authRequired;
+	private final boolean advConfig;
 	private final String vAPIUser;
 	private final String vAPIPassword;
 	private final String vSIFName;
@@ -27,21 +28,28 @@ public class VMGRLaunch extends Builder {
 	private final boolean deleteInputFile;
 	private final boolean dynamicUserId;
 	private final String vsifType;
+	
+	private int connTimeout = 1;
+	private int readTimeout = 30;
 
 	// Fields in config.jelly must match the parameter names in the
 	// "DataBoundConstructor"
 	@DataBoundConstructor
 	public VMGRLaunch(String vAPIUrl, String vAPIUser, String vAPIPassword, String vSIFName, String vSIFInputFile, boolean deleteInputFile, boolean authRequired, String vsifType,
-			boolean dynamicUserId) {
+			boolean dynamicUserId, boolean advConfig, int connTimeout, int readTimeout) {
 		this.vAPIUrl = vAPIUrl;
 		this.vAPIUser = vAPIUser;
 		this.vAPIPassword = vAPIPassword;
 		this.vSIFName = vSIFName;
 		this.vSIFInputFile = vSIFInputFile;
 		this.authRequired = authRequired;
+		this.advConfig = advConfig;
 		this.deleteInputFile = deleteInputFile;
 		this.vsifType = vsifType;
 		this.dynamicUserId = dynamicUserId;
+		
+		this.connTimeout = connTimeout;
+		this.readTimeout = readTimeout;
 	}
 
 	/**
@@ -83,6 +91,18 @@ public class VMGRLaunch extends Builder {
 	public String getVsifType() {
 		return vsifType;
 	}
+	
+	public boolean isAdvConfig() {
+		return advConfig;
+	}
+	
+	public int getConnTimeout() {
+		return connTimeout;
+	}
+
+	public int getReadTimeout() {
+		return readTimeout;
+	}
 
 	@Override
 	public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
@@ -98,6 +118,13 @@ public class VMGRLaunch extends Builder {
 		listener.getLogger().println("The id is: " + build.getId());
 		listener.getLogger().println("The number is: " + build.getNumber());
 		listener.getLogger().println("The workspace dir is: " + build.getWorkspace());
+		if (advConfig){
+			listener.getLogger().println("The connection timeout is: " + connTimeout + " minutes");
+			listener.getLogger().println("The read api timeout is: " + readTimeout + " minutes");
+		} else {
+			listener.getLogger().println("The connection timeout is: 1 minutes");
+			listener.getLogger().println("The read api timeout is: 30 minutes");
+		}
 
 		try {
 			Utils utils = new Utils();
@@ -121,7 +148,7 @@ public class VMGRLaunch extends Builder {
 			// Now call the actual launch
 			// ----------------------------------------------------------------------------------------------------------------
 			String output = utils.executeVSIFLaunch(vsifFileNames, vAPIUrl, authRequired, vAPIUser, vAPIPassword, listener, dynamicUserId, build.getId(), build.getNumber(),
-					"" + build.getWorkspace());
+					"" + build.getWorkspace(),connTimeout,readTimeout,advConfig);
 			if (!"success".equals(output)) {
 				listener.getLogger().println("Failed to launch vsifs for build " + build.getId() + " " + build.getNumber() + "\n");
 				listener.getLogger().println(output + "\n");

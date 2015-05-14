@@ -1,0 +1,5 @@
+<div>
+  Connection Timeout is the time (in minutes) for the Jenkins executor to wait till it establish a connection with the vManager server.  It is usually very fast, so no need to change the default (1 minute).</br>
+  Setting the time to 0 means an unlimited time.  In case it is taking too long to establish a connection, and the time passed is more than the Connection Timeout set, the connection to the vManager server will be closed, and the Jenkins executor will be able to continue.  The vAPI operation will fail (it will not start), and the build will be marked as failed.</br>
+  If no Connection timeout is set, the default is 1 minutes.
+</div>
