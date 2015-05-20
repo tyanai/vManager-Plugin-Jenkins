@@ -7,7 +7,7 @@
   </parent>
 
   <artifactId>vmanager-plugin</artifactId>
-  <version>1.6-SNAPSHOT</version>
+  <version>1.6</version>
   <packaging>hpi</packaging>
   <description>Integrates Jenkins to Cadence vManager</description>
   <url>http://wiki.jenkins-ci.org/display/JENKINS/Cadence+vManager+Plugin</url>
