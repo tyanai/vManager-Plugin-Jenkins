@@ -67,10 +67,14 @@
           <f:entry title="Delete Input File" field="deleteInputFile" description="If checked, the job will delete the VSIF file name after processing it."><f:checkbox name="deleteInputFile" checked="${it.deleteInputFile}"/></f:entry>
    
   </f:radioBlock>
+  
+   <f:optionalBlock name="envVarible"  title="Include VSIF Environment Variables" description="" checked="${instance.envVarible}" inline="true">
+     	
+        <f:entry title="Name of input file" field="envVaribleFile" description="Name of input file with environment variables in json format (not mandatory) - vManager 15.1 and above only"><f:textbox /></f:entry>
+      
+    </f:optionalBlock>
    </table>
   </f:block>
-  
-  
   
    
    

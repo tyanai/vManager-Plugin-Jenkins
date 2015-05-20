@@ -169,7 +169,7 @@ public class VMGRAPI extends Builder {
 					listener.getLogger().println("The vAPI query string chosen is dynamic. jSON input file dynamic workspace directory: '" + build.getWorkspace() + "'");
 				} else {
 					listener.getLogger().println(
-							"The vAPI query string chosen is dynamic. jSON input file dynamic workspace directory: '" + build.getWorkspace() + File.separator + vJsonInputFile.trim() + "'");
+							"The vAPI query string chosen is dynamic. jSON input file static location: '" + vJsonInputFile.trim() + "'");
 				}
 				jSonInput = utils.loadJSONFromFile(build.getId(), build.getNumber(), "" + build.getWorkspace(), vJsonInputFile, listener, deleteInputFile);
 

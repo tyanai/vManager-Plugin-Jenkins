@@ -45,7 +45,8 @@ public class Utils {
 				}
 				reader = new BufferedReader(new FileReader(fileName));
 			} else {
-				fileName = workPlacePath + File.separator + inputFile;
+				//fileName = workPlacePath + File.separator + inputFile;
+				fileName = inputFile;
 				if (notInTestMode) {
 					listener.getLogger().print("Loading input file '" + fileName + "\n");
 				}
@@ -81,7 +82,7 @@ public class Utils {
 		if ("".equals(vSIFInputFile) || vSIFInputFile == null) {
 			fileName = workPlacePath + File.separator + buildNumber + "." + buildID + "." + "vsif.input";
 		} else {
-			fileName = workPlacePath + File.separator + vSIFInputFile;
+			fileName = vSIFInputFile;
 		}
 
 		try {
@@ -145,6 +146,53 @@ public class Utils {
 
 		return output;
 	}
+	
+	public String loadJSONEnvInput(String buildID, int buildNumber, String workPlacePath, String envInputFile, BuildListener listener) throws Exception {
+		String output = null;
+		StringBuffer listOfEnvs = new StringBuffer();
+		BufferedReader reader = null;
+		String fileName = null;
+		boolean notInTestMode = true;
+		if (listener == null) {
+			notInTestMode = false;
+		}
+
+		// Set the right File name.
+		if ("".equals(envInputFile) || envInputFile == null) {
+			fileName = workPlacePath + File.separator + buildNumber + "." + buildID + "." + "environment.input";
+		} else {
+			fileName = envInputFile;
+		}
+
+		try {
+
+			reader = this.loadFileFromWorkSpace(buildID, buildNumber, workPlacePath, envInputFile, listener, false, "environment.input");
+			String line = null;
+			while ((line = reader.readLine()) != null) {
+				listOfEnvs.append(line);
+			}
+			
+			output = listOfEnvs.toString();
+			
+			output = "\"environment\":{  "+ output + "}";
+
+		} catch (Exception e) {
+
+			if (notInTestMode) {
+				listener.getLogger().print("Failed to read input file for the environment varibles.  Failed to load file '" + fileName + "'\n");
+			} else {
+
+				System.out.println("Failed to open the read file for the environment varibles.  Failed to load file '" + fileName + "'");
+			}
+
+			throw e;
+		} finally {
+			reader.close();
+		}
+
+		
+		return output;
+	}
 
 	public String loadJSONFromFile(String buildID, int buildNumber, String workPlacePath, String vInputFile, BuildListener listener, boolean deleteInputFile) throws Exception {
 		String output = null;
@@ -160,7 +208,7 @@ public class Utils {
 		if ("".equals(vInputFile) || vInputFile == null) {
 			fileName = workPlacePath + File.separator + buildNumber + "." + buildID + "." + "vapi.input";
 		} else {
-			fileName = workPlacePath + File.separator + vInputFile;
+			fileName = vInputFile;
 		}
 
 		try {
@@ -362,7 +410,7 @@ public class Utils {
 	}
 
 	public String executeVSIFLaunch(String[] vsifs, String url, boolean requireAuth, String user, String password, BuildListener listener, boolean dynamicUserId, String buildID, int buildNumber,
-			String workPlacePath,int connConnTimeOut, int connReadTimeout, boolean advConfig) throws Exception {
+			String workPlacePath,int connConnTimeOut, int connReadTimeout, boolean advConfig, String jsonEnvInput) throws Exception {
 
 		boolean notInTestMode = true;
 		if (listener == null) {
@@ -376,7 +424,12 @@ public class Utils {
 			if (notInTestMode) {
 				listener.getLogger().print("vManager vAPI - Trying to launch vsif file: '" + vsifs[i] + "'\n");
 			}
-			String input = "{\"vsif\":\"" + vsifs[i] + "\"}";
+			String input = "{\"vsif\":\"" + vsifs[i] + "\"";
+			if (jsonEnvInput != null){
+				input = input + "," + jsonEnvInput;	
+			}
+			input = input + "}";
+			
 			HttpURLConnection conn = getVAPIConnection(apiURL, requireAuth, user, password, "POST", dynamicUserId, buildID, buildNumber, workPlacePath, listener, connConnTimeOut,  connReadTimeout,advConfig);
 			OutputStream os = conn.getOutputStream();
 			os.write(input.getBytes());

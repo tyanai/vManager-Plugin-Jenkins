@@ -31,12 +31,14 @@ public class VMGRLaunch extends Builder {
 	
 	private int connTimeout = 1;
 	private int readTimeout = 30;
+	private final boolean envVarible;
+	private final String envVaribleFile;
 
 	// Fields in config.jelly must match the parameter names in the
 	// "DataBoundConstructor"
 	@DataBoundConstructor
 	public VMGRLaunch(String vAPIUrl, String vAPIUser, String vAPIPassword, String vSIFName, String vSIFInputFile, boolean deleteInputFile, boolean authRequired, String vsifType,
-			boolean dynamicUserId, boolean advConfig, int connTimeout, int readTimeout) {
+			boolean dynamicUserId, boolean advConfig, int connTimeout, int readTimeout,boolean envVarible,String envVaribleFile) {
 		this.vAPIUrl = vAPIUrl;
 		this.vAPIUser = vAPIUser;
 		this.vAPIPassword = vAPIPassword;
@@ -44,9 +46,11 @@ public class VMGRLaunch extends Builder {
 		this.vSIFInputFile = vSIFInputFile;
 		this.authRequired = authRequired;
 		this.advConfig = advConfig;
+		this.envVarible = envVarible;
 		this.deleteInputFile = deleteInputFile;
 		this.vsifType = vsifType;
 		this.dynamicUserId = dynamicUserId;
+		this.envVaribleFile = envVaribleFile;
 		
 		this.connTimeout = connTimeout;
 		this.readTimeout = readTimeout;
@@ -72,6 +76,10 @@ public class VMGRLaunch extends Builder {
 		return vSIFName;
 	}
 
+	public String getEnvVaribleFile() {
+		return envVaribleFile;
+	}
+	
 	public String getVSIFInputFile() {
 		return vSIFInputFile;
 	}
@@ -94,6 +102,10 @@ public class VMGRLaunch extends Builder {
 	
 	public boolean isAdvConfig() {
 		return advConfig;
+	}
+	
+	public boolean isEnvVarible() {
+		return envVarible;
 	}
 	
 	public int getConnTimeout() {
@@ -125,11 +137,16 @@ public class VMGRLaunch extends Builder {
 			listener.getLogger().println("The connection timeout is: 1 minutes");
 			listener.getLogger().println("The read api timeout is: 30 minutes");
 		}
+		if (envVarible){
+			listener.getLogger().println("An environment varible file was selected.");
+			//listener.getLogger().println("The environment varible file is: " + envVaribleFile);
+		} 
 
 		try {
 			Utils utils = new Utils();
 			// Get the list of VSIF file to launch
 			String[] vsifFileNames = null;
+			String jsonEnvInput = null;
 
 			if ("static".equals(vsifType)) {
 				listener.getLogger().println("The VSIF file chosen is static. VSIF file static location is: '" + vSIFName + "'");
@@ -139,16 +156,30 @@ public class VMGRLaunch extends Builder {
 				if (vSIFInputFile == null || vSIFInputFile.trim().equals("")) {
 					listener.getLogger().println("The VSIF file chosen is dynamic. VSIF directory dynamic workspace directory: '" + build.getWorkspace() + "'");
 				} else {
-					listener.getLogger().println("The VSIF file chosen is dynamic. VSIF file name is: '" + build.getWorkspace() + File.separator + vSIFInputFile.trim() + "'");
+					listener.getLogger().println("The VSIF file chosen is static. VSIF file name is: '" +  vSIFInputFile.trim() + "'");
 				}
 				vsifFileNames = utils.loadVSIFFileNames(build.getId(), build.getNumber(), "" + build.getWorkspace(), vSIFInputFile, listener, deleteInputFile);
 
 			}
+			
+			//check if user set an environment variables in addition:
+			if (envVarible){
+				if (envVaribleFile == null || envVaribleFile.trim().equals("")) {
+					listener.getLogger().println("The environment varible file chosen is dynamic. Env File directory dynamic workspace directory: '" + build.getWorkspace() + "'");
+				} else {
+					listener.getLogger().println("The environment varible file chosen is static. Environment file name is: '" +  envVaribleFile.trim() + "'");
+				}
+				jsonEnvInput = utils.loadJSONEnvInput(build.getId(), build.getNumber(), "" + build.getWorkspace(), envVaribleFile, listener);
+				listener.getLogger().println("Found the following environment for the vsif: " + jsonEnvInput);
+			}
+			
+			
+			
 
 			// Now call the actual launch
 			// ----------------------------------------------------------------------------------------------------------------
 			String output = utils.executeVSIFLaunch(vsifFileNames, vAPIUrl, authRequired, vAPIUser, vAPIPassword, listener, dynamicUserId, build.getId(), build.getNumber(),
-					"" + build.getWorkspace(),connTimeout,readTimeout,advConfig);
+					"" + build.getWorkspace(),connTimeout,readTimeout,advConfig,jsonEnvInput);
 			if (!"success".equals(output)) {
 				listener.getLogger().println("Failed to launch vsifs for build " + build.getId() + " " + build.getNumber() + "\n");
 				listener.getLogger().println(output + "\n");
