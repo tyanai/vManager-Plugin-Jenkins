@@ -24,9 +24,9 @@
     <f:optionalBlock name="authRequired"  title="Authentication Required" description="If checked, User/Password are required." checked="${instance.authRequired}" inline="true">
      
    		
-        <f:entry title="vAPI User" field="vAPIUser" description="vManager vAPI User"><f:textbox default="vAPI"/></f:entry>
+        <f:entry title="Username" field="vAPIUser" description="vManager Username"><f:textbox default="vAPI"/></f:entry>
         <f:entry title="Pick User ID dynamically " field="dynamicUserId" description="If checked, the user id will get picked from the workspace"><f:checkbox name="dynamicUserId" checked="${it.dynamicUserId}"/></f:entry>
-        <f:entry title="vAPI Secret Key" field="vAPIPassword" description="vManager vAPI Secret Key"><f:password /></f:entry>
+        <f:entry title="Password" field="vAPIPassword" description="vManager password"><f:password /></f:entry>
      	
       
     </f:optionalBlock>
@@ -73,6 +73,19 @@
         <f:entry title="Name of input file" field="envVaribleFile" description="Name of input file with environment variables in json format (not mandatory) - vManager 15.1 and above only"><f:textbox /></f:entry>
       
     </f:optionalBlock>
+    
+    
+    <f:optionalBlock name="useUserOnFarm"  title="Use user's linux account privileges for this execution (16.1 and above only)" description="If selected, the session's artifacts will have the user's permissions" checked="${instance.useUserOnFarm}" inline="true">
+    	 <f:radioBlock name="userFarmType" value="static" title="Use same credentials as for vManager login" checked="${instance.userFarmType == 'static'}" inline="true">
+ 		 </f:radioBlock>
+  		<f:radioBlock name="userFarmType" value="dynamic" title="Dynamic credentials" checked="${instance.userFarmType == 'dynamic'}" inline="true">
+         	<f:entry title="Name of credential file" field="credentialInputFile" description="Name of input file with credential values (not mandatory)"><f:textbox /></f:entry>
+          	<f:entry title="Delete Credential File" field="deleteCredentialInputFile" description="If checked, the job will delete the credential file name after processing it."><f:checkbox name="deleteCredentialInputFile" checked="${it.deleteCredentialInputFile}"/></f:entry>
+ 		 </f:radioBlock>
+     </f:optionalBlock>
+    
+    
+    
    </table>
   </f:block>
   

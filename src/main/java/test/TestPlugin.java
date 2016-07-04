@@ -43,7 +43,7 @@ public class TestPlugin {
 		utils.checkVAPIConnection(vAPIUrl, authRequired, vAPIUser, vAPIPassword);
 		
 		
-		utils.executeVSIFLaunch(vsifs, vAPIUrl, authRequired, vAPIUser, vAPIPassword, null,false,buildID,buildNumber,buildArtifactPath,0,0,false,null);
+		utils.executeVSIFLaunch(vsifs, vAPIUrl, authRequired, vAPIUser, vAPIPassword, null,false,buildID,buildNumber,buildArtifactPath,0,0,false,null,false,null,null);
 		
 		
 		utils.executeAPI("{}", "/sessions/count", vAPIUrl, authRequired, vAPIUser, vAPIPassword, "POST", null, false, buildID+"-1", buildNumber, buildArtifactPath,0,0,false);

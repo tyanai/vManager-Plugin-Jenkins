@@ -147,6 +147,79 @@ public class Utils {
 		return output;
 	}
 	
+	public String[] loadFileCredentials(String buildID, int buildNumber, String workPlacePath, String credentialInputFile, BuildListener listener, boolean deleteInputFile) throws Exception {
+		String[] output = null;
+		List<String> listOfNames = new LinkedList<String>();
+		BufferedReader reader = null;
+		String fileName = null;
+		boolean notInTestMode = true;
+		if (listener == null) {
+			notInTestMode = false;
+		}
+
+		// Set the right File name.
+		if ("".equals(credentialInputFile) || credentialInputFile == null) {
+			fileName = workPlacePath + File.separator + buildNumber + "." + buildID + "." + "credential.input";
+		} else {
+			fileName = credentialInputFile;
+		}
+
+		try {
+
+			reader = this.loadFileFromWorkSpace(buildID, buildNumber, workPlacePath, credentialInputFile, listener, deleteInputFile, "credential.input");
+			String line = null;
+			while ((line = reader.readLine()) != null) {
+				listOfNames.add(line);
+			}
+
+		} catch (Exception e) {
+
+			if (notInTestMode) {
+				listener.getLogger().print("Failed to read input file for the credentials.  Failed to load file '" + fileName + "'\n");
+			} else {
+
+				System.out.println("Failed to open the read file for the credentials.  Failed to load file '" + fileName + "'");
+			}
+
+			throw e;
+		} finally {
+			reader.close();
+		}
+
+		Iterator<String> iter = listOfNames.iterator();
+		output = new String[listOfNames.size()];
+		int i = 0;
+		
+		String stringValue = null;
+		while (iter.hasNext()) {
+			stringValue = new String(iter.next());
+			output[i++] = stringValue;
+		}
+
+		if (deleteInputFile) {
+			if (notInTestMode) {
+				listener.getLogger().print("Job set to delete the credential file.  Deleting " + fileName + "\n");
+			}
+			try {
+				File fileToDelete = new File(fileName);
+				fileToDelete.delete();
+			} catch (Exception e) {
+				if (notInTestMode) {
+					listener.getLogger().print("Failed to delete input file from workspace.  Failed to delete file '" + fileName + "'\n");
+
+				} else {
+
+					System.out.println("Failed to delete the input file from the workspace.  Failed to delete file '" + fileName + "'");
+				}
+				throw e;
+			}
+		}
+
+		return output;
+	}
+	
+	
+	
 	public String loadJSONEnvInput(String buildID, int buildNumber, String workPlacePath, String envInputFile, BuildListener listener) throws Exception {
 		String output = null;
 		StringBuffer listOfEnvs = new StringBuffer();
@@ -410,7 +483,7 @@ public class Utils {
 	}
 
 	public String executeVSIFLaunch(String[] vsifs, String url, boolean requireAuth, String user, String password, BuildListener listener, boolean dynamicUserId, String buildID, int buildNumber,
-			String workPlacePath,int connConnTimeOut, int connReadTimeout, boolean advConfig, String jsonEnvInput) throws Exception {
+			String workPlacePath,int connConnTimeOut, int connReadTimeout, boolean advConfig, String jsonEnvInput, boolean useUserOnFarm, String userFarmType,String[] farmUserPassword) throws Exception {
 
 		boolean notInTestMode = true;
 		if (listener == null) {
@@ -427,6 +500,47 @@ public class Utils {
 			String input = "{\"vsif\":\"" + vsifs[i] + "\"";
 			if (jsonEnvInput != null){
 				input = input + "," + jsonEnvInput;	
+			}
+			if (useUserOnFarm){
+				String userFarm = null;
+				String passwordFarm = null;
+				if ("static".equals(userFarmType)){
+					userFarm = user;
+					passwordFarm = password;
+					if (dynamicUserId) {
+						BufferedReader reader = null;
+						try {
+
+							reader = this.loadFileFromWorkSpace(buildID, buildNumber, workPlacePath, null, listener, false, "user.input");
+							String line = null;
+							while ((line = reader.readLine()) != null) {
+								userFarm = line;
+								break;
+							}
+
+						} catch (Exception e) {
+
+							if (notInTestMode) {
+								listener.getLogger().print("Failed to read input file for the dynamic users. \n");
+							} else {
+
+								System.out.println("Failed to read input file for the dynamic users. \n");
+							}
+
+							throw e;
+						} finally {
+							reader.close();
+						}
+					}
+
+					
+				} else {
+					userFarm = farmUserPassword[0];;
+					passwordFarm = farmUserPassword[1];;
+					
+				}
+				input = input + ",\"credentials\":{\"username\":\"" + userFarm + "\",\"password\":\"" + passwordFarm + "\"}";
+				
 			}
 			input = input + "}";
 			
@@ -447,7 +561,7 @@ public class Utils {
 					reason = "VSIF file '" + vsifs[i] + "' was not found on file system, or is not accessed by the vAPI process.\n";
 				String errorMessage = "Failed : HTTP error code : " + conn.getResponseCode() + " (" + reason + ")\n";
 				if (notInTestMode) {
-					listener.getLogger().print(errorMessage);
+					listener.getLogger().print(errorMessage + conn.getResponseMessage());
 				}
 
 				System.out.println(errorMessage);

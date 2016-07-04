@@ -25,9 +25,13 @@ public class VMGRLaunch extends Builder {
 	private final String vAPIPassword;
 	private final String vSIFName;
 	private final String vSIFInputFile;
+	private final String credentialInputFile;
 	private final boolean deleteInputFile;
+	private final boolean deleteCredentialInputFile; 
+	private final boolean useUserOnFarm;
 	private final boolean dynamicUserId;
 	private final String vsifType;
+	private final String userFarmType;
 	
 	private int connTimeout = 1;
 	private int readTimeout = 30;
@@ -37,18 +41,22 @@ public class VMGRLaunch extends Builder {
 	// Fields in config.jelly must match the parameter names in the
 	// "DataBoundConstructor"
 	@DataBoundConstructor
-	public VMGRLaunch(String vAPIUrl, String vAPIUser, String vAPIPassword, String vSIFName, String vSIFInputFile, boolean deleteInputFile, boolean authRequired, String vsifType,
+	public VMGRLaunch(String vAPIUrl, String vAPIUser, String vAPIPassword, String vSIFName, String vSIFInputFile, String credentialInputFile, boolean deleteInputFile, boolean deleteCredentialInputFile, boolean useUserOnFarm, boolean authRequired, String vsifType, String userFarmType,
 			boolean dynamicUserId, boolean advConfig, int connTimeout, int readTimeout,boolean envVarible,String envVaribleFile) {
 		this.vAPIUrl = vAPIUrl;
 		this.vAPIUser = vAPIUser;
 		this.vAPIPassword = vAPIPassword;
 		this.vSIFName = vSIFName;
 		this.vSIFInputFile = vSIFInputFile;
+		this.credentialInputFile = credentialInputFile;
 		this.authRequired = authRequired;
 		this.advConfig = advConfig;
 		this.envVarible = envVarible;
 		this.deleteInputFile = deleteInputFile;
+		this.deleteCredentialInputFile = deleteCredentialInputFile;
+		this.useUserOnFarm = useUserOnFarm;
 		this.vsifType = vsifType;
+		this.userFarmType = userFarmType;
 		this.dynamicUserId = dynamicUserId;
 		this.envVaribleFile = envVaribleFile;
 		
@@ -83,13 +91,25 @@ public class VMGRLaunch extends Builder {
 	public String getVSIFInputFile() {
 		return vSIFInputFile;
 	}
-
+	
+	public String getCredentialInputFile() {
+		return credentialInputFile;
+	}
+	
 	public boolean isAuthRequired() {
 		return authRequired;
 	}
 
 	public boolean isDeleteInputFile() {
 		return deleteInputFile;
+	}
+	
+	public boolean isDeleteCredentialInputFile() {
+		return deleteCredentialInputFile;
+	}
+	
+	public boolean isUseUserOnFarm() {
+		return useUserOnFarm;
 	}
 
 	public boolean isDynamicUserId() {
@@ -98,6 +118,10 @@ public class VMGRLaunch extends Builder {
 
 	public String getVsifType() {
 		return vsifType;
+	}
+	
+	public String getUserFarmType() {
+		return userFarmType;
 	}
 	
 	public boolean isAdvConfig() {
@@ -141,6 +165,16 @@ public class VMGRLaunch extends Builder {
 			listener.getLogger().println("An environment varible file was selected.");
 			//listener.getLogger().println("The environment varible file is: " + envVaribleFile);
 		} 
+		
+		if (useUserOnFarm){
+			listener.getLogger().println("An User's Credential use was selected.");
+			listener.getLogger().println("An User's Credential type is: " + userFarmType);
+			if ("dynamic".equals(userFarmType)){
+				listener.getLogger().println("The credential file is: " + credentialInputFile);
+				listener.getLogger().println("The credential file was set to be deleted after use: " + deleteCredentialInputFile);
+			}
+			
+		} 
 
 		try {
 			Utils utils = new Utils();
@@ -174,12 +208,22 @@ public class VMGRLaunch extends Builder {
 			}
 			
 			
+			String[] farmUserPassword = null;
+			if ("dynamic".equals(userFarmType)){
+				if (credentialInputFile == null || credentialInputFile.trim().equals("")) {
+					listener.getLogger().println("The credential file chosen is dynamic. Credential directory dynamic workspace directory: '" + build.getWorkspace() + "'");
+				} else {
+					listener.getLogger().println("The credential file chosen is static. Credential file name is: '" +  credentialInputFile.trim() + "'");
+				}
+				farmUserPassword = utils.loadFileCredentials(build.getId(), build.getNumber(), "" + build.getWorkspace(), credentialInputFile, listener, deleteCredentialInputFile);
+			}
+			
 			
 
 			// Now call the actual launch
 			// ----------------------------------------------------------------------------------------------------------------
 			String output = utils.executeVSIFLaunch(vsifFileNames, vAPIUrl, authRequired, vAPIUser, vAPIPassword, listener, dynamicUserId, build.getId(), build.getNumber(),
-					"" + build.getWorkspace(),connTimeout,readTimeout,advConfig,jsonEnvInput);
+					"" + build.getWorkspace(),connTimeout,readTimeout,advConfig,jsonEnvInput,useUserOnFarm,userFarmType,farmUserPassword);
 			if (!"success".equals(output)) {
 				listener.getLogger().println("Failed to launch vsifs for build " + build.getId() + " " + build.getNumber() + "\n");
 				listener.getLogger().println(output + "\n");
