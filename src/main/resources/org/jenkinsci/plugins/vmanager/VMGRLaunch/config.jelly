@@ -83,6 +83,15 @@
           	<f:entry title="Delete Credential File" field="deleteCredentialInputFile" description="If checked, the job will delete the credential file name after processing it."><f:checkbox name="deleteCredentialInputFile" checked="${it.deleteCredentialInputFile}"/></f:entry>
  		 </f:radioBlock>
      </f:optionalBlock>
+     
+     <f:optionalBlock name="waitTillSessionEnds"  title="Wait for launched sessions to end" description="If selected, the build step will not finish until all sessions launched by this build ended" checked="${instance.waitTillSessionEnds}" inline="true">
+    	<f:entry title="Sessions Timeout" field="stepSessionTimeout" description="Timeout in minutes (0 for unlimited), after which the build step will mark this build as a failure"><f:number default="30"/></f:entry>
+  		<f:entry title="In case session status was changed to 'inaccessible'" field="inaccessibleResolver" ><f:select /></f:entry>
+  		<f:entry title="In case session status was changed to 'stopped'" field="stoppedResolver" ><f:select /></f:entry>
+  		<f:entry title="In case session status was changed to 'failed'" field="failedResolver" ><f:select /></f:entry>
+  		<f:entry title="In case session status was changed to 'done'" field="doneResolver" ><f:select /></f:entry>
+  		<f:entry title="In case session status was changed to 'suspended'" field="suspendedResolver" ><f:select /></f:entry>
+     </f:optionalBlock>
     
     
     

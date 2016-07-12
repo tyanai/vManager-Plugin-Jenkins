@@ -12,6 +12,7 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,7 +28,7 @@ import net.sf.json.JSONObject;
 public class Utils {
 
 	public BufferedReader loadFileFromWorkSpace(String buildID, int buildNumber, String workPlacePath, String inputFile, BuildListener listener, boolean deleteInputFile, String fileTypeEndingName)
-			throws Exception {
+			throws Exception { 
 
 		BufferedReader reader = null;
 		String fileName = null;
@@ -483,7 +484,7 @@ public class Utils {
 	}
 
 	public String executeVSIFLaunch(String[] vsifs, String url, boolean requireAuth, String user, String password, BuildListener listener, boolean dynamicUserId, String buildID, int buildNumber,
-			String workPlacePath,int connConnTimeOut, int connReadTimeout, boolean advConfig, String jsonEnvInput, boolean useUserOnFarm, String userFarmType,String[] farmUserPassword) throws Exception {
+			String workPlacePath,int connConnTimeOut, int connReadTimeout, boolean advConfig, String jsonEnvInput, boolean useUserOnFarm, String userFarmType,String[] farmUserPassword, StepHolder stepHolder) throws Exception {
 
 		boolean notInTestMode = true;
 		if (listener == null) {
@@ -491,6 +492,8 @@ public class Utils {
 		}
 
 		String apiURL = url + "/rest/sessions/launch";
+		
+		List<String> listOfSessions = new ArrayList<String>();
 
 		for (int i = 0; i < vsifs.length; i++) {
 
@@ -581,6 +584,7 @@ public class Utils {
 			JSONObject tmp = JSONObject.fromObject(result.toString());
 
 			String textOut = "Session Launch Success: Session ID: " + tmp.getString("value") + "\n";
+			listOfSessions.add(tmp.getString("value"));
 
 			if (notInTestMode) {
 				listener.getLogger().print(textOut);
@@ -589,6 +593,24 @@ public class Utils {
 				System.out.println(textOut);
 			}
 
+		}
+		
+		//Write the sessions id into the workspace for further use
+		// Flush the output into workspace
+		String fileOutput = workPlacePath + File.separator + buildNumber + "." + buildID + ".session_launch.output";
+
+		FileWriter writer = new FileWriter(fileOutput);
+		Iterator<String> iter = listOfSessions.iterator();
+		while (iter.hasNext()){
+			writer.append(iter.next() + "\n");
+		}
+		
+		writer.flush();
+		writer.close();
+		
+		if (stepHolder != null){
+			waitTillSessionEnds(url, requireAuth, user, password, listener, dynamicUserId, buildID, buildNumber,
+				workPlacePath,connConnTimeOut, connReadTimeout, advConfig, stepHolder,listOfSessions,notInTestMode);
 		}
 
 		return "success";
@@ -677,6 +699,14 @@ public class Utils {
 
 	
 	
+	public void waitTillSessionEnds(String url, boolean requireAuth, String user, String password, BuildListener listener, boolean dynamicUserId, String buildID, int buildNumber,
+			String workPlacePath,int connConnTimeOut, int connReadTimeout, boolean advConfig, StepHolder stepHolder, List listOfSessions, boolean notInTestMode) throws Exception{
+		
+			LaunchHolder launchHolder = new LaunchHolder(stepHolder,listOfSessions);
+			launchHolder.performWaiting( url,  requireAuth,  user,  password,  listener,  dynamicUserId,  buildID,  buildNumber,
+					 workPlacePath, connConnTimeOut,  connReadTimeout,  advConfig, notInTestMode);
+		
+	}
 	
 	
 	

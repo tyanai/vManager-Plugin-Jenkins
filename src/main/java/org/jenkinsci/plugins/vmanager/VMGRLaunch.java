@@ -8,10 +8,16 @@ import hudson.model.AbstractProject;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
+import hudson.util.ListBoxModel.Option;
+
 import java.io.File;
 import java.io.IOException;
+
 import javax.servlet.ServletException;
+
 import net.sf.json.JSONObject;
+
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -37,12 +43,23 @@ public class VMGRLaunch extends Builder {
 	private int readTimeout = 30;
 	private final boolean envVarible;
 	private final String envVaribleFile;
+	
+	
+	private final String inaccessibleResolver;
+	private final String stoppedResolver;
+	private final String failedResolver;
+	private final String doneResolver;
+	private final String suspendedResolver;
+	private final boolean waitTillSessionEnds;
+	private int stepSessionTimeout = 0;
+	
+	
 
 	// Fields in config.jelly must match the parameter names in the
 	// "DataBoundConstructor"
 	@DataBoundConstructor
 	public VMGRLaunch(String vAPIUrl, String vAPIUser, String vAPIPassword, String vSIFName, String vSIFInputFile, String credentialInputFile, boolean deleteInputFile, boolean deleteCredentialInputFile, boolean useUserOnFarm, boolean authRequired, String vsifType, String userFarmType,
-			boolean dynamicUserId, boolean advConfig, int connTimeout, int readTimeout,boolean envVarible,String envVaribleFile) {
+			boolean dynamicUserId, boolean advConfig, int connTimeout, int readTimeout,boolean envVarible,String envVaribleFile,String inaccessibleResolver,String stoppedResolver,String failedResolver,String doneResolver,String suspendedResolver,boolean waitTillSessionEnds, int stepSessionTimeout) {
 		this.vAPIUrl = vAPIUrl;
 		this.vAPIUser = vAPIUser;
 		this.vAPIPassword = vAPIPassword;
@@ -62,6 +79,15 @@ public class VMGRLaunch extends Builder {
 		
 		this.connTimeout = connTimeout;
 		this.readTimeout = readTimeout;
+		
+		this.inaccessibleResolver = inaccessibleResolver;
+		this.stoppedResolver = stoppedResolver;
+		this.failedResolver = failedResolver;
+		this.doneResolver = doneResolver;
+		this.suspendedResolver = suspendedResolver;
+		this.waitTillSessionEnds = waitTillSessionEnds;
+		this.stepSessionTimeout = stepSessionTimeout;
+		
 	}
 
 	/**
@@ -139,6 +165,35 @@ public class VMGRLaunch extends Builder {
 	public int getReadTimeout() {
 		return readTimeout;
 	}
+	
+	public int getStepSessionTimeout() {
+		return stepSessionTimeout;
+	}
+	
+	
+	
+	
+	public String getInaccessibleResolver(){
+		return inaccessibleResolver;
+	}
+	public String getStoppedResolver(){
+		return stoppedResolver;
+	}
+	public String getFailedResolver(){
+		return failedResolver;
+	}
+	public String getDoneResolver(){
+		return doneResolver;
+	}
+	public String getSuspendedResolver(){
+		return suspendedResolver;
+	}
+	public boolean getWaitTillSessionEnds(){
+		return waitTillSessionEnds;
+	}
+	
+	
+	
 
 	@Override
 	public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
@@ -175,6 +230,20 @@ public class VMGRLaunch extends Builder {
 			}
 			
 		} 
+		
+		StepHolder stepHolder = null;
+		if (waitTillSessionEnds){
+			listener.getLogger().println("Build set to finish only when session finish to run");
+			
+			listener.getLogger().println("In case session is at state \'inaccessible\' the build will " + inaccessibleResolver);
+			listener.getLogger().println("In case session is at state \'failed\' the build will " + failedResolver);
+			listener.getLogger().println("In case session is at state \'stopped\' the build will " + stoppedResolver);
+			listener.getLogger().println("In case session is at state \'suspended\' the build will " + suspendedResolver);
+			listener.getLogger().println("In case session is at state \'done\' the build will " + doneResolver);
+			listener.getLogger().println("Timeout for entire step is " + stepSessionTimeout + " minutes");
+			
+			stepHolder = new StepHolder(inaccessibleResolver, stoppedResolver, failedResolver, doneResolver, suspendedResolver, waitTillSessionEnds,stepSessionTimeout);
+		}
 
 		try {
 			Utils utils = new Utils();
@@ -192,6 +261,7 @@ public class VMGRLaunch extends Builder {
 				} else {
 					listener.getLogger().println("The VSIF file chosen is static. VSIF file name is: '" +  vSIFInputFile.trim() + "'");
 				}
+				
 				vsifFileNames = utils.loadVSIFFileNames(build.getId(), build.getNumber(), "" + build.getWorkspace(), vSIFInputFile, listener, deleteInputFile);
 
 			}
@@ -222,8 +292,9 @@ public class VMGRLaunch extends Builder {
 
 			// Now call the actual launch
 			// ----------------------------------------------------------------------------------------------------------------
+			
 			String output = utils.executeVSIFLaunch(vsifFileNames, vAPIUrl, authRequired, vAPIUser, vAPIPassword, listener, dynamicUserId, build.getId(), build.getNumber(),
-					"" + build.getWorkspace(),connTimeout,readTimeout,advConfig,jsonEnvInput,useUserOnFarm,userFarmType,farmUserPassword);
+					"" + build.getWorkspace(),connTimeout,readTimeout,advConfig,jsonEnvInput,useUserOnFarm,userFarmType,farmUserPassword,stepHolder);
 			if (!"success".equals(output)) {
 				listener.getLogger().println("Failed to launch vsifs for build " + build.getId() + " " + build.getNumber() + "\n");
 				listener.getLogger().println(output + "\n");
@@ -232,7 +303,7 @@ public class VMGRLaunch extends Builder {
 			// ----------------------------------------------------------------------------------------------------------------
 
 		} catch (Exception e) {
-			listener.getLogger().println("Failed to launch vsifs for build " + build.getId() + " " + build.getNumber());
+			listener.getLogger().println("Failed to build " + build.getId() + " " + build.getNumber());
 			return false;
 		}
 
@@ -303,6 +374,49 @@ public class VMGRLaunch extends Builder {
 			// types
 			return true;
 		}
+		
+		
+		public ListBoxModel doFillInaccessibleResolverItems() {
+	        ListBoxModel items = new ListBoxModel();
+	        items.add("Mark the build as failed","fail");
+	        items.add("Continue, and move to the next build step","continue");
+	        items.add("Ignore, and continue to wait","ignore");
+	        return items;
+	    }
+		
+		public ListBoxModel doFillStoppedResolverItems() {
+			 ListBoxModel items = new ListBoxModel();
+			 items.add("Mark the build as failed","fail");
+		     items.add("Continue, and move to the next build step","continue");
+		     items.add("Ignore, and continue to wait","ignore");
+	        return items;
+	    }
+		
+		public ListBoxModel doFillFailedResolverItems() {
+	        ListBoxModel items = new ListBoxModel();
+	        items.add("Mark the build as failed","fail");
+	        items.add("Continue, and move to the next build step","continue");
+	        items.add("Ignore, and continue to wait","ignore");
+	        return items;
+	    }
+		
+		public ListBoxModel doFillDoneResolverItems() {
+			ListBoxModel items = new ListBoxModel();
+			items.add("Ignore, and continue to wait","ignore");
+			items.add("Continue, and move to the next build step","continue");
+	        items.add("Mark the build as failed","fail");
+	        return items;
+	    }
+		
+		public ListBoxModel doFillSuspendedResolverItems() {
+			ListBoxModel items = new ListBoxModel();
+			items.add("Ignore, and continue to wait","ignore");
+			items.add("Continue, and move to the next build step","continue");
+	        items.add("Mark the build as failed","fail");
+	        return items;
+	    }
+		
+		
 
 		/**
 		 * This human readable name is used in the configuration screen.
