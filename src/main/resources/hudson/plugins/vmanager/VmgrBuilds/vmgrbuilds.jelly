@@ -1,0 +1,58 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler"
+         xmlns:l="/lib/layout" xmlns:t="/lib/hudson"
+         xmlns:dp="/hudson/plugins/view/dashboard">
+    <j:set var="iconSize" value="16x16" />
+    <j:set var="builds" value="${it.finishedBuilds}" />
+    <table id="statistics" class="sortable pane bigtable"
+                               style="margin-top: 0px;">
+        <tr style="border-top: 0px;">
+            <th tooltip="${%Build name}" align="left">${%Build name}</th>
+            <th tooltip="${%Build status}" align="left">${%Build status}</th>
+	    <th tooltip="${%Build time}" align="left">${%Build time}</th>
+	    <th tooltip="${%Build owner}" align="left">${%Build owner}</th>
+            <th tooltip="${%Build sessionstatus}" align="left">${%Build sessionstatus}</th>
+	    <th tooltip="${%Build sessiontriage}" align="left">${%Build sessiontriage}</th>
+            <th tooltip="${%Build sessionname}" align="left">${%Build sessionname}</th>
+	    <th tooltip="${%Build totalruns}" align="left">${%Build totalruns}</th>
+            <th tooltip="${%Build passed}" align="left">${%Build passed}</th>
+            <th tooltip="${%Build failed}" align="left">${%Build failed}</th>
+	    <th tooltip="${%Build running}" align="left">${%Build running}</th>
+            <th tooltip="${%Build waiting}" align="left">${%Build waiting}</th>
+            <th tooltip="${%Build other}" align="left">${%Build other}</th>
+	    <th tooltip="${%Build numofsessions}" align="left">${%Build numofsessions}</th>
+
+	    
+        </tr>
+        <j:forEach var="build" items="${builds}">
+            <tr>
+                <td style="border: 1px #bbb solid;">
+                    <!-- This tag does not generate a job link relative to view for jobs included using regexp -->
+                    <!--t:jobLink job="${build.parent}"/-->
+                    <dp:jobLink job="${build.parent}"/>
+                </td>
+                <td style="border: 1px #bbb solid;" data="${it.getBuildColumnSortData(build)}">
+                    <a href="${h.getRelativeLinkTo(build.parent)}/${build.number}" tooltip="${build.description}">
+                        <img src="${imagesURL}/16x16/${build.buildStatusUrl}"
+                     alt="${build.iconColor.description}"
+                     title="${build.iconColor.description}" />${build.displayName}
+                    </a>
+                </td>
+		<td style="border: 1px #bbb solid;" data="${it.getTimestampString(build)}">${it.getTimestampString(build)}</td>
+                <td style="border: 1px #bbb solid;" data="${it.getBuildOwner(build)}">${it.getBuildOwner(build)}</td>
+		<td style="border: 1px #bbb solid;" data="${it.getSessionStatus(build)}">${it.getSessionStatus(build)}</td>
+		<td style="border: 1px #bbb solid;" data="${it.getSessionTriage(build)}"><a target="_blank" href="${it.getSessionTriage(build)}" tooltip="A Link to vManager Web Regression">Link</a></td>		
+		<td style="border: 1px #bbb solid;" data="${it.getSessionName(build)}">${it.getSessionName(build)}</td>
+		<td style="border: 1px #bbb solid;" data="${it.getTotalRuns(build)}">${it.getTotalRuns(build)}</td>
+		<td style="border: 1px #bbb solid;" data="${it.getPassedRuns(build)}">${it.getPassedRuns(build)}</td>
+		<td style="border: 1px #bbb solid;" data="${it.getFailedRuns(build)}">${it.getFailedRuns(build)}</td>
+		<td style="border: 1px #bbb solid;" data="${it.getRunningRuns(build)}">${it.getRunningRuns(build)}</td>
+		<td style="border: 1px #bbb solid;" data="${it.getWaitingRuns(build)}">${it.getWaitingRuns(build)}</td>
+		<td style="border: 1px #bbb solid;" data="${it.getOtherRuns(build)}">${it.getOtherRuns(build)}</td>
+		<td style="border: 1px #bbb solid;" data="${it.getTotalSessions(build)}">${it.getTotalSessions(build)}</td>
+
+            </tr>
+        </j:forEach>
+    </table>
+    <!--t:buildListTable builds="${builds}" jobBaseUrl="" /-->
+</j:jelly>

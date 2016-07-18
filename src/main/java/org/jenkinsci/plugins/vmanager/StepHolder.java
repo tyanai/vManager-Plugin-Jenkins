@@ -9,11 +9,12 @@ public class StepHolder {
 	private String suspendedResolver;
 	private boolean waitTillSessionEnds;
 	private int stepSessionTimeout = 0;
+	private JUnitRequestHolder jUnitRequestHolder = null;
 	
 	
 	
 	
-	public StepHolder(String inaccessibleResolver, String stoppedResolver, String failedResolver, String doneResolver, String suspendedResolver, boolean waitTillSessionEnds, int stepSessionTimeout) {
+	public StepHolder(String inaccessibleResolver, String stoppedResolver, String failedResolver, String doneResolver, String suspendedResolver, boolean waitTillSessionEnds, int stepSessionTimeout, JUnitRequestHolder jUnitRequestHolder) {
 		super();
 		this.inaccessibleResolver = inaccessibleResolver;
 		this.stoppedResolver = stoppedResolver;
@@ -22,9 +23,23 @@ public class StepHolder {
 		this.suspendedResolver = suspendedResolver;
 		this.waitTillSessionEnds = waitTillSessionEnds;
 		this.stepSessionTimeout = stepSessionTimeout;
+		this.jUnitRequestHolder = jUnitRequestHolder;
 	}
 	
 	
+	
+	public JUnitRequestHolder getjUnitRequestHolder() {
+		return jUnitRequestHolder;
+	}
+
+
+
+	public void setjUnitRequestHolder(JUnitRequestHolder jUnitRequestHolder) {
+		this.jUnitRequestHolder = jUnitRequestHolder;
+	}
+
+
+
 	public int getStepSessionTimeout() {
 		return stepSessionTimeout;
 	}

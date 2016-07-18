@@ -1,6 +1,7 @@
 package org.jenkinsci.plugins.vmanager;
 
 import hudson.model.BuildListener;
+import hudson.util.FormValidation;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,9 +9,12 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -23,15 +27,17 @@ public class LaunchHolder {
 	private static long TIME_TO_SLEEP = 60000;
 	private static final String postData1 = "{\"filter\":{\"attName\":\"id\",\"operand\":\"EQUALS\",\"@c\":\".AttValueFilter\",\"attValue\":\"";
 	private static final String postData2 = "\"},\"projection\": {\"type\":\"SELECTION_ONLY\",\"selection\":[\"session_status\",\"name\"]}}";
+	private static final String runsList = "{\"filter\":{\"condition\":\"AND\",\"@c\":\".ChainedFilter\",\"chain\":[{\"@c\":\".RelationFilter\",\"relationName\":\"session\",\"filter\":{\"condition\":\"AND\",\"@c\":\".ChainedFilter\",\"chain\":[{\"@c\":\".InFilter\",\"attName\":\"id\",\"operand\":\"IN\",\"values\":[\"######\"]}]}}]},\"settings\":{\"write-hidden\":true,\"stream-mode\":true},\"projection\": {\"type\": \"SELECTION_ONLY\",\"selection\":[\"test_name\",\"status\",\"duration\",\"test_group\",\"computed_seed\",\"id\",\"first_failure_name\",\"first_failure_description\"###ATTR###]}}";
+	Map<String,String> extraAttrLabels = new HashMap<String,String>();
 
 	public LaunchHolder(StepHolder stepHolder, List<String> listOfSessions) {
 		super();
 		this.stepHolder = stepHolder;
 		this.listOfSessions = listOfSessions;
-		
+
 		this.listOfSessionsForCountDown = new ArrayList<String>();
 		Iterator<String> iter = listOfSessions.iterator();
-		while (iter.hasNext()){
+		while (iter.hasNext()) {
 			this.listOfSessionsForCountDown.add(iter.next());
 		}
 	}
@@ -70,13 +76,16 @@ public class LaunchHolder {
 
 		if (notInTestMode) {
 			listener.getLogger().print("Waiting until all sessions will end...\n");
-			listener.getLogger().print("Checking for state change every " + (TIME_TO_SLEEP/60000)  +" minutes.\n");
-			listener.getLogger().print("Printing out session state every " + (timeBetweenPrintStatus/60000)  +" minutes.\n");
+			listener.getLogger().print("Checking for state change every " + (TIME_TO_SLEEP / 60000) + " minutes.\n");
+			listener.getLogger().print("Printing out session state every " + (timeBetweenPrintStatus / 60000) + " minutes.\n");
 		} else {
 			System.out.println("Waiting until all sessions will end...\n");
-			System.out.println("Checking for state change every " + (TIME_TO_SLEEP/60000)  +" minutes.");
-			System.out.println("Printing out session state every " + (timeBetweenPrintStatus/60000)  +" minutes.");
+			System.out.println("Checking for state change every " + (TIME_TO_SLEEP / 60000) + " minutes.");
+			System.out.println("Printing out session state every " + (timeBetweenPrintStatus / 60000) + " minutes.");
 		}
+		
+		//Init the SessionStatusHolder - it will be saving the aggregated sessions info every check in the file system
+		SessionStatusHolder sessionStatusHolder = new SessionStatusHolder( url,  requireAuth,  user,  password,  listener,  dynamicUserId,  buildNumber,  workPlacePath,buildID, connConnTimeOut,  connReadTimeout,  advConfig,  notInTestMode,listOfSessions );
 
 		while (keepWaiting) {
 
@@ -198,7 +207,7 @@ public class LaunchHolder {
 
 					} catch (java.net.ConnectException e) {
 						if (notInTestMode) {
-							if (debugPrint){
+							if (debugPrint) {
 								listener.getLogger().print("(" + new Date().toString() + ") - vManager Server is not responding or is down. Build will keep try to connect.\n");
 							}
 						} else {
@@ -212,7 +221,7 @@ public class LaunchHolder {
 						e.printStackTrace();
 					} finally {
 						conn.disconnect();
-						
+
 					}
 
 				}
@@ -223,24 +232,124 @@ public class LaunchHolder {
 				}
 				e.printStackTrace();
 			} finally {
-				if (listOfSessions.size() > 1){
+				if (listOfSessions.size() > 1) {
 					if (notInTestMode) {
-						if (debugPrint){
+						if (debugPrint) {
 							listener.getLogger().print("\n");
 						}
 					} else {
-						if (debugPrint){
+						if (debugPrint) {
 							System.out.println("\n");
 						}
 					}
 				}
 				debugPrint = false;
+				
+				//Write the session state information - can be future use by the dashboard
+				sessionStatusHolder.dumpSessionStatus(); 
+				
 			}
 
 		}
 
 		if (!"success".equals(buildResult)) {
 			throw new Exception(buildResult);
+		} else {
+			// Check if to write the Unit Test XML
+			if (stepHolder.getjUnitRequestHolder() != null) {
+				if (stepHolder.getjUnitRequestHolder().isGenerateJUnitXML()) {
+					
+					
+					//Fill in the Extra runs attribute map
+					apiURL = url + "/rest/$schema/response?action=list&component=runs&extended=true";
+					conn = utils.getVAPIConnection(apiURL, requireAuth, user, password, "GET", dynamicUserId, buildID, buildNumber, workPlacePath, listener, connConnTimeOut,
+							connReadTimeout, advConfig);
+					BufferedReader brExtra = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+
+					StringBuilder resultExtra = new StringBuilder();
+					
+					String outputExtra;
+
+					while ((outputExtra = brExtra.readLine()) != null) {
+						resultExtra.append(outputExtra);
+					}
+
+					conn.disconnect();
+
+					JSONObject tmp = JSONObject.fromObject(resultExtra.toString());
+					
+					JSONObject responseItems = JSONObject.fromObject(tmp.getString("items"));
+					JSONObject properties = JSONObject.fromObject(responseItems.getString("properties"));
+					List<String> extraItems = Arrays.asList(stepHolder.getjUnitRequestHolder().getStaticAttributeList().split("\\s*,\\s*"));
+					Iterator<String> iterExtra = extraItems.iterator();
+					
+					String attr = null;
+					JSONObject attrObject = null;
+					String extraAttributesForRuns = "";
+					
+					while (iterExtra.hasNext()){
+						attr = iterExtra.next();
+						if (properties.has(attr)){
+							attrObject = JSONObject.fromObject(properties.getString(attr));
+							String attrTitle = attrObject.getString("title");
+							extraAttrLabels.put(attr, attrTitle);
+							
+							if (attr.indexOf(" ") > 0 || attr.equals("first_failure_name") || attr.equals("first_failure_description") || attr.equals("computed_seed") || attr.equals("test_group") || attr.equals("test_name")){
+								continue;
+							} else {
+								extraAttributesForRuns = extraAttributesForRuns + ",\"" + attr + "\"";
+							} 
+						} 
+					}
+					
+					
+					// Get all the runs data from the server
+					String runsRestURL = url + "/rest/runs/list";
+					Iterator<String> sessionIter = this.listOfSessions.iterator();
+					
+									
+					
+					String runsJSONData = null;
+					String tmpSessionId = null;
+					while (sessionIter.hasNext()) {
+						runsJSONData = new String(runsList);
+						tmpSessionId = sessionIter.next();
+						runsJSONData = runsJSONData.replaceAll("######", tmpSessionId);
+						runsJSONData = runsJSONData.replaceAll("###ATTR###", extraAttributesForRuns);
+						try {
+							conn = utils.getVAPIConnection(runsRestURL, requireAuth, user, password, requestMethod, dynamicUserId, buildID, buildNumber, workPlacePath, listener, connConnTimeOut,
+									connReadTimeout, advConfig);
+
+							OutputStream os = conn.getOutputStream();
+							os.write(runsJSONData.getBytes());
+							os.flush();
+
+							if (checkResponseCode(conn)) {
+								BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+								StringBuilder result = new StringBuilder();
+								String output;
+								while ((output = br.readLine()) != null) {
+									result.append(output);
+								}
+
+								JSONArray tmpRunsArray = JSONArray.fromObject(result.toString());
+								UnitTestFormatter unitTestFormatter = new UnitTestFormatter(tmpRunsArray, tmpSessionId,stepHolder.getjUnitRequestHolder(),extraAttrLabels);
+								unitTestFormatter.dumpXMLFile(workPlacePath, buildNumber, buildID);
+
+							}
+						} catch (Exception e) {
+							if (notInTestMode) {
+								listener.getLogger().print(e.getMessage());
+							}
+							e.printStackTrace();
+						} finally {
+							conn.disconnect();
+
+						}
+					}
+				}
+			}
+
 		}
 
 	}
@@ -327,7 +436,8 @@ public class LaunchHolder {
 	private boolean checkResponseCode(HttpURLConnection conn) {
 		try {
 			if (conn.getResponseCode() != HttpURLConnection.HTTP_OK && conn.getResponseCode() != HttpURLConnection.HTTP_NO_CONTENT && conn.getResponseCode() != HttpURLConnection.HTTP_ACCEPTED
-					&& conn.getResponseCode() != HttpURLConnection.HTTP_CREATED && conn.getResponseCode() != HttpURLConnection.HTTP_PARTIAL && conn.getResponseCode() != HttpURLConnection.HTTP_RESET) {
+					&& conn.getResponseCode() != HttpURLConnection.HTTP_CREATED && conn.getResponseCode() != HttpURLConnection.HTTP_PARTIAL && conn.getResponseCode() != HttpURLConnection.HTTP_RESET
+					&& conn.getResponseCode() != 406) {
 				return false;
 			} else {
 				return true;

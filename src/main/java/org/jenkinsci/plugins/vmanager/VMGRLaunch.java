@@ -13,6 +13,9 @@ import hudson.util.ListBoxModel.Option;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.servlet.ServletException;
 
@@ -54,12 +57,17 @@ public class VMGRLaunch extends Builder {
 	private int stepSessionTimeout = 0;
 	
 	
+	private final boolean generateJUnitXML;
+	private final boolean extraAttributesForFailures; 
+	private final String staticAttributeList;
+	//private final String extraAttributesForFailuresInputFile;
+	//private final boolean deleteExtraAttributesFile;
 
 	// Fields in config.jelly must match the parameter names in the
 	// "DataBoundConstructor"
 	@DataBoundConstructor
 	public VMGRLaunch(String vAPIUrl, String vAPIUser, String vAPIPassword, String vSIFName, String vSIFInputFile, String credentialInputFile, boolean deleteInputFile, boolean deleteCredentialInputFile, boolean useUserOnFarm, boolean authRequired, String vsifType, String userFarmType,
-			boolean dynamicUserId, boolean advConfig, int connTimeout, int readTimeout,boolean envVarible,String envVaribleFile,String inaccessibleResolver,String stoppedResolver,String failedResolver,String doneResolver,String suspendedResolver,boolean waitTillSessionEnds, int stepSessionTimeout) {
+			boolean dynamicUserId, boolean advConfig, int connTimeout, int readTimeout,boolean envVarible,String envVaribleFile,String inaccessibleResolver,String stoppedResolver,String failedResolver,String doneResolver,String suspendedResolver,boolean waitTillSessionEnds, int stepSessionTimeout,boolean generateJUnitXML,boolean extraAttributesForFailures,String staticAttributeList) {
 		this.vAPIUrl = vAPIUrl;
 		this.vAPIUser = vAPIUser;
 		this.vAPIPassword = vAPIPassword;
@@ -88,11 +96,31 @@ public class VMGRLaunch extends Builder {
 		this.waitTillSessionEnds = waitTillSessionEnds;
 		this.stepSessionTimeout = stepSessionTimeout;
 		
+		this.generateJUnitXML = generateJUnitXML;
+		this.extraAttributesForFailures = extraAttributesForFailures;
+		this.staticAttributeList = staticAttributeList;
+		
+
+		
 	}
 
 	/**
 	 * We'll use this from the <tt>config.jelly</tt>.
 	 */
+	
+	public boolean isExtraAttributesForFailures() {
+		return extraAttributesForFailures;
+	}
+	
+	public String getStaticAttributeList() {
+		return staticAttributeList;
+	}
+	
+	
+	public boolean isGenerateJUnitXML() {
+		return generateJUnitXML;
+	}
+	
 	public String getVAPIUrl() {
 		return vAPIUrl;
 	}
@@ -232,6 +260,8 @@ public class VMGRLaunch extends Builder {
 		} 
 		
 		StepHolder stepHolder = null;
+		JUnitRequestHolder jUnitRequestHolder = null;
+		
 		if (waitTillSessionEnds){
 			listener.getLogger().println("Build set to finish only when session finish to run");
 			
@@ -242,7 +272,18 @@ public class VMGRLaunch extends Builder {
 			listener.getLogger().println("In case session is at state \'done\' the build will " + doneResolver);
 			listener.getLogger().println("Timeout for entire step is " + stepSessionTimeout + " minutes");
 			
-			stepHolder = new StepHolder(inaccessibleResolver, stoppedResolver, failedResolver, doneResolver, suspendedResolver, waitTillSessionEnds,stepSessionTimeout);
+			listener.getLogger().println("Generate XML Report XML output: " + generateJUnitXML );
+			if (generateJUnitXML){
+				jUnitRequestHolder = new JUnitRequestHolder(generateJUnitXML, extraAttributesForFailures, staticAttributeList);
+				listener.getLogger().println("Extra Attributes in JUnit Report: " + extraAttributesForFailures);
+				if (extraAttributesForFailures){
+					listener.getLogger().println("Extra Attributes list in JUnit Report is: " + staticAttributeList);
+				} 
+				
+			}
+			
+			
+			stepHolder = new StepHolder(inaccessibleResolver, stoppedResolver, failedResolver, doneResolver, suspendedResolver, waitTillSessionEnds,stepSessionTimeout,jUnitRequestHolder);
 		}
 
 		try {
@@ -367,6 +408,43 @@ public class VMGRLaunch extends Builder {
 				return FormValidation.warning("Isn't the name too short?");
 			return FormValidation.ok();
 		}
+		
+		public FormValidation doCheckStaticAttributeList(@QueryParameter String value) throws IOException, ServletException {
+			if (value != null){
+				if (value.indexOf(";") > 0) {
+					return FormValidation.error("(;) is not allowed for seperation.  Please use only comma as a seperator.");
+				} else if (value.indexOf("|") > 0) {
+					return FormValidation.error("(|) is not allowed for seperation.  Please use only comma as a seperator.");
+				} else if (value.indexOf(".") > 0) {
+					return FormValidation.error("(.) is not allowed for seperation.  Please use only comma as a seperator.");
+				} 
+			} 
+			
+			List<String> items = Arrays.asList(value.split("\\s*,\\s*"));
+			
+			Iterator<String> iter = items.iterator();
+			
+			String tmpAttr = null;
+			while (iter.hasNext()){
+				tmpAttr = iter.next();
+				if (tmpAttr.indexOf(" ") > 0){
+					return FormValidation.error("'" + tmpAttr + "' is not a valid option for vManager attribute code name. Attribute code names can't have space.  Try using underscore instaed.");
+				} else if (tmpAttr.equals("first_failure_name")){
+					return FormValidation.warning("'" + tmpAttr + "' is already included as part of the stack error message by default.");
+				} else if (tmpAttr.equals("first_failure_description")){
+					return FormValidation.warning("'" + tmpAttr + "' is already included as part of the stack error message by default.");
+				} else if (tmpAttr.equals("computed_seed")){
+					return FormValidation.warning("'" + tmpAttr + "' is already included as part of the stack error message by default.");
+				} else if (tmpAttr.equals("test_group")){
+					return FormValidation.warning("'" + tmpAttr + "' is already included as part of the stack error message by default.");
+				} else if (tmpAttr.equals("test_name")){
+					return FormValidation.warning("'" + tmpAttr + "' is already included as part of the stack error message by default.");
+				}
+			}
+			
+				
+			return FormValidation.ok();
+		}
 
 
 		public boolean isApplicable(Class<? extends AbstractProject> aClass) {
@@ -465,6 +543,25 @@ public class VMGRLaunch extends Builder {
 				return FormValidation.error("Client error : " + e.getMessage());
 			}
 		}
+		
+		public FormValidation doTestExtraStaticAttr(@QueryParameter("vAPIUser") final String vAPIUser, @QueryParameter("vAPIPassword") final String vAPIPassword,
+				@QueryParameter("vAPIUrl") final String vAPIUrl, @QueryParameter("authRequired") final boolean authRequired, @QueryParameter("staticAttributeList") final String staticAttributeList) throws IOException,
+				ServletException {
+			try {
+
+		 		Utils utils = new Utils();
+				String output = utils.checkExtraStaticAttr(vAPIUrl, authRequired, vAPIUser, vAPIPassword,staticAttributeList);
+				if (!output.startsWith("Failed")) {
+					return FormValidation.ok("Success. " + output);
+				} else {
+					return FormValidation.error(output);
+				}
+			} catch (Exception e) {
+				return FormValidation.error("Client error : " + e.getMessage());
+			}
+		}
+		
+		
 
 	}
 }

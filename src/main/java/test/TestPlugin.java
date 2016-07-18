@@ -1,7 +1,10 @@
 package test;
 
+import hudson.plugins.vmanager.BuildStatusMap;
+
 import java.util.logging.Logger;
 
+import org.jenkinsci.plugins.vmanager.JUnitRequestHolder;
 import org.jenkinsci.plugins.vmanager.Utils;
 import org.jenkinsci.plugins.vmanager.VMGRLaunch;
 import org.jenkinsci.plugins.vmanager.StepHolder;
@@ -9,9 +12,9 @@ import org.jenkinsci.plugins.vmanager.StepHolder;
 public class TestPlugin {
 
 	
-	final String vAPIUrl = "https://vlnx488:50500/camera/vapi";
+	final String vAPIUrl = "https://vlnx488:50500/vmgr/vapi";
     final boolean authRequired = true;
-    final String vAPIUser = "root";
+    final String vAPIUser = "tyanai";
     final String vAPIPassword = "letmein";
     final String vSIFName = "/home/tyanai/vsif/vm_basic.vsif";
     final String vSIFInputFile  = "d:/temp/artifacts/vsifs.input";
@@ -29,7 +32,11 @@ public class TestPlugin {
 	private String suspendedResolver = "ignore";
 	private boolean waitTillSessionEnds = true;
 	private int stepSessionTimeout = 10;
-    
+	
+	private final boolean generateJUnitXML = true;
+	private final boolean extraAttributesForFailures = true; 
+	private final String staticAttributeList = "top_files,test_group,verification_scope";
+	
     	
 	
 	public static void main(String[] args) throws Exception {
@@ -58,14 +65,29 @@ public class TestPlugin {
 		//Test connection testing
 		utils.checkVAPIConnection(vAPIUrl, authRequired, vAPIUser, vAPIPassword);
 		
+		//Test attributes for JUnit taken from runs
+		String testAttr = utils.checkExtraStaticAttr(vAPIUrl, authRequired, vAPIUser, vAPIPassword,"comment,status,first_failure_name");
+		System.out.println(testAttr);
+		
 		
 		StepHolder stepHolder = null;
 		if (waitTillSessionEnds){
-			stepHolder = new StepHolder(inaccessibleResolver, stoppedResolver, failedResolver, doneResolver, suspendedResolver, waitTillSessionEnds,stepSessionTimeout);
+			JUnitRequestHolder jUnitRequestHolder = new JUnitRequestHolder(generateJUnitXML, extraAttributesForFailures, staticAttributeList);
+			stepHolder = new StepHolder(inaccessibleResolver, stoppedResolver, failedResolver, doneResolver, suspendedResolver, waitTillSessionEnds,stepSessionTimeout,jUnitRequestHolder);
 		}
-		utils.executeVSIFLaunch(vsifFileNames, vAPIUrl, authRequired, vAPIUser, vAPIPassword, null,false,buildID,buildNumber,buildArtifactPath,0,0,false,null,false,null,null, stepHolder);
+		//utils.executeVSIFLaunch(vsifFileNames, vAPIUrl, authRequired, vAPIUser, vAPIPassword, null,false,buildID,buildNumber,buildArtifactPath,0,0,false,null,false,null,null, stepHolder);
+		
+		String buildStatus = BuildStatusMap.getValue(buildID, buildNumber, buildArtifactPath+"", "id", true);
+		System.out.println("Build status is '" + buildStatus + "'" );
 		
 		
+		String sessionName = "vm_basic_scopes.tyanai.16_07_12_21_19_25_5241";
+				for (int i=0;i<6;i++){
+					sessionName = sessionName.substring(0,sessionName.lastIndexOf("_"));
+				}
+				sessionName = sessionName.substring(0,sessionName.lastIndexOf("."));
+				sessionName = sessionName.substring(0,sessionName.lastIndexOf("."));
+				System.out.println(sessionName);
 		//utils.executeAPI("{}", "/sessions/count", vAPIUrl, authRequired, vAPIUser, vAPIPassword, "POST", null, false, buildID+"-1", buildNumber, buildArtifactPath,0,0,false);
 		//utils.executeAPI("{}", "/runs/get?id=5", vAPIUrl, authRequired, vAPIUser, vAPIPassword, "GET", null, false, buildID+"-2", buildNumber, buildArtifactPath,0,0,false);
 	}

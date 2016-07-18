@@ -51,7 +51,15 @@
       <url>http://repo.jenkins-ci.org/public/</url>
     </pluginRepository>
   </pluginRepositories>
-
+  
+  <dependencies>
+    <dependency>
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>dashboard-view</artifactId>
+      <version>2.9.10</version>
+    </dependency>
+  </dependencies>
+ 
   <organization>
   	<name>Cadence</name>
   	<url>www.cadence.com</url>

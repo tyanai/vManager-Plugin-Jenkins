@@ -13,9 +13,12 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -26,6 +29,9 @@ import org.apache.commons.codec.binary.Base64;
 import net.sf.json.JSONObject;
 
 public class Utils {
+	
+	
+	
 
 	public BufferedReader loadFileFromWorkSpace(String buildID, int buildNumber, String workPlacePath, String inputFile, BuildListener listener, boolean deleteInputFile, String fileTypeEndingName)
 			throws Exception { 
@@ -388,6 +394,88 @@ public class Utils {
 
 		} catch (Exception e) {
 			
+			String errorMessage = "Failed : HTTP error: " + e.getMessage() ;
+			
+			if (e.getMessage().indexOf("Unexpected end of file from server") > -1) {
+				errorMessage = errorMessage + " (from Incisive 14.2 onward the connection is secured.  Verify your url is https://)";	
+			}
+			
+
+			System.out.println(errorMessage);
+			textOut = errorMessage;
+		}
+
+		return textOut;
+	}
+	 
+	public String checkExtraStaticAttr(String url, boolean requireAuth, String user, String password, String listOfAttr) throws Exception {
+
+		String textOut = null;
+		try {
+			List<String> items = Arrays.asList(listOfAttr.split("\\s*,\\s*"));
+			
+			//System.out.println("Trying to connect with vManager vAPI " + url);
+			//String input = "{}";
+
+			String apiURL = url + "/rest/$schema/response?action=list&component=runs&extended=true";
+
+			HttpURLConnection conn = getVAPIConnection(apiURL, requireAuth, user, password, "GET", false, "", 0, null, null,0,0,false);
+			
+			if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
+				String reason = "";
+				if (conn.getResponseCode() == 503)
+					reason = "vAPI process failed to connect to remote vManager server.";
+				if (conn.getResponseCode() == 401)
+					reason = "Authentication Error";
+				String errorMessage = "Failed : HTTP error code : " + conn.getResponseCode() + " (" + reason + ")";
+
+				return errorMessage;
+			}
+
+			BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+
+			StringBuilder result = new StringBuilder();
+			
+			String output;
+
+			while ((output = br.readLine()) != null) {
+				result.append(output);
+			}
+
+			conn.disconnect();
+
+			JSONObject tmp = JSONObject.fromObject(result.toString());
+			
+			JSONObject responseItems = JSONObject.fromObject(tmp.getString("items"));
+			JSONObject properties = JSONObject.fromObject(responseItems.getString("properties"));
+			
+			Iterator<String> iter = items.iterator();
+			
+			String attr = null;
+			JSONObject attrObject = null;
+			String attrOutputString = "";
+			int i=1;
+			boolean isSuccess = true;
+			while (iter.hasNext()){
+				attr = iter.next();
+				if (properties.has(attr)){
+					attrObject = JSONObject.fromObject(properties.getString(attr));
+					String attrTitle = attrObject.getString("title");
+					attrOutputString = attrOutputString + "(" + i +") " + attr + " (" + attrTitle + ")\n";
+					i++;
+				} else {
+					isSuccess = false;
+					textOut = "Failed : '" + attr + "' doesn't exist for runs entities in the vManager server you are pointing at.\n";
+					break;
+				}
+			}
+			
+			if (isSuccess){
+				textOut = " All attributes were found on server:\n" + attrOutputString;
+			} 
+
+		} catch (Exception e) {
+			e.printStackTrace();
 			String errorMessage = "Failed : HTTP error: " + e.getMessage() ;
 			
 			if (e.getMessage().indexOf("Unexpected end of file from server") > -1) {
