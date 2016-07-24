@@ -251,7 +251,7 @@ public class VMGRLaunch extends Builder {
 		
 		if (useUserOnFarm){
 			listener.getLogger().println("An User's Credential use was selected.");
-			listener.getLogger().println("An User's Credential type is: " + userFarmType);
+			listener.getLogger().println("The User's Credential type is: " + userFarmType);
 			if ("dynamic".equals(userFarmType)){
 				listener.getLogger().println("The credential file is: " + credentialInputFile);
 				listener.getLogger().println("The credential file was set to be deleted after use: " + deleteCredentialInputFile);

@@ -28,7 +28,7 @@ public class LaunchHolder {
 	private static final String postData1 = "{\"filter\":{\"attName\":\"id\",\"operand\":\"EQUALS\",\"@c\":\".AttValueFilter\",\"attValue\":\"";
 	private static final String postData2 = "\"},\"projection\": {\"type\":\"SELECTION_ONLY\",\"selection\":[\"session_status\",\"name\"]}}";
 	private static final String runsList = "{\"filter\":{\"condition\":\"AND\",\"@c\":\".ChainedFilter\",\"chain\":[{\"@c\":\".RelationFilter\",\"relationName\":\"session\",\"filter\":{\"condition\":\"AND\",\"@c\":\".ChainedFilter\",\"chain\":[{\"@c\":\".InFilter\",\"attName\":\"id\",\"operand\":\"IN\",\"values\":[\"######\"]}]}}]},\"settings\":{\"write-hidden\":true,\"stream-mode\":true},\"projection\": {\"type\": \"SELECTION_ONLY\",\"selection\":[\"test_name\",\"status\",\"duration\",\"test_group\",\"computed_seed\",\"id\",\"first_failure_name\",\"first_failure_description\"###ATTR###]}}";
-	Map<String,String> extraAttrLabels = new HashMap<String,String>();
+	Map<String, String> extraAttrLabels = new HashMap<String, String>();
 
 	public LaunchHolder(StepHolder stepHolder, List<String> listOfSessions) {
 		super();
@@ -83,9 +83,11 @@ public class LaunchHolder {
 			System.out.println("Checking for state change every " + (TIME_TO_SLEEP / 60000) + " minutes.");
 			System.out.println("Printing out session state every " + (timeBetweenPrintStatus / 60000) + " minutes.");
 		}
-		
-		//Init the SessionStatusHolder - it will be saving the aggregated sessions info every check in the file system
-		SessionStatusHolder sessionStatusHolder = new SessionStatusHolder( url,  requireAuth,  user,  password,  listener,  dynamicUserId,  buildNumber,  workPlacePath,buildID, connConnTimeOut,  connReadTimeout,  advConfig,  notInTestMode,listOfSessions );
+
+		// Init the SessionStatusHolder - it will be saving the aggregated
+		// sessions info every check in the file system
+		SessionStatusHolder sessionStatusHolder = new SessionStatusHolder(url, requireAuth, user, password, listener, dynamicUserId, buildNumber, workPlacePath, buildID, connConnTimeOut,
+				connReadTimeout, advConfig, notInTestMode, listOfSessions);
 
 		while (keepWaiting) {
 
@@ -244,113 +246,109 @@ public class LaunchHolder {
 					}
 				}
 				debugPrint = false;
-				
-				//Write the session state information - can be future use by the dashboard
-				sessionStatusHolder.dumpSessionStatus(); 
-				
+
+				// Write the session state information - can be future use by
+				// the dashboard
+				sessionStatusHolder.dumpSessionStatus();
+
 			}
 
+		}
+
+		// Check if to write the Unit Test XML
+		if (stepHolder.getjUnitRequestHolder() != null) {
+			if (stepHolder.getjUnitRequestHolder().isGenerateJUnitXML()) {
+
+				// Fill in the Extra runs attribute map
+				apiURL = url + "/rest/$schema/response?action=list&component=runs&extended=true";
+				conn = utils.getVAPIConnection(apiURL, requireAuth, user, password, "GET", dynamicUserId, buildID, buildNumber, workPlacePath, listener, connConnTimeOut, connReadTimeout, advConfig);
+				BufferedReader brExtra = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+
+				StringBuilder resultExtra = new StringBuilder();
+
+				String outputExtra;
+
+				while ((outputExtra = brExtra.readLine()) != null) {
+					resultExtra.append(outputExtra);
+				}
+
+				conn.disconnect();
+
+				JSONObject tmp = JSONObject.fromObject(resultExtra.toString());
+
+				JSONObject responseItems = JSONObject.fromObject(tmp.getString("items"));
+				JSONObject properties = JSONObject.fromObject(responseItems.getString("properties"));
+				List<String> extraItems = Arrays.asList(stepHolder.getjUnitRequestHolder().getStaticAttributeList().split("\\s*,\\s*"));
+				Iterator<String> iterExtra = extraItems.iterator();
+
+				String attr = null;
+				JSONObject attrObject = null;
+				String extraAttributesForRuns = "";
+
+				while (iterExtra.hasNext()) {
+					attr = iterExtra.next();
+					if (properties.has(attr)) {
+						attrObject = JSONObject.fromObject(properties.getString(attr));
+						String attrTitle = attrObject.getString("title");
+						extraAttrLabels.put(attr, attrTitle);
+
+						if (attr.indexOf(" ") > 0 || attr.equals("first_failure_name") || attr.equals("first_failure_description") || attr.equals("computed_seed") || attr.equals("test_group")
+								|| attr.equals("test_name")) {
+							continue;
+						} else {
+							extraAttributesForRuns = extraAttributesForRuns + ",\"" + attr + "\"";
+						}
+					}
+				}
+
+				// Get all the runs data from the server
+				String runsRestURL = url + "/rest/runs/list";
+				Iterator<String> sessionIter = this.listOfSessions.iterator();
+
+				String runsJSONData = null;
+				String tmpSessionId = null;
+				while (sessionIter.hasNext()) {
+					runsJSONData = new String(runsList);
+					tmpSessionId = sessionIter.next();
+					runsJSONData = runsJSONData.replaceAll("######", tmpSessionId);
+					runsJSONData = runsJSONData.replaceAll("###ATTR###", extraAttributesForRuns);
+					try {
+						conn = utils.getVAPIConnection(runsRestURL, requireAuth, user, password, requestMethod, dynamicUserId, buildID, buildNumber, workPlacePath, listener, connConnTimeOut,
+								connReadTimeout, advConfig);
+
+						OutputStream os = conn.getOutputStream();
+						os.write(runsJSONData.getBytes());
+						os.flush();
+
+						if (checkResponseCode(conn)) {
+							BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+							StringBuilder result = new StringBuilder();
+							String output;
+							while ((output = br.readLine()) != null) {
+								result.append(output);
+							}
+
+							JSONArray tmpRunsArray = JSONArray.fromObject(result.toString());
+							UnitTestFormatter unitTestFormatter = new UnitTestFormatter(tmpRunsArray, tmpSessionId, stepHolder.getjUnitRequestHolder(), extraAttrLabels);
+							unitTestFormatter.dumpXMLFile(workPlacePath, buildNumber, buildID);
+
+						}
+					} catch (Exception e) {
+						if (notInTestMode) {
+							listener.getLogger().print(e.getMessage());
+						}
+						e.printStackTrace();
+					} finally {
+						conn.disconnect();
+
+					}
+				}
+			}
 		}
 
 		if (!"success".equals(buildResult)) {
 			throw new Exception(buildResult);
-		} else {
-			// Check if to write the Unit Test XML
-			if (stepHolder.getjUnitRequestHolder() != null) {
-				if (stepHolder.getjUnitRequestHolder().isGenerateJUnitXML()) {
-					
-					
-					//Fill in the Extra runs attribute map
-					apiURL = url + "/rest/$schema/response?action=list&component=runs&extended=true";
-					conn = utils.getVAPIConnection(apiURL, requireAuth, user, password, "GET", dynamicUserId, buildID, buildNumber, workPlacePath, listener, connConnTimeOut,
-							connReadTimeout, advConfig);
-					BufferedReader brExtra = new BufferedReader(new InputStreamReader((conn.getInputStream())));
-
-					StringBuilder resultExtra = new StringBuilder();
-					
-					String outputExtra;
-
-					while ((outputExtra = brExtra.readLine()) != null) {
-						resultExtra.append(outputExtra);
-					}
-
-					conn.disconnect();
-
-					JSONObject tmp = JSONObject.fromObject(resultExtra.toString());
-					
-					JSONObject responseItems = JSONObject.fromObject(tmp.getString("items"));
-					JSONObject properties = JSONObject.fromObject(responseItems.getString("properties"));
-					List<String> extraItems = Arrays.asList(stepHolder.getjUnitRequestHolder().getStaticAttributeList().split("\\s*,\\s*"));
-					Iterator<String> iterExtra = extraItems.iterator();
-					
-					String attr = null;
-					JSONObject attrObject = null;
-					String extraAttributesForRuns = "";
-					
-					while (iterExtra.hasNext()){
-						attr = iterExtra.next();
-						if (properties.has(attr)){
-							attrObject = JSONObject.fromObject(properties.getString(attr));
-							String attrTitle = attrObject.getString("title");
-							extraAttrLabels.put(attr, attrTitle);
-							
-							if (attr.indexOf(" ") > 0 || attr.equals("first_failure_name") || attr.equals("first_failure_description") || attr.equals("computed_seed") || attr.equals("test_group") || attr.equals("test_name")){
-								continue;
-							} else {
-								extraAttributesForRuns = extraAttributesForRuns + ",\"" + attr + "\"";
-							} 
-						} 
-					}
-					
-					
-					// Get all the runs data from the server
-					String runsRestURL = url + "/rest/runs/list";
-					Iterator<String> sessionIter = this.listOfSessions.iterator();
-					
-									
-					
-					String runsJSONData = null;
-					String tmpSessionId = null;
-					while (sessionIter.hasNext()) {
-						runsJSONData = new String(runsList);
-						tmpSessionId = sessionIter.next();
-						runsJSONData = runsJSONData.replaceAll("######", tmpSessionId);
-						runsJSONData = runsJSONData.replaceAll("###ATTR###", extraAttributesForRuns);
-						try {
-							conn = utils.getVAPIConnection(runsRestURL, requireAuth, user, password, requestMethod, dynamicUserId, buildID, buildNumber, workPlacePath, listener, connConnTimeOut,
-									connReadTimeout, advConfig);
-
-							OutputStream os = conn.getOutputStream();
-							os.write(runsJSONData.getBytes());
-							os.flush();
-
-							if (checkResponseCode(conn)) {
-								BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
-								StringBuilder result = new StringBuilder();
-								String output;
-								while ((output = br.readLine()) != null) {
-									result.append(output);
-								}
-
-								JSONArray tmpRunsArray = JSONArray.fromObject(result.toString());
-								UnitTestFormatter unitTestFormatter = new UnitTestFormatter(tmpRunsArray, tmpSessionId,stepHolder.getjUnitRequestHolder(),extraAttrLabels);
-								unitTestFormatter.dumpXMLFile(workPlacePath, buildNumber, buildID);
-
-							}
-						} catch (Exception e) {
-							if (notInTestMode) {
-								listener.getLogger().print(e.getMessage());
-							}
-							e.printStackTrace();
-						} finally {
-							conn.disconnect();
-
-						}
-					}
-				}
-			}
-
-		}
+		} 
 
 	}
 

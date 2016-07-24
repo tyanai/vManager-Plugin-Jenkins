@@ -19,17 +19,17 @@ public class TestPlugin {
     final String vSIFName = "/home/tyanai/vsif/vm_basic.vsif";
     final String vSIFInputFile  = "d:/temp/artifacts/vsifs.input";
     final boolean deleteInputFile = false;
-    final String vsifType = "dynamic";
+    final String vsifType = "static";
     
     final int buildNumber = 83;
     final String buildID = "2014-45-45-34-56-78";
     final String buildArtifactPath = "d:/temp/artifacts";
     
     private String inaccessibleResolver = "fail";
-	private String stoppedResolver = "continue";
+	private String stoppedResolver = "fail";
 	private String failedResolver = "fail";
 	private String doneResolver = "ignore";
-	private String suspendedResolver = "ignore";
+	private String suspendedResolver = "fail";
 	private boolean waitTillSessionEnds = true;
 	private int stepSessionTimeout = 10;
 	
@@ -75,19 +75,13 @@ public class TestPlugin {
 			JUnitRequestHolder jUnitRequestHolder = new JUnitRequestHolder(generateJUnitXML, extraAttributesForFailures, staticAttributeList);
 			stepHolder = new StepHolder(inaccessibleResolver, stoppedResolver, failedResolver, doneResolver, suspendedResolver, waitTillSessionEnds,stepSessionTimeout,jUnitRequestHolder);
 		}
-		//utils.executeVSIFLaunch(vsifFileNames, vAPIUrl, authRequired, vAPIUser, vAPIPassword, null,false,buildID,buildNumber,buildArtifactPath,0,0,false,null,false,null,null, stepHolder);
+		utils.executeVSIFLaunch(vsifFileNames, vAPIUrl, authRequired, vAPIUser, vAPIPassword, null,false,buildID,buildNumber,buildArtifactPath,0,0,false,null,false,null,null, stepHolder);
 		
-		String buildStatus = BuildStatusMap.getValue(buildID, buildNumber, buildArtifactPath+"", "id", true);
-		System.out.println("Build status is '" + buildStatus + "'" );
+		//String buildStatus = BuildStatusMap.getValue(buildID, buildNumber, buildArtifactPath+"", "id", true);
+		//System.out.println("Build status is '" + buildStatus + "'" );
 		
 		
-		String sessionName = "vm_basic_scopes.tyanai.16_07_12_21_19_25_5241";
-				for (int i=0;i<6;i++){
-					sessionName = sessionName.substring(0,sessionName.lastIndexOf("_"));
-				}
-				sessionName = sessionName.substring(0,sessionName.lastIndexOf("."));
-				sessionName = sessionName.substring(0,sessionName.lastIndexOf("."));
-				System.out.println(sessionName);
+		
 		//utils.executeAPI("{}", "/sessions/count", vAPIUrl, authRequired, vAPIUser, vAPIPassword, "POST", null, false, buildID+"-1", buildNumber, buildArtifactPath,0,0,false);
 		//utils.executeAPI("{}", "/runs/get?id=5", vAPIUrl, authRequired, vAPIUser, vAPIPassword, "GET", null, false, buildID+"-2", buildNumber, buildArtifactPath,0,0,false);
 	}

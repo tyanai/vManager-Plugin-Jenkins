@@ -372,8 +372,8 @@ public class Utils {
 					reason = "Authentication Error";
 				if (conn.getResponseCode() == 412)
 					reason = "vAPI requires vManager 'Integration Server' license.";
-				String errorMessage = "Failed : HTTP error code : " + conn.getResponseCode() + " (" + reason + ")";
-
+				//String errorMessage = "Failed : HTTP error code : " + conn.getResponseCode() + " (" + reason + ")";
+				String errorMessage = processErrorFromRespone(conn, null, false);
 				return errorMessage;
 			}
 
@@ -427,8 +427,8 @@ public class Utils {
 					reason = "vAPI process failed to connect to remote vManager server.";
 				if (conn.getResponseCode() == 401)
 					reason = "Authentication Error";
-				String errorMessage = "Failed : HTTP error code : " + conn.getResponseCode() + " (" + reason + ")";
-
+				//String errorMessage = "Failed : HTTP error code : " + conn.getResponseCode() + " (" + reason + ")";
+				String errorMessage = processErrorFromRespone(conn, null, false);
 				return errorMessage;
 			}
 
@@ -650,12 +650,11 @@ public class Utils {
 					reason = "vAPI requires vManager 'Integration Server' license.";
 				if (conn.getResponseCode() == 406)
 					reason = "VSIF file '" + vsifs[i] + "' was not found on file system, or is not accessed by the vAPI process.\n";
-				String errorMessage = "Failed : HTTP error code : " + conn.getResponseCode() + " (" + reason + ")\n";
-				if (notInTestMode) {
-					listener.getLogger().print(errorMessage + conn.getResponseMessage());
-				}
-
-				System.out.println(errorMessage);
+				
+				
+				String errorMessage = processErrorFromRespone(conn, listener, notInTestMode);
+				
+				
 				return errorMessage;
 			}
 
@@ -740,12 +739,15 @@ public class Utils {
 				reason = "The method specified in the Request-Line is not allowed for the resource identified by the Request-URI. The response MUST include an Allow header containing a list of valid methods for the requested resource.  Check if you selected the right request method (GET/POST/DELETE/PUT).";
 			if (conn.getResponseCode() == 412)
 				reason = "vAPI requires vManager 'Integration Server' license.";
-			String errorMessage = "Failed : HTTP error code : " + conn.getResponseCode() + " (" + reason + ")\n";
+			//String errorMessage = "Failed : HTTP error code : " + conn.getResponseCode() + " (" + reason + ")\n";
+			String errorMessage = processErrorFromRespone(conn, listener, notInTestMode);
 			if (notInTestMode) {
 				listener.getLogger().print(errorMessage);
+			} else {
+				System.out.println(errorMessage);
 			}
 
-			System.out.println(errorMessage);
+			
 			return errorMessage;
 		}
 
@@ -834,7 +836,33 @@ public class Utils {
 	    }
 	
 	
-	
+	    @SuppressWarnings("finally")
+		public String processErrorFromRespone(HttpURLConnection conn, BuildListener listener, boolean notInTestMode){
+	    	String errorMessage = "";
+			StringBuilder resultFromError = null;
+			int responseCode = 0;
+			try{
+				resultFromError = new StringBuilder(conn.getResponseMessage());
+				responseCode = conn.getResponseCode();
+				BufferedReader br = new BufferedReader(new InputStreamReader((conn.getErrorStream())));
+
+				
+				String output;
+				while ((output = br.readLine()) != null) {
+					resultFromError.append(output);
+				}
+			}catch (Exception e){
+				
+			} finally {
+				errorMessage = "Failed : HTTP error code : " + responseCode + " (" + resultFromError + ")\n";
+				if (notInTestMode) {
+					listener.getLogger().print(errorMessage);
+				} else {
+					System.out.println(errorMessage);
+				}
+				return errorMessage;
+			}
+	    }
 	
 	
 	

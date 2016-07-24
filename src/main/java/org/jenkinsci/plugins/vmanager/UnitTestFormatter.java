@@ -56,23 +56,50 @@ public class UnitTestFormatter {
 			
 			while (runsIter.hasNext()){
 				tmpRun = runsIter.next();
-				if (tmpRun.has("status"))  testStatus = tmpRun.getString("status");
-				if (tmpRun.has("test_group"))  testGroup = tmpRun.getString("test_group");
-				if (tmpRun.has("test_name"))  name = tmpRun.getString("test_name");
-				if (tmpRun.has("computed_seed"))  	testSeed = tmpRun.getString("computed_seed");
+				if (tmpRun.has("status"))  {
+					testStatus = tmpRun.getString("status");
+				} else {
+					testStatus = "NA";
+				}
+				if (tmpRun.has("test_group")){
+					testGroup = tmpRun.getString("test_group");
+				} else {
+					testGroup = "NA";
+				}
+				if (tmpRun.has("test_name")) {
+					name = tmpRun.getString("test_name");
+				} else {
+					name = "NA";
+				}
+				if (tmpRun.has("computed_seed")) {
+					testSeed = tmpRun.getString("computed_seed");
+				} else {
+					testSeed = "NA";
+				}
+				
 				if (tmpRun.has("duration")) {
 					try{
 						testDuration = new Integer(tmpRun.getString("duration")).intValue();
 					} catch (Exception e){
 						//In case it's not a number like "undefined"
 					}
+				} else {
+					testDuration = 0;
 				}
 				
 				
 				
-				if ("failed".equals(testStatus)){
-					if (tmpRun.has("first_failure_name")) testFirstErrorCode = tmpRun.getString("first_failure_name");
-					if (tmpRun.has("first_failure_description")) testFirstErrorDescription = tmpRun.getString("first_failure_description");
+				if ("failed".equals(testStatus) || "running".equals(testStatus) || "other".equals(testStatus) || "waiting".equals(testStatus)){
+					if (tmpRun.has("first_failure_name")){
+						testFirstErrorCode = tmpRun.getString("first_failure_name");
+					} else {
+						testFirstErrorCode = "RUN_STILL_IN_PROGRESS";
+					}
+					if (tmpRun.has("first_failure_description")){
+						testFirstErrorDescription = tmpRun.getString("first_failure_description");
+					} else {
+						testFirstErrorDescription = "    Run is in state running,other or waiting.\n     Reason for run to mark as failed is because session change status to such that build was marked as failed.";
+					}
 					writer.append("		<testcase classname=\"" + testGroup  + "\" name=\"" + name  + " : Seed-" + testSeed + "\" time=\"" + testDuration + "\">" + "\n");
 					writer.append("			<failure message=\"" + testFirstErrorCode +"\" type=\"" + testFirstErrorCode +"\">First Error Description: \n" + testFirstErrorDescription +  "\n" + "Computed Seed: \n" + testSeed +  "\n" + addExtraAttrValues(tmpRun) + "</failure>" + "\n");
 					writer.append("		</testcase>" + "\n");
@@ -111,6 +138,8 @@ public class UnitTestFormatter {
 					attrValue = tmpRun.getString(tmpAttr);
 					attrValue = attrValue.replaceAll("<__SEPARATOR__>", "\n    ");
 					extraAttributesForRuns = extraAttributesForRuns + extraAttrLabels.get(tmpAttr) + ":\n    " + attrValue + "\n";
+				} else {
+					attrValue = "NA";
 				}
 			} 
 		}
