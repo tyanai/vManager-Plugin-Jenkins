@@ -2,5 +2,5 @@
   This view is used to render the installed plugins page.
 -->
 <div>
-  This plugin is used in order to interact from remote with Cadence vManager API. This plugin will not work without having your administratror start a vAPI process to serve this plugin requests.
+  This plugin is used in order to interact from remote with Cadence vManager API. 
 </div>
