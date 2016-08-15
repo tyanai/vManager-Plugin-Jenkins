@@ -14,9 +14,16 @@ public class SessionState {
 	private String owner =  "NA";
 	private String numOfSession = "NA";
 	private String serverUrl = "NA";
+	private String sessionCode = "NA";
 		
 	
 	
+	public String getSessionCode() {
+		return sessionCode;
+	}
+	public void setSessionCode(String sessionCode) {
+		this.sessionCode = sessionCode;
+	}
 	public String getServerUrl() {
 		return serverUrl;
 	}

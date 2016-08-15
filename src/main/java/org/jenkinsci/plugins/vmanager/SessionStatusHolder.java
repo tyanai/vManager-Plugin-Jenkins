@@ -136,6 +136,8 @@ public class SessionStatusHolder {
 				sessionData.setName("Mixed");
 			} else {
 				sessionData.setName(cutSessionNameDate(session.getString("name")));
+				sessionData.setSessionCode(cutSessionCodeDate(session.getString("name")));
+				
 			}
 			
 		}
@@ -164,6 +166,7 @@ public class SessionStatusHolder {
 		
 		writer.append("status=" + sessionData.getStatus() + "\n");
 		writer.append("name=" + sessionData.getName() + "\n");
+		writer.append("session_code=" + sessionData.getSessionCode() + "\n");
 		writer.append("total_runs_in_session=" + sessionData.getTotalRuns() + "\n");
 		writer.append("passed_runs=" + sessionData.getPassed() + "\n");
 		writer.append("failed_runs=" + sessionData.getFailed() + "\n");
@@ -201,6 +204,7 @@ public class SessionStatusHolder {
 			// get the property value 
 			sessionData.setStatus((prop.getProperty("status") != null) ? prop.getProperty("status") : "NA");
 			sessionData.setName((prop.getProperty("name") != null) ? prop.getProperty("name") : "NA");
+			sessionData.setSessionCode((prop.getProperty("session_code") != null) ? prop.getProperty("session_code") : "NA");
 			sessionData.setTotalRuns((prop.getProperty("total_runs_in_session") != null) ? prop.getProperty("total_runs_in_session") : "NA");
 			sessionData.setPassed((prop.getProperty("passed_runs") != null) ? prop.getProperty("passed_runs") : "NA");
 			sessionData.setFailed((prop.getProperty("failed_runs") != null) ? prop.getProperty("failed_runs") : "NA");
@@ -256,6 +260,17 @@ public class SessionStatusHolder {
 		sessionName = sessionName.substring(0,sessionName.lastIndexOf("."));
 		sessionName = sessionName.substring(0,sessionName.lastIndexOf("."));
 		return sessionName;
+	}
+	
+	private String cutSessionCodeDate(String sessionName){
+		
+		String sessionCode = "NA";
+		try{
+			sessionCode = sessionName.substring(sessionName.lastIndexOf("_")+1, sessionName.length());
+		}catch (Exception e){
+			
+		}
+		return sessionCode;
 	}
 		
 	

@@ -64,7 +64,12 @@ public class VmgrBuilds extends DashboardPortlet {
 	}
 
 	public String getSessionName(AbstractBuild run) {
-		return BuildStatusMap.getValue(run.getId(), run.getNumber(), run.getWorkspace()+"", "name", false);
+		String sessionName = BuildStatusMap.getValue(run.getId(), run.getNumber(), run.getWorkspace()+"", "name", false);
+		if (!"NA".equals(sessionName)){
+			String sessionCode = BuildStatusMap.getValue(run.getId(), run.getNumber(), run.getWorkspace()+"", "session_code", false);
+			sessionName = sessionName + " (" + sessionCode + ")";
+		}
+		return sessionName;
 	}
 
 	public String getTotalRuns(AbstractBuild run) {

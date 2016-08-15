@@ -38,6 +38,7 @@ public class BuildStatusMap {
 		
 		if ("status".equals(key)) return session.getStatus();
 		if ("name".equals(key)) return session.getName();
+		if ("session_code".equals(key)) return session.getSessionCode();
 		if ("total_runs_in_session".equals(key)) return session.getTotalRuns();
 		if ("passed_runs".equals(key)) return session.getPassed();
 		if ("failed_runs".equals(key)) return session.getFailed();
