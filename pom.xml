@@ -18,16 +18,16 @@
       <url>http://opensource.org/licenses/MIT</url>
     </license>
   </licenses>
-  <distributionManagement>
+  <!--distributionManagement>
    <repository>
     <id>repo.jenkins-ci.org</id>
     <url>http://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/</url>
    </repository>
-  </distributionManagement>
+  </distributionManagement-->
   
   <properties>
   	<skipTests>true</skipTests>
-    <jenkins.version>1.532.3</jenkins.version>
+    <!--jenkins.version>1.532.3</jenkins.version-->
   </properties>
   
   <developers>
@@ -65,7 +65,7 @@
       <artifactId>dashboard-view</artifactId>
       <version>2.9.10</version>
     </dependency>
-    <dependency>
+    <!--dependency>
       <groupId>org.jenkins-ci.main</groupId>
       <artifactId>jenkins-war</artifactId>
       <type>war</type>
@@ -83,7 +83,7 @@
       <artifactId>jenkins-test-harness</artifactId>
       <version>1.532.3-SNAPSHOT</version>
       <scope>test</scope>
-    </dependency>
+    </dependency-->
   </dependencies>
   <build>
   <plugins>
