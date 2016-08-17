@@ -18,12 +18,12 @@
       <url>http://opensource.org/licenses/MIT</url>
     </license>
   </licenses>
-  <distributionManagement>
+  <!--distributionManagement>
    <repository>
     <id>github-project-site</id>
     <url>gitsite:git@github.com/jenkinsci/vmanager-plugin</url>
    </repository>
-  </distributionManagement>
+  </distributionManagement-->
   
   <properties>
   	<skipTests>true</skipTests>
