@@ -40,7 +40,8 @@ public class UnitTestFormatter {
 		
 		if (runs.size() > 0){
 			// Flush the output into workspace
-			String fileOutput = workPlacePath + File.separator + buildNumber + "." + buildID + "." + sessionId + ".session_runs.xml";
+			//String fileOutput = workPlacePath + File.separator + buildNumber + "." + buildID + "." + sessionId + ".session_runs.xml";
+			String fileOutput = workPlacePath + File.separator + "session_runs.xml";
 
 			FileWriter writer = new FileWriter(fileOutput);
 			writer.append("<testsuite tests=\"vManager\">" + "\n");		
