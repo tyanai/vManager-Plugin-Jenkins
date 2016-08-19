@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>2.6</version>
+    <version>2.14</version>
   </parent>
 
   <artifactId>vmanager-plugin</artifactId>
@@ -18,16 +18,9 @@
       <url>http://opensource.org/licenses/MIT</url>
     </license>
   </licenses>
-  <!--distributionManagement>
-   <repository>
-    <id>repo.jenkins-ci.org</id>
-    <url>http://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/</url>
-   </repository>
-  </distributionManagement-->
   
   <properties>
-  	<skipTests>true</skipTests>
-    <!--jenkins.version>1.532.3</jenkins.version-->
+    <findbugs.failOnError>false</findbugs.failOnError> <!-- TODO fix -->
   </properties>
   
   <developers>
@@ -49,14 +42,14 @@
   <repositories>
     <repository>
       <id>repo.jenkins-ci.org</id>
-      <url>http://repo.jenkins-ci.org/public/</url>
+      <url>https://repo.jenkins-ci.org/public/</url>
     </repository>
   </repositories>
 
   <pluginRepositories>
     <pluginRepository>
       <id>repo.jenkins-ci.org</id>
-      <url>http://repo.jenkins-ci.org/public/</url>
+      <url>https://repo.jenkins-ci.org/public/</url>
     </pluginRepository>
   </pluginRepositories>
   
@@ -64,44 +57,15 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>dashboard-view</artifactId>
-      <version>2.9.10</version>
+      <version>2.9.11-SNAPSHOT</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.jenkins-ci.main</groupId>
+          <artifactId>maven-plugin</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
-    <!--dependency>
-      <groupId>org.jenkins-ci.main</groupId>
-      <artifactId>jenkins-war</artifactId>
-      <type>war</type>
-      <version>1.532.3-SNAPSHOT</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jenkins-ci.main</groupId>
-      <artifactId>jenkins-core</artifactId>
-      <version>1.532.3-SNAPSHOT</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jenkins-ci.main</groupId>
-      <artifactId>jenkins-test-harness</artifactId>
-      <version>1.532.3-SNAPSHOT</version>
-      <scope>test</scope>
-    </dependency-->
   </dependencies>
-  <build>
-  <plugins>
-  <plugin>
-    <groupId>org.codehaus.mojo</groupId>
-    <artifactId>findbugs-maven-plugin</artifactId>
-    <executions>
-        <execution>
-            <phase>none</phase>
-        </execution>
-    </executions>
-    <configuration>
-             <skip>true</skip>
-    </configuration>
-  </plugin>
-  </plugins>
-  </build>
  
   <organization>
   	<name>Cadence</name>
