@@ -90,7 +90,7 @@ public class UnitTestFormatter {
 				
 				
 				
-				if ("failed".equals(testStatus) || "running".equals(testStatus) || "other".equals(testStatus) || "waiting".equals(testStatus)){
+				if ("failed".equals(testStatus)){
 					if (tmpRun.has("first_failure_name")){
 						testFirstErrorCode = tmpRun.getString("first_failure_name");
 					} else {
@@ -104,7 +104,7 @@ public class UnitTestFormatter {
 					writer.append("		<testcase classname=\"" + testGroup  + "\" name=\"" + name  + " : Seed-" + testSeed + "\" time=\"" + testDuration + "\">" + "\n");
 					writer.append("			<failure message=\"" + testFirstErrorCode +"\" type=\"" + testFirstErrorCode +"\">First Error Description: \n" + testFirstErrorDescription +  "\n" + "Computed Seed: \n" + testSeed +  "\n" + addExtraAttrValues(tmpRun) + "</failure>" + "\n");
 					writer.append("		</testcase>" + "\n");
-				} else if ("stopped".equals(testStatus)){
+				} else if ("stopped".equals(testStatus) || "running".equals(testStatus) || "other".equals(testStatus) || "waiting".equals(testStatus)){
 					writer.append("		<testcase classname=\"" + testGroup  + "\" name=\"" + name  + " : Seed-" + testSeed + "\" time=\"" + testDuration + "\">" + "\n");
 					writer.append("		 <skipped />" + "\n");
 					writer.append("		</testcase>" + "\n");
