@@ -54,9 +54,14 @@ public class VmgrBuilds extends DashboardPortlet {
 			return "NA";
 		}
 		url = url.replaceAll("/vapi", "");
-		//String sessionId = BuildStatusMap.getValue(run.getId(), run.getNumber(), run.getWorkspace()+"", "id", false);
+		String sessionId = BuildStatusMap.getValue(run.getId(), run.getNumber(), run.getWorkspace()+"", "id", false);
+		if (sessionId != null){
+			if (sessionId.indexOf(",") > -1){
+				sessionId = sessionId.substring(0,sessionId.indexOf(","));
+			} 
+		}
 		
-		return  url + "/regression"; //?sessionid=" + sessionId;
+		return  url + "/regression/index.html?sessionid=" + sessionId;
 	}
 
 	public String getSessionStatus(AbstractBuild run) {

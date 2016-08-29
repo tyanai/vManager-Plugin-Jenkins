@@ -175,7 +175,20 @@ public class SessionStatusHolder {
 		writer.append("other_runs=" + sessionData.getOther() + "\n");
 		writer.append("owner=" + sessionData.getOwner() + "\n");
 		writer.append("number_of_entities=" + sessionData.getNumOfSession() + "\n");
-		writer.append("id=" + sessionData.getId() + "\n");
+		
+		//Set the id (might be more than one
+		Iterator<String> iter = listOfSessions.iterator();
+		String result = "";
+		int commaCounter = listOfSessions.size() - 1;
+		while (iter.hasNext()){
+			result = result + iter.next();
+			if (commaCounter > 0) {
+				result = result + ",";
+			}
+			commaCounter--;
+		}
+		writer.append("id=" + result + "\n");
+		
 		writer.append("url=" + sessionData.getServerUrl() + "\n");
 		
 		
@@ -291,6 +304,7 @@ public class SessionStatusHolder {
 		this.connReadTimeout = connReadTimeout;
 		this.advConfig = advConfig;
 		this.notInTestMode = notInTestMode;
+		this.listOfSessions = listOfSessions;
 		
 		buildPostDataSessionPart(listOfSessions);
 		

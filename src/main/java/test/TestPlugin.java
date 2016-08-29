@@ -12,14 +12,14 @@ import org.jenkinsci.plugins.vmanager.StepHolder;
 public class TestPlugin {
 
 	
-	final String vAPIUrl = "https://vlnx488:50500/vmgr/vapi";
+	final String vAPIUrl = "https://vlnx489:50500/vmgr/vapi";
     final boolean authRequired = true;
     final String vAPIUser = "tyanai";
     final String vAPIPassword = "letmein";
     final String vSIFName = "/home/tyanai/vsif/vm_basic.vsif";
     final String vSIFInputFile  = "d:/temp/artifacts/vsifs.input";
     final boolean deleteInputFile = false;
-    final String vsifType = "static";
+    final String vsifType = "dynamic";
     
     final int buildNumber = 83;
     final String buildID = "2014-45-45-34-56-78";
