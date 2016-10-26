@@ -38,6 +38,7 @@ public class SessionStatusHolder {
 	int connReadTimeout;
 	boolean advConfig;
 	boolean notInTestMode; 
+	boolean markBuildAsFailedIfAllRunFailed = false;
 	
 	
 	List<String> listOfSessions = null;
@@ -55,6 +56,7 @@ public class SessionStatusHolder {
 		this.buildNumber = buildNumber;
 		this.workPlacePath = workspace;
 		this.buildId = buildId;
+		
 	}
 	
 	private void buildPostDataSessionPart(List<String> listOfSessions){
@@ -123,6 +125,8 @@ public class SessionStatusHolder {
 	
 	private void writeSessionIntoFile(JSONObject session) throws IOException{
 		
+		
+		
 		SessionState sessionData = new SessionState();
 		if (session.has("session_status")) {
 			if ("MIXED_GROUP_VALUE".equals(session.getString("session_status"))){
@@ -161,6 +165,14 @@ public class SessionStatusHolder {
 		
 		
 		String fileOutput = workPlacePath + File.separator + buildNumber + "." + buildId + ".session_status.properties";
+		
+		//Just before writing the file, check if user choose to overwide session status to "Failed" in case the session is in completed state and all runs failed.
+		if (markBuildAsFailedIfAllRunFailed){
+			if (sessionData.getTotalRuns().trim().equals(sessionData.getFailed().trim())){
+				sessionData.setStatus("failed");
+			}
+			
+		}
 
 		FileWriter writer = new FileWriter(fileOutput);
 		
@@ -288,7 +300,7 @@ public class SessionStatusHolder {
 		
 	
 	public SessionStatusHolder(String url, boolean requireAuth, String user, String password, BuildListener listener, boolean dynamicUserId, int buildNumber, String workPlacePath, String buildId,
-			int connConnTimeOut, int connReadTimeout, boolean advConfig, boolean notInTestMode,List<String> listOfSessions) {
+			int connConnTimeOut, int connReadTimeout, boolean advConfig, boolean notInTestMode,List<String> listOfSessions, boolean markBuildAsFailedIfAllRunFailed) {
 		
 		super();
 		this.url = url;
@@ -305,6 +317,7 @@ public class SessionStatusHolder {
 		this.advConfig = advConfig;
 		this.notInTestMode = notInTestMode;
 		this.listOfSessions = listOfSessions;
+		this.markBuildAsFailedIfAllRunFailed = markBuildAsFailedIfAllRunFailed;
 		
 		buildPostDataSessionPart(listOfSessions);
 		

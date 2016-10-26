@@ -92,6 +92,9 @@
   		<f:entry title="In case session status was changed to 'failed'" field="failedResolver" ><f:select /></f:entry>
   		<f:entry title="In case session status was changed to 'done'" field="doneResolver" ><f:select /></f:entry>
   		<f:entry title="In case session status was changed to 'suspended'" field="suspendedResolver" ><f:select /></f:entry>
+  		<f:entry title="Show build as failed if all runs failed" field="markBuildAsFailedIfAllRunFailed" description="If checked, the Dashboard will show the session status as Failed, instead of completed."><f:checkbox name="markBuildAsFailedIfAllRunFailed" checked="${it.markBuildAsFailedIfAllRunFailed}"/></f:entry>
+  		
+  		
   		
   		<f:optionalBlock name="generateJUnitXML"  title="Generate JUnit Test Result" description="If selected, the job will create an XML file with the session's run result in the format of JUnit Report." checked="${instance.generateJUnitXML}" inline="true">
  		 <f:optionalBlock name="extraAttributesForFailures"  title="Add extra attributes for failure stack" description="If selected, the job will add extra attributes for failure stack." checked="${instance.extraAttributesForFailures}" inline="true">

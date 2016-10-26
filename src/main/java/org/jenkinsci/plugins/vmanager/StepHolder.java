@@ -10,11 +10,12 @@ public class StepHolder {
 	private boolean waitTillSessionEnds;
 	private int stepSessionTimeout = 0;
 	private JUnitRequestHolder jUnitRequestHolder = null;
+	private boolean markBuildAsFailedIfAllRunFailed = false;
 	
 	
 	
 	
-	public StepHolder(String inaccessibleResolver, String stoppedResolver, String failedResolver, String doneResolver, String suspendedResolver, boolean waitTillSessionEnds, int stepSessionTimeout, JUnitRequestHolder jUnitRequestHolder) {
+	public StepHolder(String inaccessibleResolver, String stoppedResolver, String failedResolver, String doneResolver, String suspendedResolver, boolean waitTillSessionEnds, int stepSessionTimeout, JUnitRequestHolder jUnitRequestHolder, boolean markBuildAsFailedIfAllRunFailed) {
 		super();
 		this.inaccessibleResolver = inaccessibleResolver;
 		this.stoppedResolver = stoppedResolver;
@@ -24,6 +25,7 @@ public class StepHolder {
 		this.waitTillSessionEnds = waitTillSessionEnds;
 		this.stepSessionTimeout = stepSessionTimeout;
 		this.jUnitRequestHolder = jUnitRequestHolder;
+		this.markBuildAsFailedIfAllRunFailed = markBuildAsFailedIfAllRunFailed;
 	}
 	
 	
@@ -85,6 +87,16 @@ public class StepHolder {
 	}
 	public void setWaitTillSessionEnds(boolean waitTillSessionEnds) {
 		this.waitTillSessionEnds = waitTillSessionEnds;
+	}
+
+	public boolean isMarkBuildAsFailedIfAllRunFailed() {
+		return markBuildAsFailedIfAllRunFailed;
+	}
+
+
+
+	public void setMarkBuildAsFailedIfAllRunFailed(boolean markBuildAsFailedIfAllRunFailed) {
+		this.markBuildAsFailedIfAllRunFailed = markBuildAsFailedIfAllRunFailed;
 	}
 	
 }
