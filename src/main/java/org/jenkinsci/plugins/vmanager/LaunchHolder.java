@@ -27,7 +27,7 @@ public class LaunchHolder {
 	private static long TIME_TO_SLEEP = 60000;
 	private static final String postData1 = "{\"filter\":{\"attName\":\"id\",\"operand\":\"EQUALS\",\"@c\":\".AttValueFilter\",\"attValue\":\"";
 	private static final String postData2 = "\"},\"projection\": {\"type\":\"SELECTION_ONLY\",\"selection\":[\"session_status\",\"name\"]}}";
-	private static final String runsList = "{\"filter\":{\"condition\":\"AND\",\"@c\":\".ChainedFilter\",\"chain\":[{\"@c\":\".RelationFilter\",\"relationName\":\"session\",\"filter\":{\"condition\":\"AND\",\"@c\":\".ChainedFilter\",\"chain\":[{\"@c\":\".InFilter\",\"attName\":\"id\",\"operand\":\"IN\",\"values\":[\"######\"]}]}}]},\"settings\":{\"write-hidden\":true,\"stream-mode\":true},\"projection\": {\"type\": \"SELECTION_ONLY\",\"selection\":[\"test_name\",\"status\",\"duration\",\"test_group\",\"computed_seed\",\"id\",\"first_failure_name\",\"first_failure_description\"###ATTR###]}}";
+	private static final String runsList = "{\"filter\":{\"condition\":\"AND\",\"@c\":\".ChainedFilter\",\"chain\":[{\"@c\":\".RelationFilter\",\"relationName\":\"session\",\"filter\":{\"condition\":\"AND\",\"@c\":\".ChainedFilter\",\"chain\":[{\"@c\":\".InFilter\",\"attName\":\"id\",\"operand\":\"IN\",\"values\":[\"######\"]}]}}]},\"pageLength\":100000,\"settings\":{\"write-hidden\":true,\"stream-mode\":true},\"projection\": {\"type\": \"SELECTION_ONLY\",\"selection\":[\"test_name\",\"status\",\"duration\",\"test_group\",\"computed_seed\",\"id\",\"first_failure_name\",\"first_failure_description\"###ATTR###]}}";
 	Map<String, String> extraAttrLabels = new HashMap<String, String>();
 
 	public LaunchHolder(StepHolder stepHolder, List<String> listOfSessions) {
