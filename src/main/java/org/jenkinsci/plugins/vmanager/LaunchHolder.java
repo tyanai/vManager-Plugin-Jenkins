@@ -1,6 +1,6 @@
 package org.jenkinsci.plugins.vmanager;
 
-import hudson.model.BuildListener;
+import hudson.model.BuildListener; 
 import hudson.util.FormValidation;
 
 import java.io.BufferedReader;
