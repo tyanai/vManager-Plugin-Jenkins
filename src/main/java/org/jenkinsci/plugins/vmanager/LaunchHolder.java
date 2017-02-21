@@ -87,7 +87,7 @@ public class LaunchHolder {
 		// Init the SessionStatusHolder - it will be saving the aggregated
 		// sessions info every check in the file system
 		SessionStatusHolder sessionStatusHolder = new SessionStatusHolder(url, requireAuth, user, password, listener, dynamicUserId, buildNumber, workPlacePath, buildID, connConnTimeOut,
-				connReadTimeout, advConfig, notInTestMode, listOfSessions, stepHolder.isMarkBuildAsFailedIfAllRunFailed());
+				connReadTimeout, advConfig, notInTestMode, listOfSessions, stepHolder.isMarkBuildAsFailedIfAllRunFailed(),stepHolder.isFailJobIfAllRunFailed());
 
 		while (keepWaiting) {
 

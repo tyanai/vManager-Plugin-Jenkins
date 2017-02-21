@@ -92,7 +92,8 @@
   		<f:entry title="In case session status was changed to 'failed'" field="failedResolver" ><f:select /></f:entry>
   		<f:entry title="In case session status was changed to 'done'" field="doneResolver" ><f:select /></f:entry>
   		<f:entry title="In case session status was changed to 'suspended'" field="suspendedResolver" ><f:select /></f:entry>
-  		<f:entry title="Show build as failed if all runs failed" field="markBuildAsFailedIfAllRunFailed" description="If checked, the Dashboard will show the session status as Failed, instead of completed."><f:checkbox name="markBuildAsFailedIfAllRunFailed" checked="${it.markBuildAsFailedIfAllRunFailed}"/></f:entry>
+  		<f:entry title="Show regression as failed if all runs failed" field="markBuildAsFailedIfAllRunFailed" description="If checked, the Dashboard will show the session status as Failed, instead of completed."><f:checkbox name="markBuildAsFailedIfAllRunFailed" checked="${it.markBuildAsFailedIfAllRunFailed}"/></f:entry>
+                <f:entry title="Fail the job if all runs failed" field="failJobIfAllRunFailed" description="If checked, the Jenkins job will fail and stop its execution."><f:checkbox name="failJobIfAllRunFailed" checked="${it.failJobIfAllRunFailed}"/></f:entry>
   		
   		
   		

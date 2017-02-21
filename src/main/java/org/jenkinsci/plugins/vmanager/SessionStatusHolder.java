@@ -39,17 +39,14 @@ public class SessionStatusHolder {
 	boolean advConfig;
 	boolean notInTestMode; 
 	boolean markBuildAsFailedIfAllRunFailed = false;
+        boolean failJobIfAllRunFailed = false;
 	
 	
 	List<String> listOfSessions = null;
 	private String postDataSessions;
 	
 	private String postSessionData = "{\"filter\":{\"@c\":\".ChainedFilter\",\"condition\":\"OR\",\"chain\":[" + "######"  + "]},\"grouping\":[\"owner\"],\"settings\":{\"write-hidden\":true,\"stream-mode\":false},\"projection\":{\"type\": \"SELECTION_ONLY\",\"selection\":[\"session_status\",\"name\",\"total_runs_in_session\",\"passed_runs\",\"failed_runs\",\"running\",\"waiting\",\"other_runs\",\"owner\",\"number_of_entities\",\"id\"]}}";
-/*
-{"attName":"id","operand":"EQUALS","@c":".AttValueFilter","attValue":"851988"},
-{"attName":"id","operand":"EQUALS","@c":".AttValueFilter","attValue":"851987"},
-{"attName":"id","operand":"EQUALS","@c":".AttValueFilter","attValue":"851986"}
-*/
+
 	
 	public SessionStatusHolder(int buildNumber, String workspace, String buildId) {
 		super();
@@ -76,7 +73,7 @@ public class SessionStatusHolder {
 		
 	}
 	
-	public void dumpSessionStatus(){
+	public void dumpSessionStatus() throws Exception{
 		HttpURLConnection conn = null;
 		Utils utils = new Utils();
 		
@@ -113,17 +110,20 @@ public class SessionStatusHolder {
 
 			}
 		} catch (Exception e) {
-			if (notInTestMode) {
-				listener.getLogger().print(e.getMessage());
-			}
-			//e.printStackTrace();
+                        if ("ALL_RUNS_FAILED".equals(e.getMessage())){
+                            throw new Exception("All runs failed in the regression - marking job as a failed job.\n");
+                        } else {
+                           e.printStackTrace(); 
+                        }
+			
+			
 		} finally {
 			conn.disconnect();
 
 		}
 	}
 	
-	private void writeSessionIntoFile(JSONObject session) throws IOException{
+	private void writeSessionIntoFile(JSONObject session) throws IOException, Exception{
 		
 		
 		
@@ -206,6 +206,15 @@ public class SessionStatusHolder {
 		
 		writer.flush();
 		writer.close();
+                
+                //Just before continue to the next Jenkins step, check if the user choose to fail the entire Job in case all runs failed
+                if (failJobIfAllRunFailed){
+			if (sessionData.getTotalRuns().trim().equals(sessionData.getFailed().trim())){
+				//Fail the entire Job:
+                                throw new Exception("ALL_RUNS_FAILED");
+			}
+			
+		}
 		
 		
 		
@@ -300,7 +309,7 @@ public class SessionStatusHolder {
 		
 	
 	public SessionStatusHolder(String url, boolean requireAuth, String user, String password, BuildListener listener, boolean dynamicUserId, int buildNumber, String workPlacePath, String buildId,
-			int connConnTimeOut, int connReadTimeout, boolean advConfig, boolean notInTestMode,List<String> listOfSessions, boolean markBuildAsFailedIfAllRunFailed) {
+			int connConnTimeOut, int connReadTimeout, boolean advConfig, boolean notInTestMode,List<String> listOfSessions, boolean markBuildAsFailedIfAllRunFailed, boolean failJobIfAllRunFailed) {
 		
 		super();
 		this.url = url;
@@ -318,7 +327,7 @@ public class SessionStatusHolder {
 		this.notInTestMode = notInTestMode;
 		this.listOfSessions = listOfSessions;
 		this.markBuildAsFailedIfAllRunFailed = markBuildAsFailedIfAllRunFailed;
-		
+		this.failJobIfAllRunFailed = failJobIfAllRunFailed;
 		buildPostDataSessionPart(listOfSessions);
 		
 		this.postSessionData = this.postSessionData.replaceAll("######", postDataSessions);

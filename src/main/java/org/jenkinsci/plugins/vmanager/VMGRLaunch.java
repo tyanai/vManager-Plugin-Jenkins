@@ -61,6 +61,7 @@ public class VMGRLaunch extends Builder {
 	private final boolean extraAttributesForFailures; 
 	private final String staticAttributeList;
 	private final boolean markBuildAsFailedIfAllRunFailed;
+        private final boolean failJobIfAllRunFailed;
 	//private final String extraAttributesForFailuresInputFile;
 	//private final boolean deleteExtraAttributesFile;
 
@@ -68,7 +69,7 @@ public class VMGRLaunch extends Builder {
 	// "DataBoundConstructor"
 	@DataBoundConstructor
 	public VMGRLaunch(String vAPIUrl, String vAPIUser, String vAPIPassword, String vSIFName, String vSIFInputFile, String credentialInputFile, boolean deleteInputFile, boolean deleteCredentialInputFile, boolean useUserOnFarm, boolean authRequired, String vsifType, String userFarmType,
-			boolean dynamicUserId, boolean advConfig, int connTimeout, int readTimeout,boolean envVarible,String envVaribleFile,String inaccessibleResolver,String stoppedResolver,String failedResolver,String doneResolver,String suspendedResolver,boolean waitTillSessionEnds, int stepSessionTimeout,boolean generateJUnitXML,boolean extraAttributesForFailures,String staticAttributeList,boolean markBuildAsFailedIfAllRunFailed) {
+			boolean dynamicUserId, boolean advConfig, int connTimeout, int readTimeout,boolean envVarible,String envVaribleFile,String inaccessibleResolver,String stoppedResolver,String failedResolver,String doneResolver,String suspendedResolver,boolean waitTillSessionEnds, int stepSessionTimeout,boolean generateJUnitXML,boolean extraAttributesForFailures,String staticAttributeList,boolean markBuildAsFailedIfAllRunFailed ,boolean failJobIfAllRunFailed) {
 		this.vAPIUrl = vAPIUrl;
 		this.vAPIUser = vAPIUser;
 		this.vAPIPassword = vAPIPassword;
@@ -100,6 +101,7 @@ public class VMGRLaunch extends Builder {
 		this.generateJUnitXML = generateJUnitXML;
 		this.extraAttributesForFailures = extraAttributesForFailures;
 		this.markBuildAsFailedIfAllRunFailed = markBuildAsFailedIfAllRunFailed;
+                this.failJobIfAllRunFailed = failJobIfAllRunFailed;
 		this.staticAttributeList = staticAttributeList;
 		
 
@@ -116,6 +118,10 @@ public class VMGRLaunch extends Builder {
 	
 	public boolean isMarkBuildAsFailedIfAllRunFailed() {
 		return markBuildAsFailedIfAllRunFailed;
+	}
+        
+        public boolean isFailJobIfAllRunFailed() {
+		return failJobIfAllRunFailed;
 	}
 	
 	public String getStaticAttributeList() {
@@ -277,7 +283,8 @@ public class VMGRLaunch extends Builder {
 			listener.getLogger().println("In case session is at state \'suspended\' the build will " + suspendedResolver);
 			listener.getLogger().println("In case session is at state \'done\' the build will " + doneResolver);
 			listener.getLogger().println("Timeout for entire step is " + stepSessionTimeout + " minutes");
-			listener.getLogger().println("User choosed to mark build as Failed in case all runs are failing: " + markBuildAsFailedIfAllRunFailed);
+			listener.getLogger().println("User choosed to mark regression as Failed in case all runs are failing: " + markBuildAsFailedIfAllRunFailed);
+                        listener.getLogger().println("User choosed to fail the job in case all runs are failing: " + failJobIfAllRunFailed);
 			
 			
 			
@@ -292,7 +299,7 @@ public class VMGRLaunch extends Builder {
 			}
 			
 			
-			stepHolder = new StepHolder(inaccessibleResolver, stoppedResolver, failedResolver, doneResolver, suspendedResolver, waitTillSessionEnds,stepSessionTimeout,jUnitRequestHolder, markBuildAsFailedIfAllRunFailed);
+			stepHolder = new StepHolder(inaccessibleResolver, stoppedResolver, failedResolver, doneResolver, suspendedResolver, waitTillSessionEnds,stepSessionTimeout,jUnitRequestHolder, markBuildAsFailedIfAllRunFailed, failJobIfAllRunFailed);
 		}
 
 		try {
@@ -343,6 +350,8 @@ public class VMGRLaunch extends Builder {
 			// Now call the actual launch
 			// ----------------------------------------------------------------------------------------------------------------
 			
+                        
+                        
 			String output = utils.executeVSIFLaunch(vsifFileNames, vAPIUrl, authRequired, vAPIUser, vAPIPassword, listener, dynamicUserId, build.getId(), build.getNumber(),
 					"" + build.getWorkspace(),connTimeout,readTimeout,advConfig,jsonEnvInput,useUserOnFarm,userFarmType,farmUserPassword,stepHolder);
 			if (!"success".equals(output)) {
@@ -352,8 +361,13 @@ public class VMGRLaunch extends Builder {
 			}
 			// ----------------------------------------------------------------------------------------------------------------
 
-		} catch (Exception e) {
+		} catch (Exception e) {                      
 			listener.getLogger().println("Failed to build " + build.getId() + " " + build.getNumber());
+                        listener.getLogger().println(e.getMessage());
+                        for (StackTraceElement ste :e.getStackTrace()) {
+                            listener.getLogger().println(" " + ste);
+                        }
+                        
 			return false;
 		}
 

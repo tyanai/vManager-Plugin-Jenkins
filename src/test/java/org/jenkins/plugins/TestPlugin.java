@@ -1,4 +1,4 @@
-package test;
+package org.jenkins.plugins;
 
 import hudson.plugins.vmanager.BuildStatusMap;
 
@@ -37,6 +37,7 @@ public class TestPlugin {
 	private final boolean extraAttributesForFailures = true; 
 	private final String staticAttributeList = "top_files,test_group,verification_scope";
 	private final boolean markBuildAsFailedIfAllRunFailed = false;
+        private final boolean markJobAsFailedIfAllRunFailed = false;
 	
     	
 	
@@ -74,7 +75,7 @@ public class TestPlugin {
 		StepHolder stepHolder = null;
 		if (waitTillSessionEnds){
 			JUnitRequestHolder jUnitRequestHolder = new JUnitRequestHolder(generateJUnitXML, extraAttributesForFailures, staticAttributeList);
-			stepHolder = new StepHolder(inaccessibleResolver, stoppedResolver, failedResolver, doneResolver, suspendedResolver, waitTillSessionEnds,stepSessionTimeout,jUnitRequestHolder,markBuildAsFailedIfAllRunFailed);
+			stepHolder = new StepHolder(inaccessibleResolver, stoppedResolver, failedResolver, doneResolver, suspendedResolver, waitTillSessionEnds,stepSessionTimeout,jUnitRequestHolder,markBuildAsFailedIfAllRunFailed,markJobAsFailedIfAllRunFailed);
 		}
 		utils.executeVSIFLaunch(vsifFileNames, vAPIUrl, authRequired, vAPIUser, vAPIPassword, null,false,buildID,buildNumber,buildArtifactPath,0,0,false,null,false,null,null, stepHolder);
 		
