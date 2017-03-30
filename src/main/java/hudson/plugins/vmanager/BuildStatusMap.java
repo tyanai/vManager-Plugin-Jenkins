@@ -34,7 +34,7 @@ public class BuildStatusMap {
 		
 	}
 	
-	private static String getValue(String key, SessionState session){
+	private static String getValue(String key,  SessionState session){
 		
 		if ("status".equals(key)) return session.getStatus();
 		if ("name".equals(key)) return session.getName();
