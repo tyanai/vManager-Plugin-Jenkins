@@ -572,7 +572,7 @@ public class Utils {
 	}
 
 	public String executeVSIFLaunch(String[] vsifs, String url, boolean requireAuth, String user, String password, BuildListener listener, boolean dynamicUserId, String buildID, int buildNumber,
-			String workPlacePath,int connConnTimeOut, int connReadTimeout, boolean advConfig, String jsonEnvInput, boolean useUserOnFarm, String userFarmType,String[] farmUserPassword, StepHolder stepHolder) throws Exception {
+			String workPlacePath,int connConnTimeOut, int connReadTimeout, boolean advConfig, String jsonEnvInput, boolean useUserOnFarm, String userFarmType,String[] farmUserPassword, StepHolder stepHolder, String envSourceInputFile) throws Exception {
 
 		boolean notInTestMode = true;
 		if (listener == null) {
@@ -631,6 +631,11 @@ public class Utils {
 					
 				}
 				input = input + ",\"credentials\":{\"username\":\"" + userFarm + "\",\"password\":\"" + passwordFarm + "\"}";
+                                
+                                if (!"".equals(envSourceInputFile.trim())){                                 
+                                    String scriptShell = "BSH";
+                                    input = input + ",\"preliminaryStage\":{\"sourceFilePath\":\"" + envSourceInputFile + "\",\"shell\":\"" + scriptShell + "\"}";
+                                } 
 				
 			}
 			input = input + "}";

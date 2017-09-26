@@ -41,6 +41,7 @@ public class VMGRLaunch extends Builder {
 	private final boolean dynamicUserId;
 	private final String vsifType;
 	private final String userFarmType;
+        private final String envSourceInputFile;
 	
 	private int connTimeout = 1;
 	private int readTimeout = 30;
@@ -69,7 +70,7 @@ public class VMGRLaunch extends Builder {
 	// "DataBoundConstructor"
 	@DataBoundConstructor
 	public VMGRLaunch(String vAPIUrl, String vAPIUser, String vAPIPassword, String vSIFName, String vSIFInputFile, String credentialInputFile, boolean deleteInputFile, boolean deleteCredentialInputFile, boolean useUserOnFarm, boolean authRequired, String vsifType, String userFarmType,
-			boolean dynamicUserId, boolean advConfig, int connTimeout, int readTimeout,boolean envVarible,String envVaribleFile,String inaccessibleResolver,String stoppedResolver,String failedResolver,String doneResolver,String suspendedResolver,boolean waitTillSessionEnds, int stepSessionTimeout,boolean generateJUnitXML,boolean extraAttributesForFailures,String staticAttributeList,boolean markBuildAsFailedIfAllRunFailed ,boolean failJobIfAllRunFailed) {
+			boolean dynamicUserId, boolean advConfig, int connTimeout, int readTimeout,boolean envVarible,String envVaribleFile,String inaccessibleResolver,String stoppedResolver,String failedResolver,String doneResolver,String suspendedResolver,boolean waitTillSessionEnds, int stepSessionTimeout,boolean generateJUnitXML,boolean extraAttributesForFailures,String staticAttributeList,boolean markBuildAsFailedIfAllRunFailed ,boolean failJobIfAllRunFailed,String envSourceInputFile) {
 		this.vAPIUrl = vAPIUrl;
 		this.vAPIUser = vAPIUser;
 		this.vAPIPassword = vAPIPassword;
@@ -86,6 +87,7 @@ public class VMGRLaunch extends Builder {
 		this.userFarmType = userFarmType;
 		this.dynamicUserId = dynamicUserId;
 		this.envVaribleFile = envVaribleFile;
+                this.envSourceInputFile = envSourceInputFile;
 		
 		this.connTimeout = connTimeout;
 		this.readTimeout = readTimeout;
@@ -152,6 +154,10 @@ public class VMGRLaunch extends Builder {
 
 	public String getEnvVaribleFile() {
 		return envVaribleFile;
+	}
+        
+        public String getEnvSourceInputFile() {
+		return envSourceInputFile;
 	}
 	
 	public String getVSIFInputFile() {
@@ -268,6 +274,11 @@ public class VMGRLaunch extends Builder {
 				listener.getLogger().println("The credential file is: " + credentialInputFile);
 				listener.getLogger().println("The credential file was set to be deleted after use: " + deleteCredentialInputFile);
 			}
+                        if (!"".equals(envSourceInputFile.trim())){
+                            listener.getLogger().println("The User's source file is: " + envSourceInputFile);
+                        } else {
+                            listener.getLogger().println("The User's source file wasn't set");
+                        }
 			
 		} 
 		
@@ -353,7 +364,7 @@ public class VMGRLaunch extends Builder {
                         
                         
 			String output = utils.executeVSIFLaunch(vsifFileNames, vAPIUrl, authRequired, vAPIUser, vAPIPassword, listener, dynamicUserId, build.getId(), build.getNumber(),
-					"" + build.getWorkspace(),connTimeout,readTimeout,advConfig,jsonEnvInput,useUserOnFarm,userFarmType,farmUserPassword,stepHolder);
+					"" + build.getWorkspace(),connTimeout,readTimeout,advConfig,jsonEnvInput,useUserOnFarm,userFarmType,farmUserPassword,stepHolder,envSourceInputFile);
 			if (!"success".equals(output)) {
 				listener.getLogger().println("Failed to launch vsifs for build " + build.getId() + " " + build.getNumber() + "\n");
 				listener.getLogger().println(output + "\n");

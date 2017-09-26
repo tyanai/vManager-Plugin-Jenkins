@@ -78,11 +78,12 @@
     
     <f:optionalBlock name="useUserOnFarm"  title="Use user's linux account privileges for this execution (16.1 and above only)" description="If selected, the session's artifacts will have the user's permissions" checked="${instance.useUserOnFarm}" inline="true">
     	 <f:radioBlock name="userFarmType" value="static" title="Use same credentials as for vManager login" checked="${instance.userFarmType == 'static'}" inline="true">
- 		 </f:radioBlock>
-  		<f:radioBlock name="userFarmType" value="dynamic" title="Dynamic credentials" checked="${instance.userFarmType == 'dynamic'}" inline="true">
+ 	 </f:radioBlock>
+  	<f:radioBlock name="userFarmType" value="dynamic" title="Dynamic credentials" checked="${instance.userFarmType == 'dynamic'}" inline="true">
          	<f:entry title="Name of credential file" field="credentialInputFile" description="Name of input file with credential values (not mandatory)"><f:textbox /></f:entry>
           	<f:entry title="Delete Credential File" field="deleteCredentialInputFile" description="If checked, the job will delete the credential file name after processing it."><f:checkbox name="deleteCredentialInputFile" checked="${it.deleteCredentialInputFile}"/></f:entry>
- 		 </f:radioBlock>
+        </f:radioBlock>
+        <f:entry title="User Pre Exceution File" field="envSourceInputFile" description="Path to user env params declaration for sourcing prior to execution (not mandatory) - vManager 17.10 and above only"><f:textbox /></f:entry> 
      </f:optionalBlock>
      
      <f:optionalBlock name="waitTillSessionEnds"  title="Wait for launched sessions to end" description="If selected, the build step will not finish until all sessions launched by this build ended" checked="${instance.waitTillSessionEnds}" inline="true">
