@@ -1,6 +1,6 @@
 package org.jenkinsci.plugins.vmanager;
 
-import hudson.model.BuildListener;
+import hudson.model.TaskListener;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -14,11 +14,9 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -33,7 +31,7 @@ public class Utils {
 	
 	
 
-	public BufferedReader loadFileFromWorkSpace(String buildID, int buildNumber, String workPlacePath, String inputFile, BuildListener listener, boolean deleteInputFile, String fileTypeEndingName)
+	public BufferedReader loadFileFromWorkSpace(String buildID, int buildNumber, String workPlacePath, String inputFile, TaskListener listener, boolean deleteInputFile, String fileTypeEndingName)
 			throws Exception { 
 
 		BufferedReader reader = null;
@@ -75,7 +73,7 @@ public class Utils {
 
 	}
 
-	public String[] loadVSIFFileNames(String buildID, int buildNumber, String workPlacePath, String vSIFInputFile, BuildListener listener, boolean deleteInputFile) throws Exception {
+	public String[] loadVSIFFileNames(String buildID, int buildNumber, String workPlacePath, String vSIFInputFile, TaskListener listener, boolean deleteInputFile) throws Exception {
 		String[] output = null;
 		List<String> listOfNames = new LinkedList<String>();
 		BufferedReader reader = null;
@@ -154,7 +152,7 @@ public class Utils {
 		return output;
 	}
 	
-	public String[] loadFileCredentials(String buildID, int buildNumber, String workPlacePath, String credentialInputFile, BuildListener listener, boolean deleteInputFile) throws Exception {
+	public String[] loadFileCredentials(String buildID, int buildNumber, String workPlacePath, String credentialInputFile, TaskListener listener, boolean deleteInputFile) throws Exception {
 		String[] output = null;
 		List<String> listOfNames = new LinkedList<String>();
 		BufferedReader reader = null;
@@ -227,7 +225,7 @@ public class Utils {
 	
 	
 	
-	public String loadJSONEnvInput(String buildID, int buildNumber, String workPlacePath, String envInputFile, BuildListener listener) throws Exception {
+	public String loadJSONEnvInput(String buildID, int buildNumber, String workPlacePath, String envInputFile, TaskListener listener) throws Exception {
 		String output = null;
 		StringBuffer listOfEnvs = new StringBuffer();
 		BufferedReader reader = null;
@@ -274,7 +272,7 @@ public class Utils {
 		return output;
 	}
 
-	public String loadJSONFromFile(String buildID, int buildNumber, String workPlacePath, String vInputFile, BuildListener listener, boolean deleteInputFile) throws Exception {
+	public String loadJSONFromFile(String buildID, int buildNumber, String workPlacePath, String vInputFile, TaskListener listener, boolean deleteInputFile) throws Exception {
 		String output = null;
 		StringBuffer listOfNames = new StringBuffer();
 		BufferedReader reader = null;
@@ -491,7 +489,7 @@ public class Utils {
 	}
 
 	public HttpURLConnection getVAPIConnection(String apiUrl, boolean requireAuth, String user, String password, String requestMethod, boolean dynamicUserId, String buildID, int buildNumber, String workPlacePath,
-			BuildListener listener,int connConnTimeOut, int connReadTimeout,boolean advConfig) throws Exception {
+			TaskListener listener,int connConnTimeOut, int connReadTimeout,boolean advConfig) throws Exception {
 
 		boolean notInTestMode = true;
 		if (listener == null) {
@@ -571,8 +569,8 @@ public class Utils {
 		return conn;
 	}
 
-	public String executeVSIFLaunch(String[] vsifs, String url, boolean requireAuth, String user, String password, BuildListener listener, boolean dynamicUserId, String buildID, int buildNumber,
-			String workPlacePath,int connConnTimeOut, int connReadTimeout, boolean advConfig, String jsonEnvInput, boolean useUserOnFarm, String userFarmType,String[] farmUserPassword, StepHolder stepHolder, String envSourceInputFile) throws Exception {
+	public String executeVSIFLaunch(String[] vsifs, String url, boolean requireAuth, String user, String password, TaskListener listener, boolean dynamicUserId, String buildID, int buildNumber,
+			String workPlacePath,int connConnTimeOut, int connReadTimeout, boolean advConfig, String jsonEnvInput, boolean useUserOnFarm, String userFarmType,String[] farmUserPassword, StepHolder stepHolder, String envSourceInputFile, String workingJobDir) throws Exception {
 
 		boolean notInTestMode = true;
 		if (listener == null) {
@@ -702,13 +700,13 @@ public class Utils {
 		
 		if (stepHolder != null){
 			waitTillSessionEnds(url, requireAuth, user, password, listener, dynamicUserId, buildID, buildNumber,
-				workPlacePath,connConnTimeOut, connReadTimeout, advConfig, stepHolder,listOfSessions,notInTestMode);
+				workPlacePath,connConnTimeOut, connReadTimeout, advConfig, stepHolder,listOfSessions,notInTestMode,workingJobDir);
 		}
 
 		return "success";
 	}
 
-	public String executeAPI(String jSON, String apiUrl, String url, boolean requireAuth, String user, String password, String requestMethod, BuildListener listener, boolean dynamicUserId, String buildID, int buildNumber,
+	public String executeAPI(String jSON, String apiUrl, String url, boolean requireAuth, String user, String password, String requestMethod, TaskListener listener, boolean dynamicUserId, String buildID, int buildNumber,
 			String workPlacePath,int connConnTimeOut, int connReadTimeout, boolean advConfig) throws Exception {
 		
 		try{
@@ -794,15 +792,16 @@ public class Utils {
 
 	
 	
-	public void waitTillSessionEnds(String url, boolean requireAuth, String user, String password, BuildListener listener, boolean dynamicUserId, String buildID, int buildNumber,
-			String workPlacePath,int connConnTimeOut, int connReadTimeout, boolean advConfig, StepHolder stepHolder, List listOfSessions, boolean notInTestMode) throws Exception{
+	public void waitTillSessionEnds(String url, boolean requireAuth, String user, String password, TaskListener listener, boolean dynamicUserId, String buildID, int buildNumber,
+			String workPlacePath,int connConnTimeOut, int connReadTimeout, boolean advConfig, StepHolder stepHolder, List listOfSessions, boolean notInTestMode, String workingJobDir) throws Exception{
 		
 			LaunchHolder launchHolder = new LaunchHolder(stepHolder,listOfSessions);
 			launchHolder.performWaiting( url,  requireAuth,  user,  password,  listener,  dynamicUserId,  buildID,  buildNumber,
-					 workPlacePath, connConnTimeOut,  connReadTimeout,  advConfig, notInTestMode);
+					 workPlacePath, connConnTimeOut,  connReadTimeout,  advConfig, notInTestMode,workingJobDir);
 		
 	}
-	
+        
+       
 	
 	
 	
@@ -842,7 +841,7 @@ public class Utils {
 	
 	
 	    @SuppressWarnings("finally")
-		public String processErrorFromRespone(HttpURLConnection conn, BuildListener listener, boolean notInTestMode){
+		public String processErrorFromRespone(HttpURLConnection conn, TaskListener listener, boolean notInTestMode){
 	    	String errorMessage = "";
 			StringBuilder resultFromError = null;
 			int responseCode = 0;

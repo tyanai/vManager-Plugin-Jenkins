@@ -9,9 +9,6 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
-import hudson.util.ListBoxModel.Option;
-
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -244,7 +241,11 @@ public class VMGRLaunch extends Builder {
 	@Override
 	public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
 
-		listener.getLogger().println("The HOST for vAPI is: " + vAPIUrl);
+		String workingJobDir = build.getRootDir().getAbsolutePath();
+                listener.getLogger().println("Root dir is: " +  workingJobDir);
+            
+            
+                listener.getLogger().println("The HOST for vAPI is: " + vAPIUrl);
 		listener.getLogger().println("The vAPIUser for vAPI is: " + vAPIUser);
 		listener.getLogger().println("The vAPIPassword for vAPI is: *******");
 		listener.getLogger().println("The vSIFName for vAPI is: " + vSIFName);
@@ -309,6 +310,7 @@ public class VMGRLaunch extends Builder {
 				
 			}
 			
+                        
 			
 			stepHolder = new StepHolder(inaccessibleResolver, stoppedResolver, failedResolver, doneResolver, suspendedResolver, waitTillSessionEnds,stepSessionTimeout,jUnitRequestHolder, markBuildAsFailedIfAllRunFailed, failJobIfAllRunFailed);
 		}
@@ -364,7 +366,7 @@ public class VMGRLaunch extends Builder {
                         
                         
 			String output = utils.executeVSIFLaunch(vsifFileNames, vAPIUrl, authRequired, vAPIUser, vAPIPassword, listener, dynamicUserId, build.getId(), build.getNumber(),
-					"" + build.getWorkspace(),connTimeout,readTimeout,advConfig,jsonEnvInput,useUserOnFarm,userFarmType,farmUserPassword,stepHolder,envSourceInputFile);
+					"" + build.getWorkspace(),connTimeout,readTimeout,advConfig,jsonEnvInput,useUserOnFarm,userFarmType,farmUserPassword,stepHolder,envSourceInputFile, workingJobDir);
 			if (!"success".equals(output)) {
 				listener.getLogger().println("Failed to launch vsifs for build " + build.getId() + " " + build.getNumber() + "\n");
 				listener.getLogger().println(output + "\n");

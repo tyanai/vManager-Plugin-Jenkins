@@ -1,0 +1,118 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+  <!--
+    This jelly script is used for per-project configuration.
+
+    See global.jelly for a general discussion about jelly script.
+  -->
+
+  <!--
+    Creates a text field that shows the value of the "name" property.
+    When submitted, it will be passed to the corresponding constructor parameter.
+  -->
+  
+ 
+  
+  
+  <f:block>
+  <table style="width: 95% ; border: 1px solid black">
+  <f:entry title="vManager Server API Url" field="vAPIUrl" description="vManager Server API Url"><f:textbox /></f:entry>
+  
+    <f:block>
+      <table>
+ 
+    <f:optionalBlock name="authRequired"  title="Authentication Required" description="If checked, User/Password are required." checked="${instance.authRequired}" inline="true">
+     
+   		
+        <f:entry title="Username" field="vAPIUser" description="vManager Username"><f:textbox default="vAPI"/></f:entry>
+        <f:entry title="Pick User ID dynamically " field="dynamicUserId" description="If checked, the user id will get picked from the workspace"><f:checkbox name="dynamicUserId" checked="${it.dynamicUserId}"/></f:entry>
+        <f:entry title="Password" field="vAPIPassword" description="vManager password"><f:password /></f:entry>
+     	
+      
+    </f:optionalBlock>
+     </table>
+      </f:block>
+      
+      <f:block>
+      <table>
+ 
+    <f:optionalBlock name="advConfig"  title="Override Default Configuration" description="" checked="${instance.advConfig}" inline="true">
+     
+   		
+        <f:entry title="Connection Timeout" field="connTimeout" description="Connection timeout in minutes (0 for unlimited)"><f:number default="1"/></f:entry>
+        <f:entry title="Read Timeout" field="readTimeout" description="Read timeout in minutes (0 for unlimited)"><f:number  default="30"/></f:entry>
+     	
+      
+    </f:optionalBlock>
+     </table>
+      </f:block>
+  
+   <f:validateButton
+   title="${%Test Connection}" progress="${%Testing...}"
+   method="testConnection" with="vAPIUser,vAPIPassword,vAPIUrl,authRequired" />
+  
+  </table>
+  </f:block>
+  
+  <f:block>
+  <table style="width: 95% ; border: 1px solid black">
+  <f:radioBlock name="vsifType" value="static" title="Static VSIF file name" checked="${instance.vsifType == 'static'}" inline="true">
+          <f:entry title="VSIF file location" field="vSIFName" description="Default VSIF file location with VSIF file name."><f:textbox /></f:entry>
+  </f:radioBlock>
+       
+        
+  <f:radioBlock name="vsifType" value="dynamic" title="Dynamic VSIF file names" checked="${instance.vsifType == 'dynamic'}" inline="true">
+    
+          <f:entry title="Name of input file" field="vSIFInputFile" description="Name of input file with one or more VSIF files for execution (not mandatory)"><f:textbox /></f:entry>
+          <f:entry title="Delete Input File" field="deleteInputFile" description="If checked, the job will delete the VSIF file name after processing it."><f:checkbox name="deleteInputFile" checked="${it.deleteInputFile}"/></f:entry>
+   
+  </f:radioBlock>
+  
+   <f:optionalBlock name="envVarible"  title="Include VSIF Environment Variables" description="" checked="${instance.envVarible}" inline="true">
+     	
+        <f:entry title="Name of input file" field="envVaribleFile" description="Name of input file with environment variables in json format (not mandatory) - vManager 15.1 and above only"><f:textbox /></f:entry>
+      
+    </f:optionalBlock>
+    
+    
+    <f:optionalBlock name="useUserOnFarm"  title="Use user's linux account privileges for this execution (16.1 and above only)" description="If selected, the session's artifacts will have the user's permissions" checked="${instance.useUserOnFarm}" inline="true">
+    	 <f:radioBlock name="userFarmType" value="static" title="Use same credentials as for vManager login" checked="${instance.userFarmType == 'static'}" inline="true">
+ 	 </f:radioBlock>
+  	<f:radioBlock name="userFarmType" value="dynamic" title="Dynamic credentials" checked="${instance.userFarmType == 'dynamic'}" inline="true">
+         	<f:entry title="Name of credential file" field="credentialInputFile" description="Name of input file with credential values (not mandatory)"><f:textbox /></f:entry>
+          	<f:entry title="Delete Credential File" field="deleteCredentialInputFile" description="If checked, the job will delete the credential file name after processing it."><f:checkbox name="deleteCredentialInputFile" checked="${it.deleteCredentialInputFile}"/></f:entry>
+        </f:radioBlock>
+        <f:entry title="User Pre Exceution File" field="envSourceInputFile" description="Path to user env params declaration for sourcing prior to execution (not mandatory) - vManager 17.10 and above only"><f:textbox /></f:entry> 
+     </f:optionalBlock>
+     
+     <f:optionalBlock name="waitTillSessionEnds"  title="Wait for launched sessions to end" description="If selected, the build step will not finish until all sessions launched by this build ended" checked="${instance.waitTillSessionEnds}" inline="true">
+    	<f:entry title="Sessions Timeout" field="stepSessionTimeout" description="Timeout in minutes (0 for unlimited), after which the build step will mark this build as a failure"><f:number default="30"/></f:entry>
+  		<f:entry title="In case session status was changed to 'inaccessible'" field="inaccessibleResolver" ><f:select /></f:entry>
+  		<f:entry title="In case session status was changed to 'stopped'" field="stoppedResolver" ><f:select /></f:entry>
+  		<f:entry title="In case session status was changed to 'failed'" field="failedResolver" ><f:select /></f:entry>
+  		<f:entry title="In case session status was changed to 'done'" field="doneResolver" ><f:select /></f:entry>
+  		<f:entry title="In case session status was changed to 'suspended'" field="suspendedResolver" ><f:select /></f:entry>
+  		<f:entry title="Show regression as failed if all runs failed" field="markBuildAsFailedIfAllRunFailed" description="If checked, the Dashboard will show the session status as Failed, instead of completed."><f:checkbox name="markBuildAsFailedIfAllRunFailed" checked="${it.markBuildAsFailedIfAllRunFailed}"/></f:entry>
+                <f:entry title="Fail the job if all runs failed" field="failJobIfAllRunFailed" description="If checked, the Jenkins job will fail and stop its execution."><f:checkbox name="failJobIfAllRunFailed" checked="${it.failJobIfAllRunFailed}"/></f:entry>
+  		
+  		
+  		
+  		<f:optionalBlock name="generateJUnitXML"  title="Generate JUnit Test Result" description="If selected, the job will create an XML file with the session's run result in the format of JUnit Report." checked="${instance.generateJUnitXML}" inline="true">
+ 		 <f:optionalBlock name="extraAttributesForFailures"  title="Add extra attributes for failure stack" description="If selected, the job will add extra attributes for failure stack." checked="${instance.extraAttributesForFailures}" inline="true">
+ 		 
+           <f:entry title="Attribute List (attribute codes must be used)" field="staticAttributeList" description="Static extra attributes for failure stack, separated by comma"><f:textbox /></f:entry>
+           <f:validateButton title="${%Test Attributes Validity}" progress="${%Testing Attribute Codes Validity...}" method="testExtraStaticAttr" with="vAPIUser,vAPIPassword,vAPIUrl,authRequired,staticAttributeList" />
+  		 
+ 		 </f:optionalBlock>
+		</f:optionalBlock>
+     	
+     </f:optionalBlock>
+    
+    
+    
+   </table>
+  </f:block>
+  
+   
+
+</j:jelly>

@@ -1,0 +1,20 @@
+<div>
+  The following setup allow you to select how the build will behave in each of the state where the session stop from running.<br/>
+  <br/>
+  <strong>Continue</strong><br/>
+  In case you select to continue, the build will assume (on the chosen state) for a given session that it can continue and finish the wait on this specific session.</br>
+  Please note that in case there are multiple sessions that are being executed by this step, the build will wait till all sessions got into a state that allow it to continue. </br>
+  <br/>
+  <strong>Ignore</strong><br/>
+  In case you select to continue, the build will assume (on the chosen state) for a given session that it can ignore the chosen state and keep waiting for other state (until get the 'completed' state). </br>
+  </br>
+  <strong>Fail</strong><br/>
+  In case you select to fail, the build will assume (on the chosen state) for a given session that it should mark this build as a failure build.  <strong>Note: </strong>If you have multiple sessions on this build step, it is enough for one single session to be marked as 'failed' in order to mark the entire build as a failed build. </br> 
+  </br>
+  <strong>Other Waiting Considerations</strong></br>
+  1.  When all sessions on this build step are having the state 'completed' the build will be marked as success.</br>
+  2.  When the vManager server goes down, the build step will keep waiting till the server will go back up.  The build step will only change its state based on sessions state changes.</br>
+  3.  If the session was manually deleted on the vManager server, before reaching into final state, the build will be marked as a failure build.</br>
+  4.  In any case, if the number of minutes waiting is bigger than the timeout set here, the build will marked as a failed build.</br>
+  
+</div>

@@ -9,15 +9,17 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import hudson.model.BuildListener;
+import hudson.model.TaskListener;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
 public class SessionStatusHolder {
 	
@@ -27,10 +29,11 @@ public class SessionStatusHolder {
 	boolean requireAuth; 
 	String user; 
 	String password;
-	BuildListener listener;
+	TaskListener listener;
 	boolean dynamicUserId;
 	private int buildNumber = 0;
 	private String workPlacePath = null;
+        private String workingJobDir = null;
 	private String buildId = null;
 	
 	
@@ -48,10 +51,19 @@ public class SessionStatusHolder {
 	private String postSessionData = "{\"filter\":{\"@c\":\".ChainedFilter\",\"condition\":\"OR\",\"chain\":[" + "######"  + "]},\"grouping\":[\"owner\"],\"settings\":{\"write-hidden\":true,\"stream-mode\":false},\"projection\":{\"type\": \"SELECTION_ONLY\",\"selection\":[\"session_status\",\"name\",\"total_runs_in_session\",\"passed_runs\",\"failed_runs\",\"running\",\"waiting\",\"other_runs\",\"owner\",\"number_of_entities\",\"id\"]}}";
 
 	
-	public SessionStatusHolder(int buildNumber, String workspace, String buildId) {
+	public SessionStatusHolder(int buildNumber, String workspace, String buildId, String workingJobDir) {
 		super();
 		this.buildNumber = buildNumber;
 		this.workPlacePath = workspace;
+                this.workingJobDir = workingJobDir;
+		this.buildId = buildId;
+		
+	}
+        
+        public SessionStatusHolder(int buildNumber, String workingJobDir, String buildId) {
+		super();
+		this.buildNumber = buildNumber;
+                this.workingJobDir = workingJobDir;
 		this.buildId = buildId;
 		
 	}
@@ -164,7 +176,7 @@ public class SessionStatusHolder {
 		sessionData.setServerUrl(this.url);
 		
 		
-		String fileOutput = workPlacePath + File.separator + buildNumber + "." + buildId + ".session_status.properties";
+		String fileOutput = this.workingJobDir + File.separator + buildNumber + "." + buildId + ".session_status.properties";
 		
 		//Just before writing the file, check if user choose to overwide session status to "Failed" in case the session is in completed state and all runs failed.
 		if (markBuildAsFailedIfAllRunFailed){
@@ -207,6 +219,12 @@ public class SessionStatusHolder {
 		writer.flush();
 		writer.close();
                 
+                //For sake of backward compatibility, also place a copy into the workspace dir:
+                String copyToWorkspace = this.workPlacePath + File.separator + buildNumber + "." + buildId + ".session_status.properties";
+                Path copyFrom = FileSystems.getDefault().getPath(fileOutput);
+                Path copyTo = FileSystems.getDefault().getPath(copyToWorkspace);
+                Files.copy(copyFrom, copyTo, StandardCopyOption.REPLACE_EXISTING);
+                
                 //Just before continue to the next Jenkins step, check if the user choose to fail the entire Job in case all runs failed
                 if (failJobIfAllRunFailed){
 			if (sessionData.getTotalRuns().trim().equals(sessionData.getFailed().trim())){
@@ -223,7 +241,7 @@ public class SessionStatusHolder {
 	public SessionState loadSessionFromFile(){
 		
 		SessionState sessionData = new SessionState();
-		String fileInput = workPlacePath + File.separator + buildNumber + "." + buildId + ".session_status.properties";
+		String fileInput = workingJobDir + File.separator + buildNumber + "." + buildId + ".session_status.properties";
 		
 		Properties prop = new Properties();
 		InputStream input = null;
@@ -308,8 +326,8 @@ public class SessionStatusHolder {
 	}
 		
 	
-	public SessionStatusHolder(String url, boolean requireAuth, String user, String password, BuildListener listener, boolean dynamicUserId, int buildNumber, String workPlacePath, String buildId,
-			int connConnTimeOut, int connReadTimeout, boolean advConfig, boolean notInTestMode,List<String> listOfSessions, boolean markBuildAsFailedIfAllRunFailed, boolean failJobIfAllRunFailed) {
+	public SessionStatusHolder(String url, boolean requireAuth, String user, String password, TaskListener listener, boolean dynamicUserId, int buildNumber, String workPlacePath, String buildId,
+			int connConnTimeOut, int connReadTimeout, boolean advConfig, boolean notInTestMode,List<String> listOfSessions, boolean markBuildAsFailedIfAllRunFailed, boolean failJobIfAllRunFailed,String workingJobDir) {
 		
 		super();
 		this.url = url;
@@ -328,6 +346,7 @@ public class SessionStatusHolder {
 		this.listOfSessions = listOfSessions;
 		this.markBuildAsFailedIfAllRunFailed = markBuildAsFailedIfAllRunFailed;
 		this.failJobIfAllRunFailed = failJobIfAllRunFailed;
+                this.workingJobDir = workingJobDir;
 		buildPostDataSessionPart(listOfSessions);
 		
 		this.postSessionData = this.postSessionData.replaceAll("######", postDataSessions);
@@ -354,6 +373,16 @@ public class SessionStatusHolder {
 	public void setBuildId(String buildId) {
 		this.buildId = buildId;
 	}
+
+    public String getWorkingJobDir() {
+        return workingJobDir;
+    }
+
+    public void setWorkingJobDir(String workingJobDir) {
+        this.workingJobDir = workingJobDir;
+    }
+        
+        
 	
 	
 

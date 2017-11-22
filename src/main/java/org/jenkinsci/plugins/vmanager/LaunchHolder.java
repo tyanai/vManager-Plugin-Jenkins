@@ -1,7 +1,6 @@
 package org.jenkinsci.plugins.vmanager;
 
-import hudson.model.BuildListener; 
-import hudson.util.FormValidation;
+import hudson.model.TaskListener; 
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -58,8 +57,8 @@ public class LaunchHolder {
 		this.listOfSessions = listOfSessions;
 	}
 
-	public void performWaiting(String url, boolean requireAuth, String user, String password, BuildListener listener, boolean dynamicUserId, String buildID, int buildNumber, String workPlacePath,
-			int connConnTimeOut, int connReadTimeout, boolean advConfig, boolean notInTestMode) throws Exception {
+	public void performWaiting(String url, boolean requireAuth, String user, String password, TaskListener listener, boolean dynamicUserId, String buildID, int buildNumber, String workPlacePath,
+			int connConnTimeOut, int connReadTimeout, boolean advConfig, boolean notInTestMode, String workingJobDir) throws Exception {
 
 		String requestMethod = "POST";
 		String apiURL = url + "/rest/sessions/list";
@@ -87,7 +86,7 @@ public class LaunchHolder {
 		// Init the SessionStatusHolder - it will be saving the aggregated
 		// sessions info every check in the file system
 		SessionStatusHolder sessionStatusHolder = new SessionStatusHolder(url, requireAuth, user, password, listener, dynamicUserId, buildNumber, workPlacePath, buildID, connConnTimeOut,
-				connReadTimeout, advConfig, notInTestMode, listOfSessions, stepHolder.isMarkBuildAsFailedIfAllRunFailed(),stepHolder.isFailJobIfAllRunFailed());
+				connReadTimeout, advConfig, notInTestMode, listOfSessions, stepHolder.isMarkBuildAsFailedIfAllRunFailed(),stepHolder.isFailJobIfAllRunFailed(),workingJobDir);
 
 		while (keepWaiting) {
 

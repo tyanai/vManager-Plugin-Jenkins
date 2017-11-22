@@ -1,12 +1,8 @@
 package org.jenkins.plugins;
 
-import hudson.plugins.vmanager.BuildStatusMap;
-
-import java.util.logging.Logger;
 
 import org.jenkinsci.plugins.vmanager.JUnitRequestHolder;
 import org.jenkinsci.plugins.vmanager.Utils;
-import org.jenkinsci.plugins.vmanager.VMGRLaunch;
 import org.jenkinsci.plugins.vmanager.StepHolder;
 
 public class TestPlugin {
@@ -77,7 +73,7 @@ public class TestPlugin {
 			JUnitRequestHolder jUnitRequestHolder = new JUnitRequestHolder(generateJUnitXML, extraAttributesForFailures, staticAttributeList);
 			stepHolder = new StepHolder(inaccessibleResolver, stoppedResolver, failedResolver, doneResolver, suspendedResolver, waitTillSessionEnds,stepSessionTimeout,jUnitRequestHolder,markBuildAsFailedIfAllRunFailed,markJobAsFailedIfAllRunFailed);
 		}
-		utils.executeVSIFLaunch(vsifFileNames, vAPIUrl, authRequired, vAPIUser, vAPIPassword, null,false,buildID,buildNumber,buildArtifactPath,0,0,false,null,false,null,null, stepHolder,"");
+		utils.executeVSIFLaunch(vsifFileNames, vAPIUrl, authRequired, vAPIUser, vAPIPassword, null,false,buildID,buildNumber,buildArtifactPath,0,0,false,null,false,null,null, stepHolder,"",buildArtifactPath);
 		
 		//String buildStatus = BuildStatusMap.getValue(buildID, buildNumber, buildArtifactPath+"", "id", true);
 		//System.out.println("Build status is '" + buildStatus + "'" );

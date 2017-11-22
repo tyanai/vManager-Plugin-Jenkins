@@ -6,4 +6,5 @@
   <f:entry title="${%Number of builds to use}">
     <f:textbox name="portlet.numBuilds" field="numBuilds" default="10" />
   </f:entry>
+  
 </j:jelly>

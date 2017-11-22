@@ -11,13 +11,13 @@ public class BuildStatusMap {
 	
 	static Map<String,SessionState> buildMap = new HashMap<String,SessionState>();
 	
-	public static String getValue(String buildId, int buildNumber, String workspace, String key,boolean firstTimeForAGivenLine){
+	public static String getValue(String buildId, int buildNumber, String workingJobDir, String key,boolean firstTimeForAGivenLine){
 		
-		String jobKey = workspace + "." + buildNumber + "." + buildId ;
+		String jobKey = workingJobDir + "." + buildNumber + "." + buildId ;
 		
 		if (firstTimeForAGivenLine){
 			//System.out.println("Trying to load properties for build: " + jobKey );
-			SessionStatusHolder sessionStatusHolder = new SessionStatusHolder( buildNumber,  workspace,  buildId);
+			SessionStatusHolder sessionStatusHolder = new SessionStatusHolder( buildNumber,  workingJobDir,  buildId); 
 			SessionState sessionState = sessionStatusHolder.loadSessionFromFile();
 			buildMap.put(jobKey, sessionState);
 		}
