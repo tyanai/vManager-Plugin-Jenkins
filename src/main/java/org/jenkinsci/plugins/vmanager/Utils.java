@@ -28,7 +28,8 @@ import net.sf.json.JSONObject;
 
 public class Utils {
 	
-	
+	private String UserUsedForLogin = null;
+        private String PasswordUsedForLogin = null;
 	
 
 	public BufferedReader loadFileFromWorkSpace(String buildID, int buildNumber, String workPlacePath, String inputFile, TaskListener listener, boolean deleteInputFile, String fileTypeEndingName)
@@ -560,6 +561,8 @@ public class Utils {
 			}
 
 			String authString = user + ":" + password;
+                        UserUsedForLogin = user;
+                        PasswordUsedForLogin = password;
 			byte[] authEncBytes = Base64.encodeBase64(authString.getBytes());
 			String authStringEnc = new String(authEncBytes);
 			conn.setRequestProperty("Authorization", "Basic " + authStringEnc);
@@ -570,7 +573,7 @@ public class Utils {
 	}
 
 	public String executeVSIFLaunch(String[] vsifs, String url, boolean requireAuth, String user, String password, TaskListener listener, boolean dynamicUserId, String buildID, int buildNumber,
-			String workPlacePath,int connConnTimeOut, int connReadTimeout, boolean advConfig, String jsonEnvInput, boolean useUserOnFarm, String userFarmType,String[] farmUserPassword, StepHolder stepHolder, String envSourceInputFile, String workingJobDir) throws Exception {
+			String workPlacePath,int connConnTimeOut, int connReadTimeout, boolean advConfig, String jsonEnvInput, boolean useUserOnFarm, String userFarmType,String[] farmUserPassword, StepHolder stepHolder, String envSourceInputFile, String workingJobDir, VMGRBuildArchiver vMGRBuildArchiver) throws Exception {
 
 		boolean notInTestMode = true;
 		if (listener == null) {
@@ -580,6 +583,8 @@ public class Utils {
 		String apiURL = url + "/rest/sessions/launch";
 		
 		List<String> listOfSessions = new ArrayList<String>();
+                
+               
 
 		for (int i = 0; i < vsifs.length; i++) {
 
@@ -684,6 +689,14 @@ public class Utils {
 			}
 
 		}
+                
+                if (vMGRBuildArchiver != null){
+                    if (vMGRBuildArchiver.isVMGRBuildArchive()){
+                        vMGRBuildArchiver.markBuildForArchive(listOfSessions,apiURL,requireAuth,UserUsedForLogin,PasswordUsedForLogin,workingJobDir,listener);
+                    }
+                }
+                
+                
 		
 		//Write the sessions id into the workspace for further use
 		// Flush the output into workspace
@@ -697,6 +710,8 @@ public class Utils {
 		
 		writer.flush();
 		writer.close();
+                
+                
 		
 		if (stepHolder != null){
 			waitTillSessionEnds(url, requireAuth, user, password, listener, dynamicUserId, buildID, buildNumber,
@@ -805,7 +820,7 @@ public class Utils {
 	
 	
 	
-	private static void configureAllowAll(HttpsURLConnection connection) {
+	public static void configureAllowAll(HttpsURLConnection connection) {
 		connection.setHostnameVerifier(new HostnameVerifier() {
 	           @Override
 	           public boolean verify(String s, SSLSession sslSession) {

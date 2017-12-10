@@ -8,6 +8,7 @@ import java.io.File;
 import org.jenkinsci.plugins.vmanager.JUnitRequestHolder;
 import org.jenkinsci.plugins.vmanager.StepHolder;
 import org.jenkinsci.plugins.vmanager.Utils;
+import org.jenkinsci.plugins.vmanager.VMGRBuildArchiver;
 import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 
@@ -129,6 +130,23 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
 
             stepHolder = new StepHolder(step.getInaccessibleResolver(), step.getStoppedResolver(), step.getFailedResolver(), step.getDoneResolver(), step.getSuspendedResolver(), step.getWaitTillSessionEnds(), step.getStepSessionTimeout(), jUnitRequestHolder, step.isMarkBuildAsFailedIfAllRunFailed(), step.isFailJobIfAllRunFailed());
         }
+        
+        VMGRBuildArchiver vMGRBuildArchiver = null;
+        if (step.isVMGRBuildArchive()){
+            listener.getLogger().println("Session was set to get deleted when build is deleted");
+            listener.getLogger().println("Delete also session directory on disk: " + step.isDeleteAlsoSessionDirectory());
+            listener.getLogger().println("Use dedicated credentials for deleting the session: " + step.isGenericCredentialForSessionDelete());
+            listener.getLogger().println("Use FAM Mode: " + step.getFamMode());
+            if ("true".equals(step.getFamMode())){
+                listener.getLogger().println("FAM Mode Location: " + step.getFamModeLocation());
+            }
+            if (step.isGenericCredentialForSessionDelete()){
+                listener.getLogger().println("Dedicated User for session delete: " + step.getArchiveUser());
+                listener.getLogger().println("Dedicated password for session delete: *******");
+            }
+            vMGRBuildArchiver = new VMGRBuildArchiver(step.isVMGRBuildArchive(),step.isGenericCredentialForSessionDelete(),step.isGenericCredentialForSessionDelete(),step.getArchiveUser(),step.getArchivePassword(),step.getFamMode(),step.getFamModeLocation());
+            
+        }
 
         try {
             Utils utils = new Utils();
@@ -176,7 +194,7 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
             
             // ----------------------------------------------------------------------------------------------------------------
             String output = utils.executeVSIFLaunch(vsifFileNames, step.getVAPIUrl(), step.isAuthRequired(), step.getVAPIUser(), step.getVAPIPassword(), listener, step.isDynamicUserId(), buildId, buildNumber,
-                    "" + workspace, step.getConnTimeout(), step.getReadTimeout(), step.isAdvConfig(), jsonEnvInput, step.isUseUserOnFarm(), step.getUserFarmType(), farmUserPassword, stepHolder, step.getEnvSourceInputFile(), workingJobDir);
+                    "" + workspace, step.getConnTimeout(), step.getReadTimeout(), step.isAdvConfig(), jsonEnvInput, step.isUseUserOnFarm(), step.getUserFarmType(), farmUserPassword, stepHolder, step.getEnvSourceInputFile(), workingJobDir,vMGRBuildArchiver);
             if (!"success".equals(output)) {
                 listener.getLogger().println("Failed to launch vsifs for build " + buildId + " " + buildNumber + "\n");
                 listener.getLogger().println(output + "\n");

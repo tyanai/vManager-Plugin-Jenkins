@@ -8,6 +8,7 @@ import hudson.Launcher;
 import hudson.model.AbstractProject;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import hudson.model.listeners.RunListener;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import java.io.IOException;
@@ -15,10 +16,12 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
 import net.sf.json.JSONObject;
 import org.jenkinsci.plugins.vmanager.Utils;
+import org.jenkinsci.plugins.vmanager.VMGRBuildArchiver;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.jenkinsci.plugins.workflow.steps.Step;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
@@ -63,10 +66,22 @@ public class VMGRLaunchStep extends Step {
     private final String staticAttributeList;
     private final boolean markBuildAsFailedIfAllRunFailed;
     private final boolean failJobIfAllRunFailed;
+    
+    private final boolean vMGRBuildArchive;
+    private final boolean deleteAlsoSessionDirectory;
+    private final boolean genericCredentialForSessionDelete;
+    private final String archiveUser;
+    private final String archivePassword;
+    
+    private final String famMode;
+    private final String famModeLocation;
+
+    
+    
 
     @DataBoundConstructor
     public VMGRLaunchStep(String vAPIUrl, String vAPIUser, String vAPIPassword, String vSIFName, String vSIFInputFile, String credentialInputFile, boolean deleteInputFile, boolean deleteCredentialInputFile, boolean useUserOnFarm, boolean authRequired, String vsifType, String userFarmType,
-            boolean dynamicUserId, boolean advConfig, int connTimeout, int readTimeout, boolean envVarible, String envVaribleFile, String inaccessibleResolver, String stoppedResolver, String failedResolver, String doneResolver, String suspendedResolver, boolean waitTillSessionEnds, int stepSessionTimeout, boolean generateJUnitXML, boolean extraAttributesForFailures, String staticAttributeList, boolean markBuildAsFailedIfAllRunFailed, boolean failJobIfAllRunFailed, String envSourceInputFile) {
+            boolean dynamicUserId, boolean advConfig, int connTimeout, int readTimeout, boolean envVarible, String envVaribleFile, String inaccessibleResolver, String stoppedResolver, String failedResolver, String doneResolver, String suspendedResolver, boolean waitTillSessionEnds, int stepSessionTimeout, boolean generateJUnitXML, boolean extraAttributesForFailures, String staticAttributeList, boolean markBuildAsFailedIfAllRunFailed, boolean failJobIfAllRunFailed, String envSourceInputFile, boolean vMGRBuildArchive, boolean deleteAlsoSessionDirectory, boolean genericCredentialForSessionDelete, String archiveUser, String archivePassword, String famMode, String famModeLocation) {
         this.vAPIUrl = vAPIUrl;
         this.vAPIUser = vAPIUser;
         this.vAPIPassword = vAPIPassword;
@@ -101,7 +116,15 @@ public class VMGRLaunchStep extends Step {
         this.markBuildAsFailedIfAllRunFailed = markBuildAsFailedIfAllRunFailed;
         this.failJobIfAllRunFailed = failJobIfAllRunFailed;
         this.staticAttributeList = staticAttributeList;
+        
+        this.vMGRBuildArchive = vMGRBuildArchive;
+        this.deleteAlsoSessionDirectory = deleteAlsoSessionDirectory;
+        this.genericCredentialForSessionDelete = genericCredentialForSessionDelete;
+        this.archiveUser = archiveUser;
+        this.archivePassword = archivePassword;
 
+        this.famMode = famMode;
+        this.famModeLocation = famModeLocation;
     }
 
     /**
@@ -230,14 +253,61 @@ public class VMGRLaunchStep extends Step {
     public boolean getWaitTillSessionEnds() {
         return waitTillSessionEnds;
     }
+    
+    public boolean isVMGRBuildArchive() {
+        return vMGRBuildArchive;
+    }
 
+    public boolean isDeleteAlsoSessionDirectory() {
+        return deleteAlsoSessionDirectory;
+    }
+
+    public boolean isGenericCredentialForSessionDelete() {
+        return genericCredentialForSessionDelete;
+    }
+
+    public String getArchiveUser() {
+        return archiveUser;
+    }
+
+    public String getArchivePassword() {
+        return archivePassword;
+    }
+
+    public String getFamMode() {
+        return famMode;
+    }
+
+    public String getFamModeLocation() {
+        return famModeLocation;
+    }
+
+    
     
      @Override
     public StepExecution start(StepContext context) throws Exception {
         return new VMGRLaunchStepImpl(this, context);
     }
     
-    
+    /*
+    @Extension
+    public static final class VMGRStepDeletedJobListener extends RunListener<Run> {
+
+        @Override
+        public void onDeleted(Run run) {
+           
+            VMGRBuildArchiver vMGRBuildArchiver = new VMGRBuildArchiver();
+            try {
+                vMGRBuildArchiver.deleteSessions(run, logger);
+            } catch (Exception ex) {
+                logger.log(Level.SEVERE, "Failed to delete session during build removal.", ex);
+            }
+            
+        }
+        
+        private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(VMGRStepDeletedJobListener.class.getName());
+    }
+*/
 
     @Extension
     public static class DescriptorImpl extends StepDescriptor  {
@@ -363,6 +433,23 @@ public class VMGRLaunchStep extends Step {
 
                 Utils utils = new Utils();
                 String output = utils.checkVAPIConnection(vAPIUrl, authRequired, vAPIUser, vAPIPassword);
+                if (!output.startsWith("Failed")) {
+                    return FormValidation.ok("Success. " + output);
+                } else {
+                    return FormValidation.error(output);
+                }
+            } catch (Exception e) {
+                return FormValidation.error("Client error : " + e.getMessage());
+            }
+        }
+        
+        public FormValidation doTestArchiveUser(@QueryParameter("archiveUser") final String archiveUser, @QueryParameter("archivePassword") final String archivePassword,
+                @QueryParameter("vAPIUrl") final String vAPIUrl) throws IOException,
+                ServletException {
+            try {
+
+                Utils utils = new Utils();
+                String output = utils.checkVAPIConnection(vAPIUrl, true, archiveUser, archivePassword);
                 if (!output.startsWith("Failed")) {
                     return FormValidation.ok("Success. " + output);
                 } else {

@@ -1,0 +1,21 @@
+<div>
+  Choosing to delete vManager session during build removal, will trigger an operation during manual/automatic deletion of a build, to deal with the remote session/sessions that were created during that build on the vManager DB.<br/>
+  When this option is enabled the build will place an instruction file (sdi.properties) within the job directory that specify the sessions to get deleted, as well as other parameters - that will be used during the delete operation.<br/><br/>
+  Builds that runs while this option is turned off, will not get effected during removal, and will keep their sessions.<br/><br/>
+  You can choose between two methodologies: <br/>
+  <br/>
+  <strong>Sync Delete Methodology (built-in)</strong><br/>
+  In case you select the sync methodology, the plugin will call vManager vAPI during the build removal process for deleting the sessions that were created during that same build.<br/>
+  With this option you can also supply a generic user/password to be used for the delete operation, otherwise, the same user that was used during the build will be picked automatically.  <br/>
+  Please note that the sync methodology is lacking two main aspects:<br/>
+  1.  Since Jenkins ignores any exception thrown within the callback functions of RunListener, the build will get deleted even if the session failed to get deleted from vManager DB.<br/>
+  2.  When the vAPI is down, it can take up to 20 seconds to finish the operation (as it needs to wait till vAPI will be available) - the UX at that time, might appear sluggish to the end user.<br/>
+  <br/>
+  <strong>Async Delete Methodology (externally)</strong><br/>
+  In case you want to introduce a more robust approach (promise session deletion even if vManager Server is down, as well as faster UX), you should use the async methodology.<br/>
+  When Async Methodology is used, the callback function will not try to delete the session, but instead will copy the sdi.properties file into an external location of your choice.  <br/>
+  You should create an additional job, one that is triggered every 1 minute for scanning that directory (and trying to delete the relevant sessions within these sdi files).  To exclude the copy of the sdi files during build removal, this flow is not managed by the plugin.<br/>
+  Please note - defining an external directory location (in windows) requires the use of forward slash instead of backslash.<br/>
+  
+  
+</div>
