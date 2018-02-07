@@ -73,13 +73,14 @@ public class VMGRLaunch extends Builder {
     
     private final String famMode;
     private final String famModeLocation;
+    private final boolean noAppendSeed;
 
     // Fields in config.jelly must match the parameter names in the
     // "DataBoundConstructor"
     @DataBoundConstructor
     public VMGRLaunch(String vAPIUrl, String vAPIUser, String vAPIPassword, String vSIFName, String vSIFInputFile, String credentialInputFile, boolean deleteInputFile, boolean deleteCredentialInputFile, boolean useUserOnFarm, boolean authRequired, String vsifType, String userFarmType,
             boolean dynamicUserId, boolean advConfig, int connTimeout, int readTimeout, boolean envVarible, String envVaribleFile, String inaccessibleResolver, String stoppedResolver, String failedResolver, String doneResolver, String suspendedResolver, boolean waitTillSessionEnds,
-            int stepSessionTimeout, boolean generateJUnitXML, boolean extraAttributesForFailures, String staticAttributeList, boolean markBuildAsFailedIfAllRunFailed, boolean failJobIfAllRunFailed, String envSourceInputFile, boolean vMGRBuildArchive, boolean deleteAlsoSessionDirectory, boolean genericCredentialForSessionDelete, String archiveUser, String archivePassword, String famMode, String famModeLocation) {
+            int stepSessionTimeout, boolean generateJUnitXML, boolean extraAttributesForFailures, String staticAttributeList, boolean markBuildAsFailedIfAllRunFailed, boolean failJobIfAllRunFailed, String envSourceInputFile, boolean vMGRBuildArchive, boolean deleteAlsoSessionDirectory, boolean genericCredentialForSessionDelete, String archiveUser, String archivePassword, String famMode, String famModeLocation, boolean noAppendSeed) {
         this.vAPIUrl = vAPIUrl;
         this.vAPIUser = vAPIUser;
         this.vAPIPassword = vAPIPassword;
@@ -123,6 +124,7 @@ public class VMGRLaunch extends Builder {
         
         this.famMode = famMode;
         this.famModeLocation = famModeLocation;
+        this.noAppendSeed = noAppendSeed;
 
     }
 
@@ -132,6 +134,12 @@ public class VMGRLaunch extends Builder {
     public boolean isExtraAttributesForFailures() {
         return extraAttributesForFailures;
     }
+
+    public boolean isNoAppendSeed() {
+        return noAppendSeed;
+    }
+    
+    
 
     public boolean isMarkBuildAsFailedIfAllRunFailed() {
         return markBuildAsFailedIfAllRunFailed;
@@ -344,7 +352,9 @@ public class VMGRLaunch extends Builder {
 
             listener.getLogger().println("Generate XML Report XML output: " + generateJUnitXML);
             if (generateJUnitXML) {
-                jUnitRequestHolder = new JUnitRequestHolder(generateJUnitXML, extraAttributesForFailures, staticAttributeList);
+                listener.getLogger().println("Do not append seed to test names: " + noAppendSeed);  
+                jUnitRequestHolder = new JUnitRequestHolder(generateJUnitXML, extraAttributesForFailures, staticAttributeList, noAppendSeed);
+                
                 listener.getLogger().println("Extra Attributes in JUnit Report: " + extraAttributesForFailures);
                 if (extraAttributesForFailures) {
                     listener.getLogger().println("Extra Attributes list in JUnit Report is: " + staticAttributeList);

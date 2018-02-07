@@ -75,13 +75,14 @@ public class VMGRLaunchStep extends Step {
     
     private final String famMode;
     private final String famModeLocation;
+    private final boolean noAppendSeed;
 
     
     
 
     @DataBoundConstructor
     public VMGRLaunchStep(String vAPIUrl, String vAPIUser, String vAPIPassword, String vSIFName, String vSIFInputFile, String credentialInputFile, boolean deleteInputFile, boolean deleteCredentialInputFile, boolean useUserOnFarm, boolean authRequired, String vsifType, String userFarmType,
-            boolean dynamicUserId, boolean advConfig, int connTimeout, int readTimeout, boolean envVarible, String envVaribleFile, String inaccessibleResolver, String stoppedResolver, String failedResolver, String doneResolver, String suspendedResolver, boolean waitTillSessionEnds, int stepSessionTimeout, boolean generateJUnitXML, boolean extraAttributesForFailures, String staticAttributeList, boolean markBuildAsFailedIfAllRunFailed, boolean failJobIfAllRunFailed, String envSourceInputFile, boolean vMGRBuildArchive, boolean deleteAlsoSessionDirectory, boolean genericCredentialForSessionDelete, String archiveUser, String archivePassword, String famMode, String famModeLocation) {
+            boolean dynamicUserId, boolean advConfig, int connTimeout, int readTimeout, boolean envVarible, String envVaribleFile, String inaccessibleResolver, String stoppedResolver, String failedResolver, String doneResolver, String suspendedResolver, boolean waitTillSessionEnds, int stepSessionTimeout, boolean generateJUnitXML, boolean extraAttributesForFailures, String staticAttributeList, boolean markBuildAsFailedIfAllRunFailed, boolean failJobIfAllRunFailed, String envSourceInputFile, boolean vMGRBuildArchive, boolean deleteAlsoSessionDirectory, boolean genericCredentialForSessionDelete, String archiveUser, String archivePassword, String famMode, String famModeLocation, boolean noAppendSeed) {
         this.vAPIUrl = vAPIUrl;
         this.vAPIUser = vAPIUser;
         this.vAPIPassword = vAPIPassword;
@@ -125,6 +126,7 @@ public class VMGRLaunchStep extends Step {
 
         this.famMode = famMode;
         this.famModeLocation = famModeLocation;
+        this.noAppendSeed = noAppendSeed;
     }
 
     /**
@@ -133,6 +135,12 @@ public class VMGRLaunchStep extends Step {
     public boolean isExtraAttributesForFailures() {
         return extraAttributesForFailures;
     }
+
+    public boolean isNoAppendSeed() {
+        return noAppendSeed;
+    }
+    
+    
 
     public boolean isMarkBuildAsFailedIfAllRunFailed() {
         return markBuildAsFailedIfAllRunFailed;

@@ -120,7 +120,9 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
 
             listener.getLogger().println("Generate XML Report XML output: " + step.isGenerateJUnitXML());
             if (step.isGenerateJUnitXML()) {
-                jUnitRequestHolder = new JUnitRequestHolder(step.isGenerateJUnitXML(), step.isExtraAttributesForFailures(), step.getStaticAttributeList());
+                
+                listener.getLogger().println("Do not append seed to test names: " + step.isNoAppendSeed());        
+                jUnitRequestHolder = new JUnitRequestHolder(step.isGenerateJUnitXML(), step.isExtraAttributesForFailures(), step.getStaticAttributeList(), step.isNoAppendSeed());
                 listener.getLogger().println("Extra Attributes in JUnit Report: " + step.isExtraAttributesForFailures());
                 if (step.isExtraAttributesForFailures()) {
                     listener.getLogger().println("Extra Attributes list in JUnit Report is: " + step.getStaticAttributeList());

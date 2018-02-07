@@ -88,7 +88,11 @@ public class UnitTestFormatter {
 					testDuration = 0;
 				}
 				
-				
+				//Check if user choose to append the seed to the test name:
+                                String seedNameForAppending = "";
+                                if (!jUnitRequestHolder.isNoAppendSeed()){
+                                    seedNameForAppending = " : Seed-" + testSeed;
+                                }
 				
 				if ("failed".equals(testStatus)){
 					if (tmpRun.has("first_failure_name")){
@@ -101,15 +105,15 @@ public class UnitTestFormatter {
 					} else {
 						testFirstErrorDescription = "    Run is in state running,other or waiting.\n     Reason for run to mark as failed is because session change status to such that build was marked as failed.";
 					}
-					writer.append("		<testcase classname=\"" + testGroup  + "\" name=\"" + name  + " : Seed-" + testSeed + "\" time=\"" + testDuration + "\">" + "\n");
+					writer.append("		<testcase classname=\"" + testGroup  + "\" name=\"" + name  + seedNameForAppending + "\" time=\"" + testDuration + "\">" + "\n");
 					writer.append("			<failure message=\"" + testFirstErrorCode +"\" type=\"" + testFirstErrorCode +"\">First Error Description: \n" + testFirstErrorDescription +  "\n" + "Computed Seed: \n" + testSeed +  "\n" + stripNonValidXMLCharacters(addExtraAttrValues(tmpRun)) + "</failure>" + "\n");
 					writer.append("		</testcase>" + "\n");
 				} else if ("stopped".equals(testStatus) || "running".equals(testStatus) || "other".equals(testStatus) || "waiting".equals(testStatus)){
-					writer.append("		<testcase classname=\"" + testGroup  + "\" name=\"" + name  + " : Seed-" + testSeed + "\" time=\"" + testDuration + "\">" + "\n");
+					writer.append("		<testcase classname=\"" + testGroup  + "\" name=\"" + name  + seedNameForAppending + "\" time=\"" + testDuration + "\">" + "\n");
 					writer.append("		 <skipped />" + "\n");
 					writer.append("		</testcase>" + "\n");
 				}else {
-					writer.append("		<testcase classname=\"" + testGroup  + "\" name=\"" + name  + " : Seed-" + testSeed + "\" time=\"" + testDuration + "\"/>" + "\n");
+					writer.append("		<testcase classname=\"" + testGroup  + "\" name=\"" + name  + seedNameForAppending + "\" time=\"" + testDuration + "\"/>" + "\n");
 				}
 				
 			}

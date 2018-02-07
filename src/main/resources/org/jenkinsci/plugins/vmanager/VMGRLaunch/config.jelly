@@ -99,7 +99,8 @@
   		
   		
   		<f:optionalBlock name="generateJUnitXML"  title="Generate JUnit Test Result" description="If selected, the job will create an XML file with the session's run result in the format of JUnit Report." checked="${instance.generateJUnitXML}" inline="true">
- 		 <f:optionalBlock name="extraAttributesForFailures"  title="Add extra attributes for failure stack" description="If selected, the job will add extra attributes for failure stack." checked="${instance.extraAttributesForFailures}" inline="true">
+ 		 <f:entry title="Do not append seed to test name " field="noAppendSeed" description="If checked, the junit report will only contain the test name, without appending the seed that was used."><f:checkbox name="noAppendSeed" checked="${it.noAppendSeed}"/></f:entry>
+                 <f:optionalBlock name="extraAttributesForFailures"  title="Add extra attributes for failure stack" description="If selected, the job will add extra attributes for failure stack." checked="${instance.extraAttributesForFailures}" inline="true">
  		 
            <f:entry title="Attribute List (attribute codes must be used)" field="staticAttributeList" description="Static extra attributes for failure stack, separated by comma"><f:textbox /></f:entry>
            <f:validateButton title="${%Test Attributes Validity}" progress="${%Testing Attribute Codes Validity...}" method="testExtraStaticAttr" with="vAPIUser,vAPIPassword,vAPIUrl,authRequired,staticAttributeList" />
