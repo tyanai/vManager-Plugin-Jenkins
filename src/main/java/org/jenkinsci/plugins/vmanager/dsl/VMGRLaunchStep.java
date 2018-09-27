@@ -52,6 +52,9 @@ public class VMGRLaunchStep extends Step {
     private int readTimeout = 30;
     private final boolean envVarible;
     private final String envVaribleFile;
+    
+    private final boolean pipelineNodes;
+    private final String masterWorkspaceLocation;
 
     private final String inaccessibleResolver;
     private final String stoppedResolver;
@@ -82,7 +85,7 @@ public class VMGRLaunchStep extends Step {
 
     @DataBoundConstructor
     public VMGRLaunchStep(String vAPIUrl, String vAPIUser, String vAPIPassword, String vSIFName, String vSIFInputFile, String credentialInputFile, boolean deleteInputFile, boolean deleteCredentialInputFile, boolean useUserOnFarm, boolean authRequired, String vsifType, String userFarmType,
-            boolean dynamicUserId, boolean advConfig, int connTimeout, int readTimeout, boolean envVarible, String envVaribleFile, String inaccessibleResolver, String stoppedResolver, String failedResolver, String doneResolver, String suspendedResolver, boolean waitTillSessionEnds, int stepSessionTimeout, boolean generateJUnitXML, boolean extraAttributesForFailures, String staticAttributeList, boolean markBuildAsFailedIfAllRunFailed, boolean failJobIfAllRunFailed, String envSourceInputFile, boolean vMGRBuildArchive, boolean deleteAlsoSessionDirectory, boolean genericCredentialForSessionDelete, String archiveUser, String archivePassword, String famMode, String famModeLocation, boolean noAppendSeed) {
+            boolean dynamicUserId, boolean advConfig, int connTimeout, int readTimeout, boolean envVarible, String envVaribleFile, String inaccessibleResolver, String stoppedResolver, String failedResolver, String doneResolver, String suspendedResolver, boolean waitTillSessionEnds, int stepSessionTimeout, boolean generateJUnitXML, boolean extraAttributesForFailures, String staticAttributeList, boolean markBuildAsFailedIfAllRunFailed, boolean failJobIfAllRunFailed, String envSourceInputFile, boolean vMGRBuildArchive, boolean deleteAlsoSessionDirectory, boolean genericCredentialForSessionDelete, String archiveUser, String archivePassword, String famMode, String famModeLocation, boolean noAppendSeed, boolean pipelineNodes, String masterWorkspaceLocation) {
         this.vAPIUrl = vAPIUrl;
         this.vAPIUser = vAPIUser;
         this.vAPIPassword = vAPIPassword;
@@ -99,6 +102,8 @@ public class VMGRLaunchStep extends Step {
         this.userFarmType = userFarmType;
         this.dynamicUserId = dynamicUserId;
         this.envVaribleFile = envVaribleFile;
+        this.pipelineNodes = pipelineNodes;
+        this.masterWorkspaceLocation = masterWorkspaceLocation;
         this.envSourceInputFile = envSourceInputFile;
 
         this.connTimeout = connTimeout;
@@ -177,6 +182,10 @@ public class VMGRLaunchStep extends Step {
     public String getEnvVaribleFile() {
         return envVaribleFile;
     }
+    
+    public String getMasterWorkspaceLocation() {
+        return masterWorkspaceLocation;
+    }
 
     public String getEnvSourceInputFile() {
         return envSourceInputFile;
@@ -224,6 +233,10 @@ public class VMGRLaunchStep extends Step {
 
     public boolean isEnvVarible() {
         return envVarible;
+    }
+    
+    public boolean isPipelineNodes() {
+        return pipelineNodes;
     }
 
     public int getConnTimeout() {

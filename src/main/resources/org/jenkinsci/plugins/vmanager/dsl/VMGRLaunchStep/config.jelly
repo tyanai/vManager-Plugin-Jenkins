@@ -126,6 +126,11 @@
      	
      </f:optionalBlock>
     
+     <f:optionalBlock name="pipelineNodes"  title="Using Pipeline Nodes for job execution" description="" checked="${instance.pipelineNodes}" inline="true">
+     	
+        <f:entry title="Name of input file" field="masterWorkspaceLocation" description="Location of workspace on master server"><f:textbox /></f:entry>
+      
+    </f:optionalBlock>
     
    </table>
   </f:block>

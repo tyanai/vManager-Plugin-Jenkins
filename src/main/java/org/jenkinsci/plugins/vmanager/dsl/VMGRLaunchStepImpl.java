@@ -33,7 +33,26 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
         EnvVars envVars = getContext().get(EnvVars.class);
         String buildId = envVars.get("BUILD_ID");
         int buildNumber = new Integer(envVars.get("BUILD_NUMBER"));  
-        String workspace = envVars.get("WORKSPACE");
+        
+        
+        String workspace =  envVars.get("WORKSPACE");        
+        
+         //If this is a master/node configuration, we need the master workspace.  The above is the node workspace
+         listener.getLogger().println("Setup is using nodes for job execution: " + step.isPipelineNodes());
+         if (step.isPipelineNodes()){
+             //Get the name of the job
+             String tmpJobName = envVars.get("JOB_NAME");
+             /*
+             String tmpJobName = workspace.substring(workspace.lastIndexOf(File.separator),workspace.length());
+             if (workspace.lastIndexOf(File.separator) < 0){
+                 throw new Exception("Failed to extract the name of the job fromt the node workspace");
+             }
+             */
+             listener.getLogger().println("Master Job Name: " + tmpJobName);
+             workspace = step.getMasterWorkspaceLocation() + File.separator + tmpJobName;
+             listener.getLogger().println("Master worspace location: " + workspace );
+         }
+        
         
         //Chekc if workspace is there, unless create it
         File theWSDir = new File(workspace); 
@@ -54,6 +73,8 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
                 listener.getLogger().println("Workspace dir created");  
             }
         }
+        
+       
         
         
         Run run = getContext().get(Run.class);
