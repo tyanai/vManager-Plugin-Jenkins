@@ -62,6 +62,8 @@ public class VMGRLaunch extends Builder {
     private final String staticAttributeList;
     private final boolean markBuildAsFailedIfAllRunFailed;
     private final boolean failJobIfAllRunFailed;
+    private final boolean markBuildAsPassedIfAllRunPassed;
+    private final boolean failJobUnlessAllRunPassed;
     //private final String extraAttributesForFailuresInputFile;
     //private final boolean deleteExtraAttributesFile;
 
@@ -80,7 +82,7 @@ public class VMGRLaunch extends Builder {
     @DataBoundConstructor
     public VMGRLaunch(String vAPIUrl, String vAPIUser, String vAPIPassword, String vSIFName, String vSIFInputFile, String credentialInputFile, boolean deleteInputFile, boolean deleteCredentialInputFile, boolean useUserOnFarm, boolean authRequired, String vsifType, String userFarmType,
             boolean dynamicUserId, boolean advConfig, int connTimeout, int readTimeout, boolean envVarible, String envVaribleFile, String inaccessibleResolver, String stoppedResolver, String failedResolver, String doneResolver, String suspendedResolver, boolean waitTillSessionEnds,
-            int stepSessionTimeout, boolean generateJUnitXML, boolean extraAttributesForFailures, String staticAttributeList, boolean markBuildAsFailedIfAllRunFailed, boolean failJobIfAllRunFailed, String envSourceInputFile, boolean vMGRBuildArchive, boolean deleteAlsoSessionDirectory, boolean genericCredentialForSessionDelete, String archiveUser, String archivePassword, String famMode, String famModeLocation, boolean noAppendSeed) {
+            int stepSessionTimeout, boolean generateJUnitXML, boolean extraAttributesForFailures, String staticAttributeList, boolean markBuildAsFailedIfAllRunFailed, boolean failJobIfAllRunFailed, String envSourceInputFile, boolean vMGRBuildArchive, boolean deleteAlsoSessionDirectory, boolean genericCredentialForSessionDelete, String archiveUser, String archivePassword, String famMode, String famModeLocation, boolean noAppendSeed, boolean markBuildAsPassedIfAllRunPassed, boolean failJobUnlessAllRunPassed) {
         this.vAPIUrl = vAPIUrl;
         this.vAPIUser = vAPIUser;
         this.vAPIPassword = vAPIPassword;
@@ -114,6 +116,8 @@ public class VMGRLaunch extends Builder {
         this.extraAttributesForFailures = extraAttributesForFailures;
         this.markBuildAsFailedIfAllRunFailed = markBuildAsFailedIfAllRunFailed;
         this.failJobIfAllRunFailed = failJobIfAllRunFailed;
+        this.markBuildAsPassedIfAllRunPassed = markBuildAsPassedIfAllRunPassed;
+        this.failJobUnlessAllRunPassed = failJobUnlessAllRunPassed;
         this.staticAttributeList = staticAttributeList;
 
         this.vMGRBuildArchive = vMGRBuildArchive;
@@ -147,6 +151,14 @@ public class VMGRLaunch extends Builder {
 
     public boolean isFailJobIfAllRunFailed() {
         return failJobIfAllRunFailed;
+    }
+    
+    public boolean isMarkBuildAsPassedIfAllRunPassed() {
+        return markBuildAsPassedIfAllRunPassed;
+    }
+
+    public boolean isFailJobUnlessAllRunPassed() {
+        return failJobUnlessAllRunPassed;
     }
 
     public String getStaticAttributeList() {
@@ -349,6 +361,10 @@ public class VMGRLaunch extends Builder {
             listener.getLogger().println("Timeout for entire step is " + stepSessionTimeout + " minutes");
             listener.getLogger().println("User choosed to mark regression as Failed in case all runs are failing: " + markBuildAsFailedIfAllRunFailed);
             listener.getLogger().println("User choosed to fail the job in case all runs are failing: " + failJobIfAllRunFailed);
+            listener.getLogger().println("User choosed to mark regression as Passed in case all runs are passed: " + markBuildAsPassedIfAllRunPassed);
+            listener.getLogger().println("User choosed to fail the job unless all runs are passed: " + failJobUnlessAllRunPassed);
+            
+            
 
             listener.getLogger().println("Generate XML Report XML output: " + generateJUnitXML);
             if (generateJUnitXML) {
@@ -362,7 +378,7 @@ public class VMGRLaunch extends Builder {
 
             }
 
-            stepHolder = new StepHolder(inaccessibleResolver, stoppedResolver, failedResolver, doneResolver, suspendedResolver, waitTillSessionEnds, stepSessionTimeout, jUnitRequestHolder, markBuildAsFailedIfAllRunFailed, failJobIfAllRunFailed);
+            stepHolder = new StepHolder(inaccessibleResolver, stoppedResolver, failedResolver, doneResolver, suspendedResolver, waitTillSessionEnds, stepSessionTimeout, jUnitRequestHolder, markBuildAsFailedIfAllRunFailed, failJobIfAllRunFailed,markBuildAsPassedIfAllRunPassed,failJobUnlessAllRunPassed);
         }
         
         VMGRBuildArchiver vMGRBuildArchiver = null;

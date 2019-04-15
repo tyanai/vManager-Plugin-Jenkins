@@ -138,6 +138,8 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
             listener.getLogger().println("Timeout for entire step is " + step.getStepSessionTimeout() + " minutes");
             listener.getLogger().println("User choosed to mark regression as Failed in case all runs are failing: " + step.isMarkBuildAsFailedIfAllRunFailed());
             listener.getLogger().println("User choosed to fail the job in case all runs are failing: " + step.isFailJobIfAllRunFailed());
+            listener.getLogger().println("User choosed to mark regression as Passed in case all runs are passed: " + step.isMarkBuildAsPassedIfAllRunPassed());
+            listener.getLogger().println("User choosed to fail the job unless all runs are passed: " + step.isFailJobUnlessAllRunPassed());
 
             listener.getLogger().println("Generate XML Report XML output: " + step.isGenerateJUnitXML());
             if (step.isGenerateJUnitXML()) {
@@ -151,7 +153,7 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
 
             }
 
-            stepHolder = new StepHolder(step.getInaccessibleResolver(), step.getStoppedResolver(), step.getFailedResolver(), step.getDoneResolver(), step.getSuspendedResolver(), step.getWaitTillSessionEnds(), step.getStepSessionTimeout(), jUnitRequestHolder, step.isMarkBuildAsFailedIfAllRunFailed(), step.isFailJobIfAllRunFailed());
+            stepHolder = new StepHolder(step.getInaccessibleResolver(), step.getStoppedResolver(), step.getFailedResolver(), step.getDoneResolver(), step.getSuspendedResolver(), step.getWaitTillSessionEnds(), step.getStepSessionTimeout(), jUnitRequestHolder, step.isMarkBuildAsFailedIfAllRunFailed(), step.isFailJobIfAllRunFailed(), step.isMarkBuildAsPassedIfAllRunPassed(), step.isFailJobUnlessAllRunPassed());
         }
         
         VMGRBuildArchiver vMGRBuildArchiver = null;

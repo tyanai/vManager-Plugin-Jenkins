@@ -12,8 +12,10 @@ public class StepHolder {
     private JUnitRequestHolder jUnitRequestHolder = null;
     private boolean markBuildAsFailedIfAllRunFailed = false;
     private boolean failJobIfAllRunFailed = false;
+    private boolean markBuildAsPassedIfAllRunPassed = false;
+    private boolean failJobUnlessAllRunPassed = false;
 
-    public StepHolder(String inaccessibleResolver, String stoppedResolver, String failedResolver, String doneResolver, String suspendedResolver, boolean waitTillSessionEnds, int stepSessionTimeout, JUnitRequestHolder jUnitRequestHolder, boolean markBuildAsFailedIfAllRunFailed, boolean failJobIfAllRunFailed) {
+    public StepHolder(String inaccessibleResolver, String stoppedResolver, String failedResolver, String doneResolver, String suspendedResolver, boolean waitTillSessionEnds, int stepSessionTimeout, JUnitRequestHolder jUnitRequestHolder, boolean markBuildAsFailedIfAllRunFailed, boolean failJobIfAllRunFailed, boolean markBuildAsPassedIfAllRunPassed, boolean failJobUnlessAllRunPassed) {
         super();
         this.inaccessibleResolver = inaccessibleResolver;
         this.stoppedResolver = stoppedResolver;
@@ -25,10 +27,28 @@ public class StepHolder {
         this.jUnitRequestHolder = jUnitRequestHolder;
         this.markBuildAsFailedIfAllRunFailed = markBuildAsFailedIfAllRunFailed;
         this.failJobIfAllRunFailed = failJobIfAllRunFailed;
+        this.markBuildAsPassedIfAllRunPassed = markBuildAsPassedIfAllRunPassed;
+        this.failJobUnlessAllRunPassed = failJobUnlessAllRunPassed;
     }
 
     public JUnitRequestHolder getjUnitRequestHolder() {
         return jUnitRequestHolder;
+    }
+
+    public boolean isMarkBuildAsPassedIfAllRunPassed() {
+        return markBuildAsPassedIfAllRunPassed;
+    }
+
+    public boolean isFailJobUnlessAllRunPassed() {
+        return failJobUnlessAllRunPassed;
+    }
+
+    public void setMarkBuildAsPassedIfAllRunPassed(boolean markBuildAsPassedIfAllRunPassed) {
+        this.markBuildAsPassedIfAllRunPassed = markBuildAsPassedIfAllRunPassed;
+    }
+
+    public void setFailJobUnlessAllRunPassed(boolean failJobUnlessAllRunPassed) {
+        this.failJobUnlessAllRunPassed = failJobUnlessAllRunPassed;
     }
 
     public void setjUnitRequestHolder(JUnitRequestHolder jUnitRequestHolder) {

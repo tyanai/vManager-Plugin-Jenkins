@@ -94,7 +94,9 @@
   		<f:entry title="In case session status was changed to 'suspended'" field="suspendedResolver" ><f:select /></f:entry>
   		<f:entry title="Show regression as failed if all runs failed" field="markBuildAsFailedIfAllRunFailed" description="If checked, the Dashboard will show the session status as Failed, instead of completed."><f:checkbox name="markBuildAsFailedIfAllRunFailed" checked="${it.markBuildAsFailedIfAllRunFailed}"/></f:entry>
                 <f:entry title="Fail the job if all runs failed" field="failJobIfAllRunFailed" description="If checked, the Jenkins job will fail and stop its execution."><f:checkbox name="failJobIfAllRunFailed" checked="${it.failJobIfAllRunFailed}"/></f:entry>
-  		
+  		<f:entry title="Show regression as passed only if all runs passed" field="markBuildAsPassedIfAllRunPassed" description="If checked, the Dashboard will show the session status as Failed, instead of completed, when not all runs passed."><f:checkbox name="markBuildAsPassedIfAllRunPassed" checked="${it.markBuildAsPassedIfAllRunPassed}"/></f:entry>
+                <f:entry title="Fail the job unless all runs passed" field="failJobUnlessAllRunPassed" description="If checked, the Jenkins job will fail and stop its execution, unless all runs passed."><f:checkbox name="failJobUnlessAllRunPassed" checked="${it.failJobUnlessAllRunPassed}"/></f:entry>
+
   		
   		
   		<f:optionalBlock name="generateJUnitXML"  title="Generate JUnit Test Result" description="If selected, the job will create an XML file with the session's run result in the format of JUnit Report." checked="${instance.generateJUnitXML}" inline="true">

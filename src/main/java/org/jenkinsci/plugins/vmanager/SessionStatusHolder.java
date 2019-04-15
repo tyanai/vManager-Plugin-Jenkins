@@ -43,6 +43,8 @@ public class SessionStatusHolder {
 	boolean notInTestMode; 
 	boolean markBuildAsFailedIfAllRunFailed = false;
         boolean failJobIfAllRunFailed = false;
+        boolean markBuildAsPassedIfAllRunPassed = false;
+        boolean failJobUnlessAllRunPassed = false;
 	
 	
 	List<String> listOfSessions = null;
@@ -84,8 +86,10 @@ public class SessionStatusHolder {
 		this.postDataSessions = result;
 		
 	}
+        
+       
 	
-	public void dumpSessionStatus() throws Exception{
+	public void dumpSessionStatus(boolean postSession) throws Exception{
 		HttpURLConnection conn = null;
 		Utils utils = new Utils();
 		
@@ -115,7 +119,7 @@ public class SessionStatusHolder {
 				}
 				
 				//Retrive all the session params
-				writeSessionIntoFile(sessionObject);
+				writeSessionIntoFile(sessionObject,postSession);
 				
 				
 				
@@ -124,7 +128,9 @@ public class SessionStatusHolder {
 		} catch (Exception e) {
                         if ("ALL_RUNS_FAILED".equals(e.getMessage())){
                             throw new Exception("All runs failed in the regression - marking job as a failed job.\n");
-                        } else {
+                        } else if ("NOT_ALL_RUNS_PASSED".equals(e.getMessage())){
+                            throw new Exception("Not all runs passed the regression - marking job as a failed job.\n");
+                        }else {
                            e.printStackTrace(); 
                         }
 			
@@ -135,7 +141,7 @@ public class SessionStatusHolder {
 		}
 	}
 	
-	private void writeSessionIntoFile(JSONObject session) throws IOException, Exception{
+	private void writeSessionIntoFile(JSONObject session,boolean postSession) throws IOException, Exception{
 		
 		
 		
@@ -178,13 +184,24 @@ public class SessionStatusHolder {
 		
 		String fileOutput = this.workingJobDir + File.separator + buildNumber + "." + buildId + ".session_status.properties";
 		
-		//Just before writing the file, check if user choose to overwide session status to "Failed" in case the session is in completed state and all runs failed.
-		if (markBuildAsFailedIfAllRunFailed){
-			if (sessionData.getTotalRuns().trim().equals(sessionData.getFailed().trim())){
-				sessionData.setStatus("failed");
-			}
+                
+                if (postSession){
+                    //Just before writing the file, check if user choose to overwide session status to "Failed" in case the session is in completed state and all runs failed.
+                    if (markBuildAsFailedIfAllRunFailed){
+                            if (sessionData.getTotalRuns().trim().equals(sessionData.getFailed().trim())){
+                                	sessionData.setStatus("failed");
+                            }
 			
-		}
+                    }
+                
+                    //Just before writing the file, check if user choose to overwide session status to "Failed" in case not all runs passed.
+                    if (markBuildAsPassedIfAllRunPassed){
+                            if (!sessionData.getTotalRuns().trim().equals(sessionData.getPassed().trim())){
+                                	sessionData.setStatus("failed");
+                            }
+                        
+                    }
+                }
 
 		FileWriter writer = new FileWriter(fileOutput);
 		
@@ -225,14 +242,26 @@ public class SessionStatusHolder {
                 Path copyTo = FileSystems.getDefault().getPath(copyToWorkspace);
                 Files.copy(copyFrom, copyTo, StandardCopyOption.REPLACE_EXISTING);
                 
-                //Just before continue to the next Jenkins step, check if the user choose to fail the entire Job in case all runs failed
-                if (failJobIfAllRunFailed){
+               
+                if (postSession){
+                    //Just before continue to the next Jenkins step, check if the user choose to fail the entire Job in case all runs failed
+                    if (failJobIfAllRunFailed){
 			if (sessionData.getTotalRuns().trim().equals(sessionData.getFailed().trim())){
 				//Fail the entire Job:
                                 throw new Exception("ALL_RUNS_FAILED");
 			}
 			
-		}
+                    }
+                
+                    //Just before continue to the next Jenkins step, check if the user choose to fail the entire Job unless not all runs passed
+                    if (failJobUnlessAllRunPassed){
+			if (!sessionData.getTotalRuns().trim().equals(sessionData.getPassed().trim())){
+				//Fail the entire Job:
+                                throw new Exception("NOT_ALL_RUNS_PASSED");
+                    	}
+			
+                    }
+                }
 		
 		
 		
@@ -327,7 +356,7 @@ public class SessionStatusHolder {
 		
 	
 	public SessionStatusHolder(String url, boolean requireAuth, String user, String password, TaskListener listener, boolean dynamicUserId, int buildNumber, String workPlacePath, String buildId,
-			int connConnTimeOut, int connReadTimeout, boolean advConfig, boolean notInTestMode,List<String> listOfSessions, boolean markBuildAsFailedIfAllRunFailed, boolean failJobIfAllRunFailed,String workingJobDir) {
+			int connConnTimeOut, int connReadTimeout, boolean advConfig, boolean notInTestMode,List<String> listOfSessions, boolean markBuildAsFailedIfAllRunFailed, boolean failJobIfAllRunFailed,String workingJobDir, boolean markBuildAsPassedIfAllRunPassed, boolean failJobUnlessAllRunPassed) {
 		
 		super();
 		this.url = url;
@@ -347,6 +376,8 @@ public class SessionStatusHolder {
 		this.markBuildAsFailedIfAllRunFailed = markBuildAsFailedIfAllRunFailed;
 		this.failJobIfAllRunFailed = failJobIfAllRunFailed;
                 this.workingJobDir = workingJobDir;
+                this.markBuildAsPassedIfAllRunPassed = markBuildAsPassedIfAllRunPassed;
+		this.failJobUnlessAllRunPassed = failJobUnlessAllRunPassed;
 		buildPostDataSessionPart(listOfSessions);
 		
 		this.postSessionData = this.postSessionData.replaceAll("######", postDataSessions);

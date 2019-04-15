@@ -34,6 +34,8 @@ public class TestPlugin {
 	private final String staticAttributeList = "top_files,test_group,verification_scope";
 	private final boolean markBuildAsFailedIfAllRunFailed = false;
         private final boolean markJobAsFailedIfAllRunFailed = false;
+        private final boolean markBuildAsPassedIfAllRunPassed = false;
+        private final boolean failJobUnlessAllRunPassed = false;
 	
     	
 	
@@ -71,7 +73,7 @@ public class TestPlugin {
 		StepHolder stepHolder = null;
 		if (waitTillSessionEnds){
 			JUnitRequestHolder jUnitRequestHolder = new JUnitRequestHolder(generateJUnitXML, extraAttributesForFailures, staticAttributeList,false);
-			stepHolder = new StepHolder(inaccessibleResolver, stoppedResolver, failedResolver, doneResolver, suspendedResolver, waitTillSessionEnds,stepSessionTimeout,jUnitRequestHolder,markBuildAsFailedIfAllRunFailed,markJobAsFailedIfAllRunFailed);
+			stepHolder = new StepHolder(inaccessibleResolver, stoppedResolver, failedResolver, doneResolver, suspendedResolver, waitTillSessionEnds,stepSessionTimeout,jUnitRequestHolder,markBuildAsFailedIfAllRunFailed,markJobAsFailedIfAllRunFailed,markBuildAsPassedIfAllRunPassed,failJobUnlessAllRunPassed);
 		}
 		utils.executeVSIFLaunch(vsifFileNames, vAPIUrl, authRequired, vAPIUser, vAPIPassword, null,false,buildID,buildNumber,buildArtifactPath,0,0,false,null,false,null,null, stepHolder,"",buildArtifactPath,null);
 		
