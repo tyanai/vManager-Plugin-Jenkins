@@ -64,6 +64,7 @@ public class VMGRLaunch extends Builder {
     private final boolean failJobIfAllRunFailed;
     private final boolean markBuildAsPassedIfAllRunPassed;
     private final boolean failJobUnlessAllRunPassed;
+    private final boolean userPrivateSSHKey;
     //private final String extraAttributesForFailuresInputFile;
     //private final boolean deleteExtraAttributesFile;
 
@@ -82,7 +83,7 @@ public class VMGRLaunch extends Builder {
     @DataBoundConstructor
     public VMGRLaunch(String vAPIUrl, String vAPIUser, String vAPIPassword, String vSIFName, String vSIFInputFile, String credentialInputFile, boolean deleteInputFile, boolean deleteCredentialInputFile, boolean useUserOnFarm, boolean authRequired, String vsifType, String userFarmType,
             boolean dynamicUserId, boolean advConfig, int connTimeout, int readTimeout, boolean envVarible, String envVaribleFile, String inaccessibleResolver, String stoppedResolver, String failedResolver, String doneResolver, String suspendedResolver, boolean waitTillSessionEnds,
-            int stepSessionTimeout, boolean generateJUnitXML, boolean extraAttributesForFailures, String staticAttributeList, boolean markBuildAsFailedIfAllRunFailed, boolean failJobIfAllRunFailed, String envSourceInputFile, boolean vMGRBuildArchive, boolean deleteAlsoSessionDirectory, boolean genericCredentialForSessionDelete, String archiveUser, String archivePassword, String famMode, String famModeLocation, boolean noAppendSeed, boolean markBuildAsPassedIfAllRunPassed, boolean failJobUnlessAllRunPassed) {
+            int stepSessionTimeout, boolean generateJUnitXML, boolean extraAttributesForFailures, String staticAttributeList, boolean markBuildAsFailedIfAllRunFailed, boolean failJobIfAllRunFailed, String envSourceInputFile, boolean vMGRBuildArchive, boolean deleteAlsoSessionDirectory, boolean genericCredentialForSessionDelete, String archiveUser, String archivePassword, String famMode, String famModeLocation, boolean noAppendSeed, boolean markBuildAsPassedIfAllRunPassed, boolean failJobUnlessAllRunPassed, boolean userPrivateSSHKey) {
         this.vAPIUrl = vAPIUrl;
         this.vAPIUser = vAPIUser;
         this.vAPIPassword = vAPIPassword;
@@ -118,6 +119,7 @@ public class VMGRLaunch extends Builder {
         this.failJobIfAllRunFailed = failJobIfAllRunFailed;
         this.markBuildAsPassedIfAllRunPassed = markBuildAsPassedIfAllRunPassed;
         this.failJobUnlessAllRunPassed = failJobUnlessAllRunPassed;
+        this.userPrivateSSHKey = userPrivateSSHKey;
         this.staticAttributeList = staticAttributeList;
 
         this.vMGRBuildArchive = vMGRBuildArchive;
@@ -160,6 +162,12 @@ public class VMGRLaunch extends Builder {
     public boolean isFailJobUnlessAllRunPassed() {
         return failJobUnlessAllRunPassed;
     }
+    
+    public boolean isUserPrivateSSHKey() {
+        return userPrivateSSHKey;
+    }
+    
+    
 
     public String getStaticAttributeList() {
         return staticAttributeList;
@@ -335,6 +343,8 @@ public class VMGRLaunch extends Builder {
         if (useUserOnFarm) {
             listener.getLogger().println("An User's Credential use was selected.");
             listener.getLogger().println("The User's Credential type is: " + userFarmType);
+            listener.getLogger().println("User is using private stored SSH key: " + userPrivateSSHKey);
+            
             if ("dynamic".equals(userFarmType)) {
                 listener.getLogger().println("The credential file is: " + credentialInputFile);
                 listener.getLogger().println("The credential file was set to be deleted after use: " + deleteCredentialInputFile);
@@ -432,6 +442,8 @@ public class VMGRLaunch extends Builder {
             }
 
             String[] farmUserPassword = null;
+            String tempUser = vAPIUser;
+            String tempPassword = vAPIPassword;
             if ("dynamic".equals(userFarmType)) {
                 if (credentialInputFile == null || credentialInputFile.trim().equals("")) {
                     listener.getLogger().println("The credential file chosen is dynamic. Credential directory dynamic workspace directory: '" + build.getWorkspace() + "'");
@@ -439,12 +451,19 @@ public class VMGRLaunch extends Builder {
                     listener.getLogger().println("The credential file chosen is static. Credential file name is: '" + credentialInputFile.trim() + "'");
                 }
                 farmUserPassword = utils.loadFileCredentials(build.getId(), build.getNumber(), "" + build.getWorkspace(), credentialInputFile, listener, deleteCredentialInputFile);
+                
+                //Tal Yanai
+                //In case this is a private user SSH, use the dynamic information for the vAPI login as well
+                if (userPrivateSSHKey){
+                    tempUser = farmUserPassword[0];
+                    tempPassword = farmUserPassword[1];
+                }
             }
 
             // Now call the actual launch
             // ----------------------------------------------------------------------------------------------------------------
-            String output = utils.executeVSIFLaunch(vsifFileNames, vAPIUrl, authRequired, vAPIUser, vAPIPassword, listener, dynamicUserId, build.getId(), build.getNumber(),
-                    "" + build.getWorkspace(), connTimeout, readTimeout, advConfig, jsonEnvInput, useUserOnFarm, userFarmType, farmUserPassword, stepHolder, envSourceInputFile, workingJobDir,vMGRBuildArchiver);
+            String output = utils.executeVSIFLaunch(vsifFileNames, vAPIUrl, authRequired, tempUser, tempPassword, listener, dynamicUserId, build.getId(), build.getNumber(),
+                    "" + build.getWorkspace(), connTimeout, readTimeout, advConfig, jsonEnvInput, useUserOnFarm, userFarmType, farmUserPassword, stepHolder, envSourceInputFile, workingJobDir,vMGRBuildArchiver,userPrivateSSHKey);
             if (!"success".equals(output)) {
                 listener.getLogger().println("Failed to launch vsifs for build " + build.getId() + " " + build.getNumber() + "\n");
                 listener.getLogger().println(output + "\n");

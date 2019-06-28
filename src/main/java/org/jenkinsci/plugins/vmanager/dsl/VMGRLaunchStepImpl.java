@@ -112,6 +112,8 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
         if (step.isUseUserOnFarm()) {
             listener.getLogger().println("An User's Credential use was selected.");
             listener.getLogger().println("The User's Credential type is: " + step.getUserFarmType());
+            listener.getLogger().println("User is using private stored SSH key: " + step.isUserPrivateSSHKey());
+            
             if ("dynamic".equals(step.getUserFarmType())) {
                 listener.getLogger().println("The credential file is: " + step.getCredentialInputFile());
                 listener.getLogger().println("The credential file was set to be deleted after use: " + step.isDeleteCredentialInputFile());
@@ -206,6 +208,8 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
             }
 
             String[] farmUserPassword = null;
+            String tempUser = step.getVAPIUser();
+            String tempPassword = step.getVAPIPassword();
             if ("dynamic".equals(step.getUserFarmType())) {
                 if (step.getCredentialInputFile() == null || step.getCredentialInputFile().trim().equals("")) {
                     listener.getLogger().println("The credential file chosen is dynamic. Credential directory dynamic workspace directory: '" + workspace + "'");
@@ -213,13 +217,20 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
                     listener.getLogger().println("The credential file chosen is static. Credential file name is: '" + step.getCredentialInputFile().trim() + "'");
                 }
                 farmUserPassword = utils.loadFileCredentials(buildId, buildNumber, "" + workspace, step.getCredentialInputFile(), listener, step.isDeleteCredentialInputFile());
+                
+                //Tal Yanai
+                //In case this is a private user SSH, use the dynamic information for the vAPI login as well
+                if (step.isUserPrivateSSHKey()){
+                    tempUser = farmUserPassword[0];
+                    tempPassword = farmUserPassword[1];
+                }
             }
 
             // Now call the actual launch
             
             // ----------------------------------------------------------------------------------------------------------------
-            String output = utils.executeVSIFLaunch(vsifFileNames, step.getVAPIUrl(), step.isAuthRequired(), step.getVAPIUser(), step.getVAPIPassword(), listener, step.isDynamicUserId(), buildId, buildNumber,
-                    "" + workspace, step.getConnTimeout(), step.getReadTimeout(), step.isAdvConfig(), jsonEnvInput, step.isUseUserOnFarm(), step.getUserFarmType(), farmUserPassword, stepHolder, step.getEnvSourceInputFile(), workingJobDir,vMGRBuildArchiver);
+            String output = utils.executeVSIFLaunch(vsifFileNames, step.getVAPIUrl(), step.isAuthRequired(), tempUser, tempPassword, listener, step.isDynamicUserId(), buildId, buildNumber,
+                    "" + workspace, step.getConnTimeout(), step.getReadTimeout(), step.isAdvConfig(), jsonEnvInput, step.isUseUserOnFarm(), step.getUserFarmType(), farmUserPassword, stepHolder, step.getEnvSourceInputFile(), workingJobDir,vMGRBuildArchiver, step.isUserPrivateSSHKey());
             if (!"success".equals(output)) {
                 listener.getLogger().println("Failed to launch vsifs for build " + buildId + " " + buildNumber + "\n");
                 listener.getLogger().println(output + "\n");

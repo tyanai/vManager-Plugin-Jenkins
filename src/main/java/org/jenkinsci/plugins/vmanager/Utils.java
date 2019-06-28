@@ -573,7 +573,7 @@ public class Utils {
 	}
 
 	public String executeVSIFLaunch(String[] vsifs, String url, boolean requireAuth, String user, String password, TaskListener listener, boolean dynamicUserId, String buildID, int buildNumber,
-			String workPlacePath,int connConnTimeOut, int connReadTimeout, boolean advConfig, String jsonEnvInput, boolean useUserOnFarm, String userFarmType,String[] farmUserPassword, StepHolder stepHolder, String envSourceInputFile, String workingJobDir, VMGRBuildArchiver vMGRBuildArchiver) throws Exception {
+			String workPlacePath,int connConnTimeOut, int connReadTimeout, boolean advConfig, String jsonEnvInput, boolean useUserOnFarm, String userFarmType,String[] farmUserPassword, StepHolder stepHolder, String envSourceInputFile, String workingJobDir, VMGRBuildArchiver vMGRBuildArchiver,boolean userPrivateSSHKey) throws Exception {
 
 		boolean notInTestMode = true;
 		if (listener == null) {
@@ -626,14 +626,17 @@ public class Utils {
 							reader.close();
 						}
 					}
-
-					
 				} else {
 					userFarm = farmUserPassword[0];;
-					passwordFarm = farmUserPassword[1];;
-					
-				}
-				input = input + ",\"credentials\":{\"username\":\"" + userFarm + "\",\"password\":\"" + passwordFarm + "\"}";
+					passwordFarm = farmUserPassword[1];;	
+				} 
+                               
+				if (!userPrivateSSHKey){
+                                   input = input + ",\"credentials\":{\"username\":\"" + userFarm + "\",\"password\":\"" + passwordFarm + "\"}"; 
+                                } else {
+                                   input = input + ",\"credentials\":{\"connectType\":\"PUBLIC_KEY\"}";
+                                }
+                                
                                 
                                 if (!"".equals(envSourceInputFile.trim())){                                 
                                     String scriptShell = "BSH";
@@ -643,6 +646,10 @@ public class Utils {
 			}
 			input = input + "}";
 			
+                        
+                        //listener.getLogger().print("vManager vAPI input: '" + input + "' with user/password: "+ user + "/" + password +"\n");
+                        
+                        
 			HttpURLConnection conn = getVAPIConnection(apiURL, requireAuth, user, password, "POST", dynamicUserId, buildID, buildNumber, workPlacePath, listener, connConnTimeOut,  connReadTimeout,advConfig);
 			OutputStream os = conn.getOutputStream();
 			os.write(input.getBytes());
