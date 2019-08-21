@@ -122,10 +122,10 @@ public class VmgrBuilds extends DashboardPortlet {
         for (Job job : jobs) {
 
             Run lb = job.getLastBuild();
-
-            workingDir = job.getBuildDir().getAbsolutePath() + File.separator + lb.getNumber();
-            VMGRRun vMGRRun = null;
             if (lb != null) {
+                workingDir = job.getBuildDir().getAbsolutePath() + File.separator + lb.getNumber();
+                VMGRRun vMGRRun = null;
+                //if (lb != null) {
                 vMGRRun = new VMGRRun(lb, workingDir, job.getBuildDir().getAbsolutePath());
                 queue.add(vMGRRun);
             }
