@@ -19,6 +19,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.StringTokenizer;
 
 import javax.net.ssl.*;
 
@@ -245,7 +246,7 @@ public class Utils {
 
 		try {
 
-			reader = this.loadFileFromWorkSpace(buildID, buildNumber, workPlacePath, envInputFile, listener, false, "environment.input");
+			reader = this.loadFileFromWorkSpace(buildID, buildNumber, workPlacePath, fileName, listener, false, "environment.input");
 			String line = null;
 			while ((line = reader.readLine()) != null) {
 				listOfEnvs.append(line);
@@ -262,6 +263,65 @@ public class Utils {
 			} else {
 
 				System.out.println("Failed to open the read file for the environment varibles.  Failed to load file '" + fileName + "'");
+			}
+
+			throw e;
+		} finally {
+			reader.close();
+		}
+
+		
+		return output;
+	}
+        
+        
+       public String loadJSONAttrValuesInput(String buildID, int buildNumber, String workPlacePath, String attrValuesFile, TaskListener listener) throws Exception {
+		String output = null;
+		StringBuffer listOfAttrValues = new StringBuffer();
+		BufferedReader reader = null;
+		String fileName = null;
+		boolean notInTestMode = true;
+		if (listener == null) {
+			notInTestMode = false;
+		}
+
+		// Set the right File name.
+		if ("".equals(attrValuesFile) || attrValuesFile == null) {
+			fileName = workPlacePath + File.separator + buildNumber + "." + buildID + "." + "attr.values.input";
+		} else {
+			fileName = attrValuesFile;
+		}
+
+		try {
+
+			reader = this.loadFileFromWorkSpace(buildID, buildNumber, workPlacePath, fileName, listener, false, "attr.values.input");
+			String line = null;
+                        boolean foundOneAttr = false;
+			while ((line = reader.readLine()) != null) {
+                                String tmpLineResult = "";
+                                StringTokenizer tokenizer = new StringTokenizer(line, ",");    
+                                tmpLineResult = tmpLineResult + "{\"name\":\"" + tokenizer.nextToken().trim() + "\",";
+                                tmpLineResult = tmpLineResult + "\"value\":\"" + tokenizer.nextToken().trim() + "\",";
+                                tmpLineResult = tmpLineResult + "\"type\":\"" + tokenizer.nextToken().trim() + "\"},"; 
+				listOfAttrValues.append(tmpLineResult);
+                                foundOneAttr = true;
+			}
+			
+			output = listOfAttrValues.toString();
+                        if (foundOneAttr){
+                           //Remove the last comma
+                           output = output.substring(0,output.length()-1);
+                        }
+			
+			output = "\"attributes\":["+ output + "]";
+
+		} catch (Exception e) {
+
+			if (notInTestMode) {
+				listener.getLogger().print("Failed to read input file for the attribute values.  Failed to load file '" + fileName + "'\n " + e.getMessage());
+			} else {
+
+				System.out.println("Failed to open the read file for the attribute values.  Failed to load file '" + fileName + "'");
 			}
 
 			throw e;
@@ -573,7 +633,7 @@ public class Utils {
 	}
 
 	public String executeVSIFLaunch(String[] vsifs, String url, boolean requireAuth, String user, String password, TaskListener listener, boolean dynamicUserId, String buildID, int buildNumber,
-			String workPlacePath,int connConnTimeOut, int connReadTimeout, boolean advConfig, String jsonEnvInput, boolean useUserOnFarm, String userFarmType,String[] farmUserPassword, StepHolder stepHolder, String envSourceInputFile, String workingJobDir, VMGRBuildArchiver vMGRBuildArchiver,boolean userPrivateSSHKey) throws Exception {
+			String workPlacePath,int connConnTimeOut, int connReadTimeout, boolean advConfig, String jsonEnvInput, boolean useUserOnFarm, String userFarmType,String[] farmUserPassword, StepHolder stepHolder, String envSourceInputFile, String workingJobDir, VMGRBuildArchiver vMGRBuildArchiver,boolean userPrivateSSHKey, String jsonAttrValuesInput) throws Exception {
 
 		boolean notInTestMode = true;
 		if (listener == null) {
@@ -594,6 +654,9 @@ public class Utils {
 			String input = "{\"vsif\":\"" + vsifs[i] + "\"";
 			if (jsonEnvInput != null){
 				input = input + "," + jsonEnvInput;	
+			}
+                        if (jsonAttrValuesInput != null){
+				input = input + "," + jsonAttrValuesInput;	
 			}
 			if (useUserOnFarm){
 				String userFarm = null;

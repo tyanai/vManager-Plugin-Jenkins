@@ -48,6 +48,9 @@ public class VMGRLaunch extends Builder {
     private int readTimeout = 30;
     private final boolean envVarible;
     private final String envVaribleFile;
+    private final boolean attrValues;
+    private final String attrValuesFile;
+    
 
     private final String inaccessibleResolver;
     private final String stoppedResolver;
@@ -83,7 +86,8 @@ public class VMGRLaunch extends Builder {
     @DataBoundConstructor
     public VMGRLaunch(String vAPIUrl, String vAPIUser, String vAPIPassword, String vSIFName, String vSIFInputFile, String credentialInputFile, boolean deleteInputFile, boolean deleteCredentialInputFile, boolean useUserOnFarm, boolean authRequired, String vsifType, String userFarmType,
             boolean dynamicUserId, boolean advConfig, int connTimeout, int readTimeout, boolean envVarible, String envVaribleFile, String inaccessibleResolver, String stoppedResolver, String failedResolver, String doneResolver, String suspendedResolver, boolean waitTillSessionEnds,
-            int stepSessionTimeout, boolean generateJUnitXML, boolean extraAttributesForFailures, String staticAttributeList, boolean markBuildAsFailedIfAllRunFailed, boolean failJobIfAllRunFailed, String envSourceInputFile, boolean vMGRBuildArchive, boolean deleteAlsoSessionDirectory, boolean genericCredentialForSessionDelete, String archiveUser, String archivePassword, String famMode, String famModeLocation, boolean noAppendSeed, boolean markBuildAsPassedIfAllRunPassed, boolean failJobUnlessAllRunPassed, boolean userPrivateSSHKey) {
+            int stepSessionTimeout, boolean generateJUnitXML, boolean extraAttributesForFailures, String staticAttributeList, boolean markBuildAsFailedIfAllRunFailed, boolean failJobIfAllRunFailed, String envSourceInputFile, boolean vMGRBuildArchive, boolean deleteAlsoSessionDirectory, 
+            boolean genericCredentialForSessionDelete, String archiveUser, String archivePassword, String famMode, String famModeLocation, boolean noAppendSeed, boolean markBuildAsPassedIfAllRunPassed, boolean failJobUnlessAllRunPassed, boolean userPrivateSSHKey, boolean attrValues, String attrValuesFile) {
         this.vAPIUrl = vAPIUrl;
         this.vAPIUser = vAPIUser;
         this.vAPIPassword = vAPIPassword;
@@ -100,6 +104,8 @@ public class VMGRLaunch extends Builder {
         this.userFarmType = userFarmType;
         this.dynamicUserId = dynamicUserId;
         this.envVaribleFile = envVaribleFile;
+        this.attrValues = attrValues;
+        this.attrValuesFile = attrValuesFile;
         this.envSourceInputFile = envSourceInputFile;
 
         this.connTimeout = connTimeout;
@@ -196,6 +202,10 @@ public class VMGRLaunch extends Builder {
     public String getEnvVaribleFile() {
         return envVaribleFile;
     }
+    
+    public String getAttrValuesFile() {
+        return attrValuesFile;
+    }
 
     public String getEnvSourceInputFile() {
         return envSourceInputFile;
@@ -243,6 +253,10 @@ public class VMGRLaunch extends Builder {
 
     public boolean isEnvVarible() {
         return envVarible;
+    }
+    
+    public boolean isAttrValues() {
+        return attrValues;
     }
 
     public int getConnTimeout() {
@@ -339,6 +353,11 @@ public class VMGRLaunch extends Builder {
             listener.getLogger().println("An environment varible file was selected.");
             //listener.getLogger().println("The environment varible file is: " + envVaribleFile);
         }
+        
+        if (attrValues) {
+            listener.getLogger().println("An attribute values file was selected.");
+            //listener.getLogger().println("The environment varible file is: " + envVaribleFile);
+        }
 
         if (useUserOnFarm) {
             listener.getLogger().println("An User's Credential use was selected.");
@@ -414,6 +433,7 @@ public class VMGRLaunch extends Builder {
             // Get the list of VSIF file to launch
             String[] vsifFileNames = null;
             String jsonEnvInput = null;
+            String jsonAttrValuesInput = null;
 
             if ("static".equals(vsifType)) {
                 listener.getLogger().println("The VSIF file chosen is static. VSIF file static location is: '" + vSIFName + "'");
@@ -440,6 +460,17 @@ public class VMGRLaunch extends Builder {
                 jsonEnvInput = utils.loadJSONEnvInput(build.getId(), build.getNumber(), "" + build.getWorkspace(), envVaribleFile, listener);
                 listener.getLogger().println("Found the following environment for the vsif: " + jsonEnvInput);
             }
+            
+             //check if user set an attribute values in addition:
+            if (attrValues) {
+                if (attrValuesFile == null || attrValuesFile.trim().equals("")) {
+                    listener.getLogger().println("The attribute values file chosen is dynamic. Env File directory dynamic workspace directory: '" + build.getWorkspace() + "'");
+                } else {
+                    listener.getLogger().println("The attribute values file chosen is static. Attribute values file name is: '" + attrValuesFile.trim() + "'");
+                }
+                jsonAttrValuesInput = utils.loadJSONAttrValuesInput(build.getId(), build.getNumber(), "" + build.getWorkspace(), attrValuesFile, listener);
+                listener.getLogger().println("Found the following attribute values for the vsif: " + jsonAttrValuesInput);
+            }
 
             String[] farmUserPassword = null;
             String tempUser = vAPIUser;
@@ -463,7 +494,7 @@ public class VMGRLaunch extends Builder {
             // Now call the actual launch
             // ----------------------------------------------------------------------------------------------------------------
             String output = utils.executeVSIFLaunch(vsifFileNames, vAPIUrl, authRequired, tempUser, tempPassword, listener, dynamicUserId, build.getId(), build.getNumber(),
-                    "" + build.getWorkspace(), connTimeout, readTimeout, advConfig, jsonEnvInput, useUserOnFarm, userFarmType, farmUserPassword, stepHolder, envSourceInputFile, workingJobDir,vMGRBuildArchiver,userPrivateSSHKey);
+                    "" + build.getWorkspace(), connTimeout, readTimeout, advConfig, jsonEnvInput, useUserOnFarm, userFarmType, farmUserPassword, stepHolder, envSourceInputFile, workingJobDir,vMGRBuildArchiver,userPrivateSSHKey,jsonAttrValuesInput);
             if (!"success".equals(output)) {
                 listener.getLogger().println("Failed to launch vsifs for build " + build.getId() + " " + build.getNumber() + "\n");
                 listener.getLogger().println(output + "\n");

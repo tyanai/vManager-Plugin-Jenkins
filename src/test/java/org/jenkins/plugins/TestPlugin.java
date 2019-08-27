@@ -75,7 +75,7 @@ public class TestPlugin {
 			JUnitRequestHolder jUnitRequestHolder = new JUnitRequestHolder(generateJUnitXML, extraAttributesForFailures, staticAttributeList,false);
 			stepHolder = new StepHolder(inaccessibleResolver, stoppedResolver, failedResolver, doneResolver, suspendedResolver, waitTillSessionEnds,stepSessionTimeout,jUnitRequestHolder,markBuildAsFailedIfAllRunFailed,markJobAsFailedIfAllRunFailed,markBuildAsPassedIfAllRunPassed,failJobUnlessAllRunPassed);
 		}
-		utils.executeVSIFLaunch(vsifFileNames, vAPIUrl, authRequired, vAPIUser, vAPIPassword, null,false,buildID,buildNumber,buildArtifactPath,0,0,false,null,false,null,null, stepHolder,"",buildArtifactPath,null,false);
+		utils.executeVSIFLaunch(vsifFileNames, vAPIUrl, authRequired, vAPIUser, vAPIPassword, null,false,buildID,buildNumber,buildArtifactPath,0,0,false,null,false,null,null, stepHolder,"",buildArtifactPath,null,false,null);
 		
 		//String buildStatus = BuildStatusMap.getValue(buildID, buildNumber, buildArtifactPath+"", "id", true);
 		//System.out.println("Build status is '" + buildStatus + "'" );

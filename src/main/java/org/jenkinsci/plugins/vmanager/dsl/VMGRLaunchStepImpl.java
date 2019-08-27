@@ -108,6 +108,9 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
         if (step.isEnvVarible()) {
             listener.getLogger().println("An environment varible file was selected.");
         }
+        if (step.isAttrValues()) {
+            listener.getLogger().println("An attribute values file was selected.");
+        }
 
         if (step.isUseUserOnFarm()) {
             listener.getLogger().println("An User's Credential use was selected.");
@@ -180,6 +183,7 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
             // Get the list of VSIF file to launch
             String[] vsifFileNames = null;
             String jsonEnvInput = null;
+            String jsonAttrValuesInput = null;
 
             if ("static".equals(step.getVsifType())) {
                 listener.getLogger().println("The VSIF file chosen is static. VSIF file static location is: '" + step.getVSIFName() + "'");
@@ -206,6 +210,17 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
                 jsonEnvInput = utils.loadJSONEnvInput(buildId, buildNumber, "" + workspace, step.getEnvVaribleFile(), listener);
                 listener.getLogger().println("Found the following environment for the vsif: " + jsonEnvInput);
             }
+            
+             //check if user set an attribute values in addition:
+            if (step.isAttrValues()) {
+                if (step.getAttrValuesFile() == null || step.getAttrValuesFile().trim().equals("")) {
+                   listener.getLogger().println("The attribute values file chosen is dynamic. Attribute values File directory dynamic workspace directory: '" + workspace + "'");
+                } else {
+                    listener.getLogger().println("The attribute values file chosen is static. Attribute values file name is: '" + step.getAttrValuesFile().trim() + "'");
+                }
+                jsonAttrValuesInput = utils.loadJSONAttrValuesInput(buildId, buildNumber, "" + workspace, step.getAttrValuesFile(), listener);
+                listener.getLogger().println("Found the following attribute values for the vsif: " + jsonAttrValuesInput);
+            }
 
             String[] farmUserPassword = null;
             String tempUser = step.getVAPIUser();
@@ -230,7 +245,7 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
             
             // ----------------------------------------------------------------------------------------------------------------
             String output = utils.executeVSIFLaunch(vsifFileNames, step.getVAPIUrl(), step.isAuthRequired(), tempUser, tempPassword, listener, step.isDynamicUserId(), buildId, buildNumber,
-                    "" + workspace, step.getConnTimeout(), step.getReadTimeout(), step.isAdvConfig(), jsonEnvInput, step.isUseUserOnFarm(), step.getUserFarmType(), farmUserPassword, stepHolder, step.getEnvSourceInputFile(), workingJobDir,vMGRBuildArchiver, step.isUserPrivateSSHKey());
+                    "" + workspace, step.getConnTimeout(), step.getReadTimeout(), step.isAdvConfig(), jsonEnvInput, step.isUseUserOnFarm(), step.getUserFarmType(), farmUserPassword, stepHolder, step.getEnvSourceInputFile(), workingJobDir,vMGRBuildArchiver, step.isUserPrivateSSHKey(),jsonAttrValuesInput);
             if (!"success".equals(output)) {
                 listener.getLogger().println("Failed to launch vsifs for build " + buildId + " " + buildNumber + "\n");
                 listener.getLogger().println(output + "\n");

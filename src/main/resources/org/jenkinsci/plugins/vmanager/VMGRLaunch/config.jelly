@@ -74,6 +74,11 @@
         <f:entry title="Name of input file" field="envVaribleFile" description="Name of input file with environment variables in json format (not mandatory) - vManager 15.1 and above only"><f:textbox /></f:entry>
       
     </f:optionalBlock>
+    <f:optionalBlock name="attrValues"  title="Include VSIF Attribute Values" description="" checked="${instance.attrValues}" inline="true">
+     	
+        <f:entry title="Name of input file" field="attrValuesFile" description="Name of input file with attribute values in json format (not mandatory) - vManager 17.1 and above only"><f:textbox /></f:entry>
+      
+    </f:optionalBlock>
     
     
     <f:optionalBlock name="useUserOnFarm"  title="Use user's linux account privileges for this execution (16.1 and above only)" description="If selected, the session's artifacts will have the user's permissions" checked="${instance.useUserOnFarm}" inline="true">
