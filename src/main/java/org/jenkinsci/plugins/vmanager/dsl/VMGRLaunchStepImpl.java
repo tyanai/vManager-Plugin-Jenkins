@@ -24,10 +24,7 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
     
    @Override
    protected Void run() throws Exception {
-       
-        
-        
-        
+               
        
         TaskListener listener = getContext().get(TaskListener.class);
         EnvVars envVars = getContext().get(EnvVars.class);

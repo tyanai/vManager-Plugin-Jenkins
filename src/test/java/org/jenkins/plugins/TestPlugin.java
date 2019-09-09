@@ -1,6 +1,10 @@
 package org.jenkins.plugins;
 
 
+import hudson.plugins.vmanager.BuildStatusMap;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 import org.jenkinsci.plugins.vmanager.JUnitRequestHolder;
 import org.jenkinsci.plugins.vmanager.Utils;
 import org.jenkinsci.plugins.vmanager.StepHolder;
@@ -51,6 +55,34 @@ public class TestPlugin {
 	public void test() throws Exception{
 		
 		Utils utils = new Utils();
+                
+                /*
+                String ids = " 720902, 720903,720904";
+                List<String> items = Arrays.asList(ids.split("\\s*,\\s*"));
+                
+                Iterator<String> iter = items.iterator();
+                while (iter.hasNext()){
+                    System.out.println(iter.next());
+                }
+                */
+                
+                //String idNames = "720902$@$vm_basic_scopes.root.19_09_07_22_13_38_2796,720903$@$vm_basic_scopes.root.19_09_07_22_13_40_1241,720904$@$vm_basic_scopes.root.19_09_07_22_13_41_9122";
+                String idNames = BuildStatusMap.getValue("137", 137, "C:\\Jenkins\\workspace\\Job Demo" + "", "idNames", true);
+                if(!idNames.equals("NA")){
+                System.out.println("idNames " + idNames);
+                List<String> items = Arrays.asList(idNames.split("\\s*,\\s*"));
+                Iterator<String> iter = items.iterator();
+                while (iter.hasNext()){
+                String item =  iter.next();
+            //System.out.println((item));
+                // String[] arrOfStr = iter.next().split("$@$", 2);
+                if ("720902".equals(item.substring(0,item.indexOf("$@$")))){
+                    System.out.println("Found! " + item.substring(item.indexOf("$@$")+3,item.length()));
+                }
+                }
+                }
+                
+                //System.out.println(Utils.getRegressionURLFromVAPIURL("https://vlnx488:50500/vmgr/vapi"));
 		
 		//Test Reading VSIF input file
 		String[] vsifFileNames = null;

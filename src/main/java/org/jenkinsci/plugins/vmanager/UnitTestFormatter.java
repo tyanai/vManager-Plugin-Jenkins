@@ -13,13 +13,13 @@ import net.sf.json.JSONObject;
 
 public class UnitTestFormatter {
 	
-	JSONArray runs = null;
+	List runs = null;
 	String sessionId = null;
 	JUnitRequestHolder jUnitRequestHolder = null;
 	Map<String,String> extraAttrLabels = null;
 	
 	
-	public UnitTestFormatter(JSONArray runs, String sessionId,JUnitRequestHolder jUnitRequestHolder, Map<String,String> extraAttrLabels) {
+	public UnitTestFormatter(List runs, String sessionId,JUnitRequestHolder jUnitRequestHolder, Map<String,String> extraAttrLabels) {
 		super();
 		this.runs = runs;
 		this.sessionId = sessionId;
@@ -28,7 +28,7 @@ public class UnitTestFormatter {
 		
 	}
 
-	public JSONArray getRuns() {
+	public List getRuns() {
 		return runs;
 	}
 

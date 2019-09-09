@@ -539,6 +539,8 @@ public class VMGRLaunchStep extends Step {
             //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
             return ImmutableSet.of(FilePath.class, Run.class, Launcher.class, TaskListener.class,EnvVars.class);
         }
+        
+       
 
     }
 }

@@ -20,6 +20,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Map;
 
 public class SessionStatusHolder {
 	
@@ -89,7 +90,7 @@ public class SessionStatusHolder {
         
        
 	
-	public void dumpSessionStatus(boolean postSession) throws Exception{
+	public void dumpSessionStatus(boolean postSession, Map<String, String> sessionIdName) throws Exception{
 		HttpURLConnection conn = null;
 		Utils utils = new Utils();
 		
@@ -119,7 +120,7 @@ public class SessionStatusHolder {
 				}
 				
 				//Retrive all the session params
-				writeSessionIntoFile(sessionObject,postSession);
+				writeSessionIntoFile(sessionObject,postSession,sessionIdName);
 				
 				
 				
@@ -141,7 +142,7 @@ public class SessionStatusHolder {
 		}
 	}
 	
-	private void writeSessionIntoFile(JSONObject session,boolean postSession) throws IOException, Exception{
+	private void writeSessionIntoFile(JSONObject session,boolean postSession, Map<String, String> sessionIdName) throws IOException, Exception{
 		
 		
 		
@@ -220,17 +221,23 @@ public class SessionStatusHolder {
 		//Set the id (might be more than one
 		Iterator<String> iter = listOfSessions.iterator();
 		String result = "";
+                String idNameResult = "";
+                String tmpIdHolder = null;
 		int commaCounter = listOfSessions.size() - 1;
 		while (iter.hasNext()){
-			result = result + iter.next();
+                        tmpIdHolder = iter.next();
+			result = result + tmpIdHolder;
+                        idNameResult = idNameResult + tmpIdHolder + "$@$" + sessionIdName.get(tmpIdHolder);
 			if (commaCounter > 0) {
 				result = result + ",";
+                                idNameResult = idNameResult + ",";
 			}
 			commaCounter--;
 		}
 		writer.append("id=" + result + "\n");
 		
 		writer.append("url=" + sessionData.getServerUrl() + "\n");
+                writer.append("idNames=" + idNameResult + "\n");
 		
 		
 		writer.flush();
@@ -296,6 +303,7 @@ public class SessionStatusHolder {
 			sessionData.setNumOfSession((prop.getProperty("number_of_entities") != null) ? prop.getProperty("number_of_entities") : "NA");
 			sessionData.setId((prop.getProperty("id") != null) ? prop.getProperty("id") : "NA");
 			sessionData.setServerUrl((prop.getProperty("url") != null) ? prop.getProperty("url") : "NA");
+                        sessionData.setIdNames((prop.getProperty("idNames") != null) ? prop.getProperty("idNames") : "NA");
 			
 			
 

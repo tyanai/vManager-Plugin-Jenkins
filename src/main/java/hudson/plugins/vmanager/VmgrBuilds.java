@@ -15,6 +15,7 @@ import java.util.List;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.util.PriorityQueue;
+import org.jenkinsci.plugins.vmanager.Utils;
 import org.jenkinsci.plugins.vmanager.VMGRRun;
 
 public class VmgrBuilds extends DashboardPortlet {
@@ -56,7 +57,7 @@ public class VmgrBuilds extends DashboardPortlet {
         if ("NA".equals(url)) {
             return "NA";
         }
-        url = url.replaceAll("/vapi", "");
+        
         String sessionId = BuildStatusMap.getValue(run.getRun().getId(), run.getRun().getNumber(), run.getJobWorkingDir() + "", "id", false);
         if (sessionId != null) {
             if (sessionId.indexOf(",") > -1) {
@@ -64,7 +65,7 @@ public class VmgrBuilds extends DashboardPortlet {
             }
         }
 
-        return url + "/regression/index.html?sessionid=" + sessionId;
+        return Utils.getRegressionURLFromVAPIURL(url) + "?sessionid=" + sessionId;
     }
 
     public String getSessionStatus(VMGRRun run) {

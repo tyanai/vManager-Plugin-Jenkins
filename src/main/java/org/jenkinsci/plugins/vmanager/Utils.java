@@ -275,6 +275,31 @@ public class Utils {
 	}
         
         
+       public static String getRegressionURLFromVAPIURL(String vAPIUrl){
+           String output;
+           try{
+             String strWorker = vAPIUrl.substring(vAPIUrl.indexOf("https://")+8,vAPIUrl.length());
+            //Look for host & port
+            String hostAndPort = strWorker.substring(0,strWorker.indexOf("/"));
+           
+            //Look for project name
+            strWorker = strWorker.substring(strWorker.indexOf("/")+1,strWorker.length());
+            String projectCode = strWorker.substring(0,strWorker.indexOf("/"));
+           
+            //Check if this is a multi project setup, and if is remove the site part
+            if (projectCode.indexOf(",") > 0){
+               projectCode = projectCode.substring(0,projectCode.indexOf(','));
+            }
+           
+            output = "https://" + hostAndPort + "/web/" + projectCode + "/regression/index.html";
+           }catch(Exception e){
+                return "#";
+           }
+           
+           return output;
+           
+       }
+        
        public String loadJSONAttrValuesInput(String buildID, int buildNumber, String workPlacePath, String attrValuesFile, TaskListener listener) throws Exception {
 		String output = null;
 		StringBuffer listOfAttrValues = new StringBuffer();
@@ -333,6 +358,9 @@ public class Utils {
 		return output;
 	}
 
+       
+        
+       
 	public String loadJSONFromFile(String buildID, int buildNumber, String workPlacePath, String vInputFile, TaskListener listener, boolean deleteInputFile) throws Exception {
 		String output = null;
 		StringBuffer listOfNames = new StringBuffer();

@@ -15,6 +15,7 @@ public class SessionState {
 	private String numOfSession = "NA";
 	private String serverUrl = "NA";
 	private String sessionCode = "NA";
+        private String idNames = "NA";
 		
 	
 	
@@ -95,6 +96,12 @@ public class SessionState {
 	}
 	public void setOwner(String owner) {
 		this.owner = owner;
+	}
+        public String getIdNames() {
+		return idNames;
+	}
+	public void setIdNames(String idNames) {
+		this.idNames = idNames;
 	}
 	
 	

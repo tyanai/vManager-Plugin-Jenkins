@@ -88,6 +88,9 @@ public class LaunchHolder {
 		SessionStatusHolder sessionStatusHolder = new SessionStatusHolder(url, requireAuth, user, password, listener, dynamicUserId, buildNumber, workPlacePath, buildID, connConnTimeOut,
 				connReadTimeout, advConfig, notInTestMode, listOfSessions, stepHolder.isMarkBuildAsFailedIfAllRunFailed(),stepHolder.isFailJobIfAllRunFailed(),workingJobDir,stepHolder.isMarkBuildAsPassedIfAllRunPassed(),stepHolder.isFailJobUnlessAllRunPassed());
 
+                //While we iterate over session status, we can use it to grab the real session name for later usages
+                Map<String, String> sessionIdName = new HashMap<String, String>();
+                
 		while (keepWaiting) {
 
 			buildResult = "";
@@ -125,6 +128,7 @@ public class LaunchHolder {
 				String tmpSessionId = null;
 				String tmpPostData = null;
 				String sessionState = null;
+                                String sessionName = null;
 				while (sessionIter.hasNext()) {
 					tmpSessionId = sessionIter.next();
 					tmpPostData = postData1 + tmpSessionId + postData2;
@@ -162,7 +166,7 @@ public class LaunchHolder {
 
 							JSONObject tmp = tmpArray.getJSONObject(0);
 							sessionState = tmp.getString("session_status");
-
+                                                        sessionIdName.put(tmpSessionId, tmp.getString("name"));
 							if (notInTestMode) {
 								if (debugPrint) {
 									listener.getLogger().print(
@@ -248,16 +252,17 @@ public class LaunchHolder {
 
 				// Write the session state information - can be future use by
 				// the dashboard
-				sessionStatusHolder.dumpSessionStatus(false);
+				sessionStatusHolder.dumpSessionStatus(false,sessionIdName);
 
 			}
 
 		}
                 
-                sessionStatusHolder.dumpSessionStatus(true);
+                sessionStatusHolder.dumpSessionStatus(true,sessionIdName);
 
 		// Check if to write the Unit Test XML
 		if (stepHolder.getjUnitRequestHolder() != null) {
+                        //listener.getLogger().print("(" + new Date().toString() + ") Starting to dump JUnit XML ");
 			if (stepHolder.getjUnitRequestHolder().isGenerateJUnitXML()) {
 
 				// Fill in the Extra runs attribute map
@@ -308,6 +313,7 @@ public class LaunchHolder {
 
 				String runsJSONData = null;
 				String tmpSessionId = null;
+                                List<JSONObject> entireSessionsRuns = new ArrayList<JSONObject>();
 				while (sessionIter.hasNext()) {
 					runsJSONData = new String(runsList);
 					tmpSessionId = sessionIter.next();
@@ -330,8 +336,11 @@ public class LaunchHolder {
 							}
 
 							JSONArray tmpRunsArray = JSONArray.fromObject(result.toString());
-							UnitTestFormatter unitTestFormatter = new UnitTestFormatter(tmpRunsArray, tmpSessionId, stepHolder.getjUnitRequestHolder(), extraAttrLabels);
-							unitTestFormatter.dumpXMLFile(workPlacePath, buildNumber, buildID);
+                                                        
+                                                        Iterator<JSONObject> runsIter = tmpRunsArray.iterator();
+                                                        while (runsIter.hasNext()){
+                                                            entireSessionsRuns.add(runsIter.next());
+                                                        }
 
 						}
 					} catch (Exception e) {
@@ -344,6 +353,10 @@ public class LaunchHolder {
 
 					}
 				}
+                                if (entireSessionsRuns.size() > 0){
+                                    UnitTestFormatter unitTestFormatter = new UnitTestFormatter(entireSessionsRuns, tmpSessionId, stepHolder.getjUnitRequestHolder(), extraAttrLabels);
+                                    unitTestFormatter.dumpXMLFile(workPlacePath, buildNumber, buildID);
+                                }
 			}
 		}
 

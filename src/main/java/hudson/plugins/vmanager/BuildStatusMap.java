@@ -49,6 +49,7 @@ public class BuildStatusMap {
 		if ("number_of_entities".equals(key)) return session.getNumOfSession();
 		if ("id".equals(key)) return session.getId();
 		if ("url".equals(key)) return session.getServerUrl();
+                if ("idNames".equals(key)) return session.getIdNames();
 		else{
 			return "NA";
 		}
