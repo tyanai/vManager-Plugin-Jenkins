@@ -12,18 +12,18 @@ import org.jenkinsci.plugins.vmanager.StepHolder;
 public class TestPlugin {
 
 	
-	final String vAPIUrl = "https://vlnx489:50500/vmgr/vapi";
+	final String vAPIUrl = "https://vlnx488:50500/vmgr/vapi";
     final boolean authRequired = true;
-    final String vAPIUser = "tyanai";
+    final String vAPIUser = "root";
     final String vAPIPassword = "letmein";
     final String vSIFName = "/home/tyanai/vsif/vm_basic.vsif";
-    final String vSIFInputFile  = "d:/temp/artifacts/vsifs.input";
+    final String vSIFInputFile  = "c:/temp/artifacts/vsifs.input";
     final boolean deleteInputFile = false;
-    final String vsifType = "dynamic";
+    final String vsifType = "static";
     
     final int buildNumber = 83;
     final String buildID = "2014-45-45-34-56-78";
-    final String buildArtifactPath = "d:/temp/artifacts";
+    final String buildArtifactPath = "c:/temp/artifacts";
     
     private String inaccessibleResolver = "fail";
 	private String stoppedResolver = "fail";
@@ -56,32 +56,7 @@ public class TestPlugin {
 		
 		Utils utils = new Utils();
                 
-                /*
-                String ids = " 720902, 720903,720904";
-                List<String> items = Arrays.asList(ids.split("\\s*,\\s*"));
-                
-                Iterator<String> iter = items.iterator();
-                while (iter.hasNext()){
-                    System.out.println(iter.next());
-                }
-                */
-                
-                //String idNames = "720902$@$vm_basic_scopes.root.19_09_07_22_13_38_2796,720903$@$vm_basic_scopes.root.19_09_07_22_13_40_1241,720904$@$vm_basic_scopes.root.19_09_07_22_13_41_9122";
-                String idNames = BuildStatusMap.getValue("137", 137, "C:\\Jenkins\\workspace\\Job Demo" + "", "idNames", true);
-                if(!idNames.equals("NA")){
-                System.out.println("idNames " + idNames);
-                List<String> items = Arrays.asList(idNames.split("\\s*,\\s*"));
-                Iterator<String> iter = items.iterator();
-                while (iter.hasNext()){
-                String item =  iter.next();
-            //System.out.println((item));
-                // String[] arrOfStr = iter.next().split("$@$", 2);
-                if ("720902".equals(item.substring(0,item.indexOf("$@$")))){
-                    System.out.println("Found! " + item.substring(item.indexOf("$@$")+3,item.length()));
-                }
-                }
-                }
-                
+           
                 //System.out.println(Utils.getRegressionURLFromVAPIURL("https://vlnx488:50500/vmgr/vapi"));
 		
 		//Test Reading VSIF input file
@@ -107,7 +82,11 @@ public class TestPlugin {
 			JUnitRequestHolder jUnitRequestHolder = new JUnitRequestHolder(generateJUnitXML, extraAttributesForFailures, staticAttributeList,false);
 			stepHolder = new StepHolder(inaccessibleResolver, stoppedResolver, failedResolver, doneResolver, suspendedResolver, waitTillSessionEnds,stepSessionTimeout,jUnitRequestHolder,markBuildAsFailedIfAllRunFailed,markJobAsFailedIfAllRunFailed,markBuildAsPassedIfAllRunPassed,failJobUnlessAllRunPassed);
 		}
-		utils.executeVSIFLaunch(vsifFileNames, vAPIUrl, authRequired, vAPIUser, vAPIPassword, null,false,buildID,buildNumber,buildArtifactPath,0,0,false,null,false,null,null, stepHolder,"",buildArtifactPath,null,false,null);
+                String[] sessionNames = new String[3];
+                sessionNames[0] = "vm_basic_scopes.root.19_09_10_13_57_26_6081";
+                sessionNames[1] = "vm_basic_scopes.root.19_09_09_19_46_00_6347";
+                sessionNames[2] = "vm_basic_scopes.root.19_09_09_12_43_21_5408	";
+		utils.executeVSIFLaunch(vsifFileNames, vAPIUrl, authRequired, vAPIUser, vAPIPassword, null,false,buildID,buildNumber,buildArtifactPath,0,0,false,null,false,null,null, stepHolder,"",buildArtifactPath,null,false,null,"batch",sessionNames);
 		
 		//String buildStatus = BuildStatusMap.getValue(buildID, buildNumber, buildArtifactPath+"", "id", true);
 		//System.out.println("Build status is '" + buildStatus + "'" );

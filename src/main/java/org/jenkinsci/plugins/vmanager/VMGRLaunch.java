@@ -53,7 +53,6 @@ public class VMGRLaunch extends Builder {
     private final String envVaribleFile;
     private final boolean attrValues;
     private final String attrValuesFile;
-    
 
     private final String inaccessibleResolver;
     private final String stoppedResolver;
@@ -79,18 +78,23 @@ public class VMGRLaunch extends Builder {
     private final boolean genericCredentialForSessionDelete;
     private final String archiveUser;
     private final String archivePassword;
-    
+
     private final String famMode;
     private final String famModeLocation;
     private final boolean noAppendSeed;
+
+    private final String executionType;
+    private final String sessionsInputFile;
+    private final boolean deleteSessionInputFile;
 
     // Fields in config.jelly must match the parameter names in the
     // "DataBoundConstructor"
     @DataBoundConstructor
     public VMGRLaunch(String vAPIUrl, String vAPIUser, String vAPIPassword, String vSIFName, String vSIFInputFile, String credentialInputFile, boolean deleteInputFile, boolean deleteCredentialInputFile, boolean useUserOnFarm, boolean authRequired, String vsifType, String userFarmType,
             boolean dynamicUserId, boolean advConfig, int connTimeout, int readTimeout, boolean envVarible, String envVaribleFile, String inaccessibleResolver, String stoppedResolver, String failedResolver, String doneResolver, String suspendedResolver, boolean waitTillSessionEnds,
-            int stepSessionTimeout, boolean generateJUnitXML, boolean extraAttributesForFailures, String staticAttributeList, boolean markBuildAsFailedIfAllRunFailed, boolean failJobIfAllRunFailed, String envSourceInputFile, boolean vMGRBuildArchive, boolean deleteAlsoSessionDirectory, 
-            boolean genericCredentialForSessionDelete, String archiveUser, String archivePassword, String famMode, String famModeLocation, boolean noAppendSeed, boolean markBuildAsPassedIfAllRunPassed, boolean failJobUnlessAllRunPassed, boolean userPrivateSSHKey, boolean attrValues, String attrValuesFile) {
+            int stepSessionTimeout, boolean generateJUnitXML, boolean extraAttributesForFailures, String staticAttributeList, boolean markBuildAsFailedIfAllRunFailed, boolean failJobIfAllRunFailed, String envSourceInputFile, boolean vMGRBuildArchive, boolean deleteAlsoSessionDirectory,
+            boolean genericCredentialForSessionDelete, String archiveUser, String archivePassword, String famMode, String famModeLocation, boolean noAppendSeed, boolean markBuildAsPassedIfAllRunPassed, boolean failJobUnlessAllRunPassed, boolean userPrivateSSHKey, boolean attrValues,
+            String attrValuesFile, String executionType, String sessionsInputFile, boolean deleteSessionInputFile) {
         this.vAPIUrl = vAPIUrl;
         this.vAPIUser = vAPIUser;
         this.vAPIPassword = vAPIPassword;
@@ -136,16 +140,32 @@ public class VMGRLaunch extends Builder {
         this.genericCredentialForSessionDelete = genericCredentialForSessionDelete;
         this.archiveUser = archiveUser;
         this.archivePassword = archivePassword;
-        
+
         this.famMode = famMode;
         this.famModeLocation = famModeLocation;
         this.noAppendSeed = noAppendSeed;
+
+        this.executionType = executionType;
+        this.sessionsInputFile = sessionsInputFile;
+        this.deleteSessionInputFile = deleteSessionInputFile;
 
     }
 
     /**
      * We'll use this from the <tt>config.jelly</tt>.
      */
+    public String getSessionsInputFile() {
+        return sessionsInputFile;
+    }
+
+    public boolean isDeleteSessionInputFile() {
+        return deleteSessionInputFile;
+    }
+
+    public String getExecutionType() {
+        return executionType;
+    }
+
     public boolean isExtraAttributesForFailures() {
         return extraAttributesForFailures;
     }
@@ -153,8 +173,6 @@ public class VMGRLaunch extends Builder {
     public boolean isNoAppendSeed() {
         return noAppendSeed;
     }
-    
-    
 
     public boolean isMarkBuildAsFailedIfAllRunFailed() {
         return markBuildAsFailedIfAllRunFailed;
@@ -163,7 +181,7 @@ public class VMGRLaunch extends Builder {
     public boolean isFailJobIfAllRunFailed() {
         return failJobIfAllRunFailed;
     }
-    
+
     public boolean isMarkBuildAsPassedIfAllRunPassed() {
         return markBuildAsPassedIfAllRunPassed;
     }
@@ -171,12 +189,10 @@ public class VMGRLaunch extends Builder {
     public boolean isFailJobUnlessAllRunPassed() {
         return failJobUnlessAllRunPassed;
     }
-    
+
     public boolean isUserPrivateSSHKey() {
         return userPrivateSSHKey;
     }
-    
-    
 
     public String getStaticAttributeList() {
         return staticAttributeList;
@@ -205,7 +221,7 @@ public class VMGRLaunch extends Builder {
     public String getEnvVaribleFile() {
         return envVaribleFile;
     }
-    
+
     public String getAttrValuesFile() {
         return attrValuesFile;
     }
@@ -257,7 +273,7 @@ public class VMGRLaunch extends Builder {
     public boolean isEnvVarible() {
         return envVarible;
     }
-    
+
     public boolean isAttrValues() {
         return attrValues;
     }
@@ -294,7 +310,7 @@ public class VMGRLaunch extends Builder {
         return suspendedResolver;
     }
 
-    public boolean getWaitTillSessionEnds() {
+    public boolean isWaitTillSessionEnds() {
         return waitTillSessionEnds;
     }
 
@@ -325,25 +341,16 @@ public class VMGRLaunch extends Builder {
     public String getFamModeLocation() {
         return famModeLocation;
     }
-    
-   
-    
-    
+
     @Override
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
 
-                
         String workingJobDir = build.getRootDir().getAbsolutePath();
         listener.getLogger().println("Root dir is: " + workingJobDir);
-
         listener.getLogger().println("The HOST for vAPI is: " + vAPIUrl);
         listener.getLogger().println("The vAPIUser for vAPI is: " + vAPIUser);
         listener.getLogger().println("The vAPIPassword for vAPI is: *******");
-        listener.getLogger().println("The vSIFName for vAPI is: " + vSIFName);
-        listener.getLogger().println("The vSIFPathForExternalVSIF Input for vAPI is: " + vSIFInputFile);
         listener.getLogger().println("The authRequired for vAPI is: " + authRequired);
-        listener.getLogger().println("The deleteInputFile for vAPI is: " + deleteInputFile);
-        listener.getLogger().println("The vsif to be executed is for vAPI is " + vsifType);
         listener.getLogger().println("The id is: " + build.getId());
         listener.getLogger().println("The number is: " + build.getNumber());
         listener.getLogger().println("The workspace dir is: " + build.getWorkspace());
@@ -354,34 +361,45 @@ public class VMGRLaunch extends Builder {
             listener.getLogger().println("The connection timeout is: 1 minutes");
             listener.getLogger().println("The read api timeout is: 30 minutes");
         }
-        if (envVarible) {
-            listener.getLogger().println("An environment varible file was selected.");
-            //listener.getLogger().println("The environment varible file is: " + envVaribleFile);
-        }
-        
-        if (attrValues) {
-            listener.getLogger().println("An attribute values file was selected.");
-            //listener.getLogger().println("The environment varible file is: " + envVaribleFile);
-        }
 
-        if (useUserOnFarm) {
-            listener.getLogger().println("An User's Credential use was selected.");
-            listener.getLogger().println("The User's Credential type is: " + userFarmType);
-            listener.getLogger().println("User is using private stored SSH key: " + userPrivateSSHKey);
-            
-            if ("dynamic".equals(userFarmType)) {
-                listener.getLogger().println("The credential file is: " + credentialInputFile);
-                listener.getLogger().println("The credential file was set to be deleted after use: " + deleteCredentialInputFile);
-            }
-            if (!"".equals(envSourceInputFile.trim())) {
-                listener.getLogger().println("The User's source file is: " + envSourceInputFile);
-            } else {
-                listener.getLogger().println("The User's source file wasn't set");
+        //Check if this is user's batch or launch
+        listener.getLogger().println("The execution type set is " + executionType);
+        if ("batch".equals(executionType)) {
+            listener.getLogger().println("The session input file name is: " + sessionsInputFile);
+            listener.getLogger().println("The deleteSessionInputFile : " + deleteSessionInputFile);
+        } else {
+            listener.getLogger().println("The vsif to be executed is is " + vsifType);
+            listener.getLogger().println("The vSIFName is: " + vSIFName);
+            listener.getLogger().println("The vSIFPathForExternalVSIF Input is: " + vSIFInputFile);
+            listener.getLogger().println("The deleteInputFile for vAPI is: " + deleteInputFile);
+            if (envVarible) {
+                listener.getLogger().println("An environment varible file was selected.");
+                //listener.getLogger().println("The environment varible file is: " + envVaribleFile);
             }
 
+            if (attrValues) {
+                listener.getLogger().println("An attribute values file was selected.");
+                //listener.getLogger().println("The environment varible file is: " + envVaribleFile);
+            }
+
+            if (useUserOnFarm) {
+                listener.getLogger().println("An User's Credential use was selected.");
+                listener.getLogger().println("The User's Credential type is: " + userFarmType);
+                listener.getLogger().println("User is using private stored SSH key: " + userPrivateSSHKey);
+
+                if ("dynamic".equals(userFarmType)) {
+                    listener.getLogger().println("The credential file is: " + credentialInputFile);
+                    listener.getLogger().println("The credential file was set to be deleted after use: " + deleteCredentialInputFile);
+                }
+                if (!"".equals(envSourceInputFile.trim())) {
+                    listener.getLogger().println("The User's source file is: " + envSourceInputFile);
+                } else {
+                    listener.getLogger().println("The User's source file wasn't set");
+                }
+
+            }
+
         }
-        
-        
 
         StepHolder stepHolder = null;
         JUnitRequestHolder jUnitRequestHolder = null;
@@ -399,14 +417,12 @@ public class VMGRLaunch extends Builder {
             listener.getLogger().println("User choosed to fail the job in case all runs are failing: " + failJobIfAllRunFailed);
             listener.getLogger().println("User choosed to mark regression as Passed in case all runs are passed: " + markBuildAsPassedIfAllRunPassed);
             listener.getLogger().println("User choosed to fail the job unless all runs are passed: " + failJobUnlessAllRunPassed);
-            
-            
 
             listener.getLogger().println("Generate XML Report XML output: " + generateJUnitXML);
             if (generateJUnitXML) {
-                listener.getLogger().println("Do not append seed to test names: " + noAppendSeed);  
+                listener.getLogger().println("Do not append seed to test names: " + noAppendSeed);
                 jUnitRequestHolder = new JUnitRequestHolder(generateJUnitXML, extraAttributesForFailures, staticAttributeList, noAppendSeed);
-                
+
                 listener.getLogger().println("Extra Attributes in JUnit Report: " + extraAttributesForFailures);
                 if (extraAttributesForFailures) {
                     listener.getLogger().println("Extra Attributes list in JUnit Report is: " + staticAttributeList);
@@ -414,94 +430,105 @@ public class VMGRLaunch extends Builder {
 
             }
 
-            stepHolder = new StepHolder(inaccessibleResolver, stoppedResolver, failedResolver, doneResolver, suspendedResolver, waitTillSessionEnds, stepSessionTimeout, jUnitRequestHolder, markBuildAsFailedIfAllRunFailed, failJobIfAllRunFailed,markBuildAsPassedIfAllRunPassed,failJobUnlessAllRunPassed);
+            stepHolder = new StepHolder(inaccessibleResolver, stoppedResolver, failedResolver, doneResolver, suspendedResolver, waitTillSessionEnds, stepSessionTimeout, jUnitRequestHolder, markBuildAsFailedIfAllRunFailed, failJobIfAllRunFailed, markBuildAsPassedIfAllRunPassed, failJobUnlessAllRunPassed);
         }
-        
+
         VMGRBuildArchiver vMGRBuildArchiver = null;
-        if (vMGRBuildArchive){
+        if (vMGRBuildArchive) {
             listener.getLogger().println("Session was set to get deleted when build is deleted");
             listener.getLogger().println("Delete also session directory on disk: " + deleteAlsoSessionDirectory);
             listener.getLogger().println("Use dedicated credentials for deleting the session: " + genericCredentialForSessionDelete);
             listener.getLogger().println("Use FAM Mode: " + famMode);
-            if ("true".equals(famMode)){
+            if ("true".equals(famMode)) {
                 listener.getLogger().println("FAM Mode Location: " + famModeLocation);
             }
-            if (genericCredentialForSessionDelete){
+            if (genericCredentialForSessionDelete) {
                 listener.getLogger().println("Dedicated User for session delete: " + archiveUser);
                 listener.getLogger().println("Dedicated password for session delete: *******");
             }
-            vMGRBuildArchiver = new VMGRBuildArchiver(vMGRBuildArchive,deleteAlsoSessionDirectory,genericCredentialForSessionDelete,archiveUser,archivePassword,famMode,famModeLocation);
-            
+            vMGRBuildArchiver = new VMGRBuildArchiver(vMGRBuildArchive, deleteAlsoSessionDirectory, genericCredentialForSessionDelete, archiveUser, archivePassword, famMode, famModeLocation);
+
         }
-       
 
         try {
             Utils utils = new Utils();
             // Get the list of VSIF file to launch
             String[] vsifFileNames = null;
+            String[] sessionNames = null;
             String jsonEnvInput = null;
             String jsonAttrValuesInput = null;
-
-            if ("static".equals(vsifType)) {
-                listener.getLogger().println("The VSIF file chosen is static. VSIF file static location is: '" + vSIFName + "'");
-                vsifFileNames = new String[1];
-                vsifFileNames[0] = vSIFName;
-            } else {
-                if (vSIFInputFile == null || vSIFInputFile.trim().equals("")) {
-                    listener.getLogger().println("The VSIF file chosen is dynamic. VSIF directory dynamic workspace directory: '" + build.getWorkspace() + "'");
-                } else {
-                    listener.getLogger().println("The VSIF file chosen is static. VSIF file name is: '" + vSIFInputFile.trim() + "'");
-                }
-
-                vsifFileNames = utils.loadVSIFFileNames(build.getId(), build.getNumber(), "" + build.getWorkspace(), vSIFInputFile, listener, deleteInputFile);
-
-            }
-
-            //check if user set an environment variables in addition:
-            if (envVarible) {
-                if (envVaribleFile == null || envVaribleFile.trim().equals("")) {
-                    listener.getLogger().println("The environment varible file chosen is dynamic. Env File directory dynamic workspace directory: '" + build.getWorkspace() + "'");
-                } else {
-                    listener.getLogger().println("The environment varible file chosen is static. Environment file name is: '" + envVaribleFile.trim() + "'");
-                }
-                jsonEnvInput = utils.loadJSONEnvInput(build.getId(), build.getNumber(), "" + build.getWorkspace(), envVaribleFile, listener);
-                listener.getLogger().println("Found the following environment for the vsif: " + jsonEnvInput);
-            }
-            
-             //check if user set an attribute values in addition:
-            if (attrValues) {
-                if (attrValuesFile == null || attrValuesFile.trim().equals("")) {
-                    listener.getLogger().println("The attribute values file chosen is dynamic. Env File directory dynamic workspace directory: '" + build.getWorkspace() + "'");
-                } else {
-                    listener.getLogger().println("The attribute values file chosen is static. Attribute values file name is: '" + attrValuesFile.trim() + "'");
-                }
-                jsonAttrValuesInput = utils.loadJSONAttrValuesInput(build.getId(), build.getNumber(), "" + build.getWorkspace(), attrValuesFile, listener);
-                listener.getLogger().println("Found the following attribute values for the vsif: " + jsonAttrValuesInput);
-            }
-
             String[] farmUserPassword = null;
             String tempUser = vAPIUser;
             String tempPassword = vAPIPassword;
-            if ("dynamic".equals(userFarmType)) {
-                if (credentialInputFile == null || credentialInputFile.trim().equals("")) {
-                    listener.getLogger().println("The credential file chosen is dynamic. Credential directory dynamic workspace directory: '" + build.getWorkspace() + "'");
+
+            if ("batch".equals(executionType)) {
+                if (sessionsInputFile == null || sessionsInputFile.trim().equals("")) {
+                        listener.getLogger().println("The session input file chosen is dynamic. Dynamic workspace directory: '" + build.getWorkspace() + "'");
+                    } else {
+                        listener.getLogger().println("The session input file chosen is static. Sessions input file name is: '" + sessionsInputFile.trim() + "'");
+                    }
+
+                    sessionNames = utils.loadSessionsFileNames(build.getId(), build.getNumber(), "" + build.getWorkspace(), sessionsInputFile, listener, deleteSessionInputFile);
+            } else {
+                if ("static".equals(vsifType)) {
+                    listener.getLogger().println("The VSIF file chosen is static. VSIF file static location is: '" + vSIFName + "'");
+                    vsifFileNames = new String[1];
+                    vsifFileNames[0] = vSIFName;
                 } else {
-                    listener.getLogger().println("The credential file chosen is static. Credential file name is: '" + credentialInputFile.trim() + "'");
+                    if (vSIFInputFile == null || vSIFInputFile.trim().equals("")) {
+                        listener.getLogger().println("The VSIF file chosen is dynamic. VSIF directory dynamic workspace directory: '" + build.getWorkspace() + "'");
+                    } else {
+                        listener.getLogger().println("The VSIF file chosen is static. VSIF file name is: '" + vSIFInputFile.trim() + "'");
+                    }
+
+                    vsifFileNames = utils.loadVSIFFileNames(build.getId(), build.getNumber(), "" + build.getWorkspace(), vSIFInputFile, listener, deleteInputFile);
+
                 }
-                farmUserPassword = utils.loadFileCredentials(build.getId(), build.getNumber(), "" + build.getWorkspace(), credentialInputFile, listener, deleteCredentialInputFile);
+
+                //check if user set an environment variables in addition:
+                if (envVarible) {
+                    if (envVaribleFile == null || envVaribleFile.trim().equals("")) {
+                        listener.getLogger().println("The environment varible file chosen is dynamic. Env File directory dynamic workspace directory: '" + build.getWorkspace() + "'");
+                    } else {
+                        listener.getLogger().println("The environment varible file chosen is static. Environment file name is: '" + envVaribleFile.trim() + "'");
+                    }
+                    jsonEnvInput = utils.loadJSONEnvInput(build.getId(), build.getNumber(), "" + build.getWorkspace(), envVaribleFile, listener);
+                    listener.getLogger().println("Found the following environment for the vsif: " + jsonEnvInput);
+                }
+
+                //check if user set an attribute values in addition:
+                if (attrValues) {
+                    if (attrValuesFile == null || attrValuesFile.trim().equals("")) {
+                        listener.getLogger().println("The attribute values file chosen is dynamic. Env File directory dynamic workspace directory: '" + build.getWorkspace() + "'");
+                    } else {
+                        listener.getLogger().println("The attribute values file chosen is static. Attribute values file name is: '" + attrValuesFile.trim() + "'");
+                    }
+                    jsonAttrValuesInput = utils.loadJSONAttrValuesInput(build.getId(), build.getNumber(), "" + build.getWorkspace(), attrValuesFile, listener);
+                    listener.getLogger().println("Found the following attribute values for the vsif: " + jsonAttrValuesInput);
+                }
+
                 
-                //Tal Yanai
-                //In case this is a private user SSH, use the dynamic information for the vAPI login as well
-                if (userPrivateSSHKey){
-                    tempUser = farmUserPassword[0];
-                    tempPassword = farmUserPassword[1];
+                if ("dynamic".equals(userFarmType)) {
+                    if (credentialInputFile == null || credentialInputFile.trim().equals("")) {
+                        listener.getLogger().println("The credential file chosen is dynamic. Credential directory dynamic workspace directory: '" + build.getWorkspace() + "'");
+                    } else {
+                        listener.getLogger().println("The credential file chosen is static. Credential file name is: '" + credentialInputFile.trim() + "'");
+                    }
+                    farmUserPassword = utils.loadFileCredentials(build.getId(), build.getNumber(), "" + build.getWorkspace(), credentialInputFile, listener, deleteCredentialInputFile);
+
+                    //Tal Yanai
+                    //In case this is a private user SSH, use the dynamic information for the vAPI login as well
+                    if (userPrivateSSHKey) {
+                        tempUser = farmUserPassword[0];
+                        tempPassword = farmUserPassword[1];
+                    }
                 }
             }
 
             // Now call the actual launch
             // ----------------------------------------------------------------------------------------------------------------
             String output = utils.executeVSIFLaunch(vsifFileNames, vAPIUrl, authRequired, tempUser, tempPassword, listener, dynamicUserId, build.getId(), build.getNumber(),
-                    "" + build.getWorkspace(), connTimeout, readTimeout, advConfig, jsonEnvInput, useUserOnFarm, userFarmType, farmUserPassword, stepHolder, envSourceInputFile, workingJobDir,vMGRBuildArchiver,userPrivateSSHKey,jsonAttrValuesInput);
+                    "" + build.getWorkspace(), connTimeout, readTimeout, advConfig, jsonEnvInput, useUserOnFarm, userFarmType, farmUserPassword, stepHolder, envSourceInputFile, workingJobDir, vMGRBuildArchiver, userPrivateSSHKey, jsonAttrValuesInput, executionType, sessionNames);
             if (!"success".equals(output)) {
                 listener.getLogger().println("Failed to launch vsifs for build " + build.getId() + " " + build.getNumber() + "\n");
                 listener.getLogger().println(output + "\n");
@@ -535,16 +562,16 @@ public class VMGRLaunch extends Builder {
 
         @Override
         public void onDeleted(Run run) {
-           
+
             VMGRBuildArchiver vMGRBuildArchiver = new VMGRBuildArchiver();
             try {
                 vMGRBuildArchiver.deleteSessions(run, logger);
             } catch (Exception ex) {
                 logger.log(Level.SEVERE, "Failed to delete session during build removal.", ex);
             }
-            
+
         }
-        
+
         private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(VMGRDeletedJobListener.class.getName());
     }
 
@@ -710,7 +737,7 @@ public class VMGRLaunch extends Builder {
                 return FormValidation.error("Client error : " + e.getMessage());
             }
         }
-        
+
         public FormValidation doTestArchiveUser(@QueryParameter("archiveUser") final String archiveUser, @QueryParameter("archivePassword") final String archivePassword,
                 @QueryParameter("vAPIUrl") final String vAPIUrl) throws IOException,
                 ServletException {
@@ -727,8 +754,6 @@ public class VMGRLaunch extends Builder {
                 return FormValidation.error("Client error : " + e.getMessage());
             }
         }
-        
-        
 
         public FormValidation doTestExtraStaticAttr(@QueryParameter("vAPIUser") final String vAPIUser, @QueryParameter("vAPIPassword") final String vAPIPassword,
                 @QueryParameter("vAPIUrl") final String vAPIUrl, @QueryParameter("authRequired") final boolean authRequired, @QueryParameter("staticAttributeList") final String staticAttributeList) throws IOException,

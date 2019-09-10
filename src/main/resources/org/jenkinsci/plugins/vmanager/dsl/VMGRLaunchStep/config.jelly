@@ -11,8 +11,6 @@
     When submitted, it will be passed to the corresponding constructor parameter.
   -->
   
-  <f:block>
-  <table style="width: 100%">
   
   
   <f:block>
@@ -57,8 +55,7 @@
   
   <f:radioBlock name="executionType" value="launcher" title="Use session launcher" checked="${instance.executionType == 'launcher'}" inline="true">
   <f:block>
-  <td colspan="4" style="padding-left: 30px;">
-  <table style="width: 100% ; border: 1px solid black ;border-collapse: initial;">
+  <table style="width: 100% ; border: 1px solid black ;border-collapse: initial;margin-left: 18px;">
   <f:radioBlock name="vsifType" value="static" title="Static VSIF file name" checked="${instance.vsifType == 'static'}" inline="true">
           <f:entry title="VSIF file location" field="vSIFName" description="Default VSIF file location with VSIF file name."><f:textbox /></f:entry>
   </f:radioBlock>
@@ -95,18 +92,18 @@
         <f:entry title="User Pre Exceution File" field="envSourceInputFile" description="Path to user env params declaration for sourcing prior to execution (not mandatory) - vManager 17.10 and above only"><f:textbox /></f:entry> 
      </f:optionalBlock>
  </table>
- </td>
+
  </f:block>  
  </f:radioBlock>  
  
  <f:radioBlock name="executionType" value="batch" title="Continue from a pre-launched session" checked="${instance.executionType == 'batch'}" inline="true">
   <f:block>
-  <td colspan="4" style="padding-left: 30px;">
-  <table style="width: 100% ; border: 1px solid black ;border-collapse: initial;">
+  
+  <table style="width: 100% ; border: 1px solid black ;border-collapse: initial;margin-left: 18px;">
           <f:entry title="Name of input file" field="sessionsInputFile" description="Name of input file with one or more session names (mandatory)"><f:textbox /></f:entry>
           <f:entry title="Delete Input File" field="deleteSessionInputFile" description="If checked, the job will delete the input file after processing it."><f:checkbox name="deleteSessionInputFile" checked="${it.deleteSessionInputFile}"/></f:entry>
   </table>
-  </td>
+  
   </f:block>  
  </f:radioBlock>  
  
@@ -164,8 +161,6 @@
  </f:block>   
     
     
-   
-   </table>
-   </f:block>
+  
 
 </j:jelly>

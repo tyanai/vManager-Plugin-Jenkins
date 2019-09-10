@@ -85,14 +85,17 @@ public class VMGRLaunchStep extends Step {
     private final String famModeLocation;
     private final boolean noAppendSeed;
 
-    
+    private final String executionType ;
+    private final String sessionsInputFile;
+    private final boolean deleteSessionInputFile;
     
 
     @DataBoundConstructor
     public VMGRLaunchStep(String vAPIUrl, String vAPIUser, String vAPIPassword, String vSIFName, String vSIFInputFile, String credentialInputFile, boolean deleteInputFile, boolean deleteCredentialInputFile, boolean useUserOnFarm, boolean authRequired, String vsifType, String userFarmType,
             boolean dynamicUserId, boolean advConfig, int connTimeout, int readTimeout, boolean envVarible, String envVaribleFile, String inaccessibleResolver, String stoppedResolver, String failedResolver, String doneResolver, String suspendedResolver, boolean waitTillSessionEnds, int stepSessionTimeout, 
             boolean generateJUnitXML, boolean extraAttributesForFailures, String staticAttributeList, boolean markBuildAsFailedIfAllRunFailed, boolean failJobIfAllRunFailed, String envSourceInputFile, boolean vMGRBuildArchive, boolean deleteAlsoSessionDirectory, boolean genericCredentialForSessionDelete, 
-            String archiveUser, String archivePassword, String famMode, String famModeLocation, boolean noAppendSeed, boolean pipelineNodes, String masterWorkspaceLocation, boolean markBuildAsPassedIfAllRunPassed, boolean failJobUnlessAllRunPassed, boolean userPrivateSSHKey, boolean attrValues, String attrValuesFile) {
+            String archiveUser, String archivePassword, String famMode, String famModeLocation, boolean noAppendSeed, boolean pipelineNodes, String masterWorkspaceLocation, boolean markBuildAsPassedIfAllRunPassed, boolean failJobUnlessAllRunPassed, boolean userPrivateSSHKey, boolean attrValues, 
+            String attrValuesFile, String executionType, String sessionsInputFile, boolean deleteSessionInputFile) {
         this.vAPIUrl = vAPIUrl;
         this.vAPIUser = vAPIUser;
         this.vAPIPassword = vAPIPassword;
@@ -146,11 +149,29 @@ public class VMGRLaunchStep extends Step {
         this.famMode = famMode;
         this.famModeLocation = famModeLocation;
         this.noAppendSeed = noAppendSeed;
+        
+        this.executionType = executionType;
+        this.sessionsInputFile = sessionsInputFile;
+        this.deleteSessionInputFile = deleteSessionInputFile; 
     }
 
     /**
      * We'll use this from the <tt>config.jelly</tt>.
      */
+    
+    public String getSessionsInputFile() {
+        return sessionsInputFile;
+    }
+
+    public boolean isDeleteSessionInputFile() {
+        return deleteSessionInputFile;
+    }
+    
+    public String getExecutionType() {
+        return executionType;
+    }    
+    
+    
     public boolean isExtraAttributesForFailures() {
         return extraAttributesForFailures;
     }
@@ -307,7 +328,7 @@ public class VMGRLaunchStep extends Step {
         return suspendedResolver;
     }
 
-    public boolean getWaitTillSessionEnds() {
+    public boolean isWaitTillSessionEnds() {
         return waitTillSessionEnds;
     }
     
