@@ -1,14 +1,165 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
-  <!--
-    This jelly script is used for per-project configuration.
-
-    See global.jelly for a general discussion about jelly script.
-  -->
-
-  <!--
-    Creates a text field that shows the value of the "name" property.
-    When submitted, it will be passed to the corresponding constructor parameter.
-  -->
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+    
+    
+    <f:block>
+        <f:optionalBlock name="advancedFunctions"  title="Advanced Functions" description="More post functions that require a remote access to the vManager server." checked="${instance.advancedFunctions}" inline="true">
+            <f:block>
+            <table style="width: 100% ; border: 1px solid black ;border-collapse: initial;">
+                <f:entry title="vManager Server API Url" field="vAPIUrl" description="vManager Server API Url">
+                    <f:textbox />
+                </f:entry>
+  
+                <f:block>
+                    <table>
  
+                        <f:optionalBlock name="authRequired"  title="Authentication Required" description="If checked, User/Password are required." checked="${instance.authRequired}" inline="true">
+     
+   		
+                            <f:entry title="Username" field="vAPIUser" description="vManager Username">
+                                <f:textbox default="vAPI"/>
+                            </f:entry>
+                            <f:entry title="Pick User ID dynamically " field="dynamicUserId" description="If checked, the user id will get picked from the workspace">
+                                <f:checkbox name="dynamicUserId" checked="${it.dynamicUserId}"/>
+                            </f:entry>
+                            <f:entry title="Password" field="vAPIPassword" description="vManager password">
+                                <f:password />
+                            </f:entry>
+     	
+      
+                        </f:optionalBlock>
+                    </table>
+                </f:block>
+      
+                <f:block>
+                    <table>
+ 
+                        <f:optionalBlock name="advConfig"  title="Override Default Configuration" description="" checked="${instance.advConfig}" inline="true">
+     
+   		
+                            <f:entry title="Connection Timeout" field="connTimeout" description="Connection timeout in minutes (0 for unlimited)">
+                                <f:number default="1"/>
+                            </f:entry>
+                            <f:entry title="Read Timeout" field="readTimeout" description="Read timeout in minutes (0 for unlimited)">
+                                <f:number  default="30"/>
+                            </f:entry>
+     	
+      
+                        </f:optionalBlock>
+                    </table>
+                </f:block>
+  
+                <f:validateButton
+                    title="${%Test Connection}" progress="${%Testing...}"
+                    method="testConnection" with="vAPIUser,vAPIPassword,vAPIUrl,authRequired" />
+  
+            </table>
+            
+             <!--f:optionalBlock name="retrieveSummaryReport"  title="Retrieve Job Summary Report" description="If selected, the build step will fetch into Jenkins the vManager summary report (sessions, runs, metrics, vPlan grades)" checked="${instance.retrieveSummaryReport}" inline="true">
+            <table style="width: 100% ; border: 1px solid black ;border-collapse: initial;">
+                
+                </table>
+                </f:optionalBlock-->
+                <table style="width: 100% ; border: 1px solid black ;border-collapse: initial;">
+                    <f:block>
+                        <f:optionalBlock name="retrieveSummaryReport"  title="Job Summary Report" description="If selected, the build step will fetch into Jenkins the vManager summary report (sessions, runs, metrics, vPlan grades)" checked="${instance.retrieveSummaryReport}" inline="true">
+                            <f:block>
+                                <f:radioBlock name="summaryType" value="pre" title="Retrieve and Present Job Summary Report" checked="${instance.summaryType == 'pre'}" inline="true">
+                                    <f:block>
+                                        <table style="margin: 0 0 0 30px;">
+                                            <f:optionalBlock name="runReport"  title="Include Runs tree grades " description="" checked="${instance.runReport}" inline="true">
+                                                <f:block>
+                                                    <table style="border-left: 4px solid #1f80b5; margin: 0 0 0 30px;">
+                                                        <f:entry title="Tests view name (optional)" field="testsViewName" description="View name that you made within vManager for selecting columns during test failure analysis (leave as 'Test_Hierarchy' if not change is needed).">
+                                                            <f:textbox default="Test_Hierarchy"/>
+                                                        </f:entry>
+                                                        <f:entry title="Depth" field="testsDepth" description="Number of hierarchy levels the report will produce. Default is 6.">
+                                                            <f:number default="6"/>
+                                                        </f:entry>
+                                                    </table>
+                                                </f:block>
+                                            </f:optionalBlock>
+                                            <f:optionalBlock name="metricsReport"  title="Include Metrics grades " description="" checked="${instance.metricsReport}" inline="true">
+                                                <f:block>
+                                                    <table style="border-left: 4px solid #1f80b5; margin: 0 0 0 30px;">
+                                                        <f:entry title="Metrics view name (optional)" field="metricsViewName" description="View name that you made within vManager for selecting columns during Coverage (metrics) analysis (leave as 'All_Metrics' if not change is needed).">
+                                                            <f:textbox default="All_Metrics"/>
+                                                        </f:entry>
+                                
+                                                        <f:radioBlock name="metricsInputType" value="basic" title="Basic settings" checked="${instance.metricsInputType == 'basic'}" inline="true">
+                                                            <f:entry title="Depth" field="metricsDepth" description="Number of hierarchy levels the report will produce. Default is 6.">
+                                                                <f:number default="6"/>
+                                                            </f:entry>
+                                                        </f:radioBlock>
+                                                        <f:radioBlock name="metricsInputType" value="advance" title="Advanced settings" checked="${instance.metricsInputType == 'advance'}" inline="true">
+                                                            <f:entry title="vAPI metricsData JSON Syntax" field="metricsAdvanceInput" description="JSON representation of the API input for Metrics summary report (metricsData part).">
+                                                                <f:textarea/>
+                                                            </f:entry>
+                                                        </f:radioBlock>
+                                
+                                
+                                                    </table>
+                                                </f:block>
+                                            </f:optionalBlock>
+                                            <f:optionalBlock name="vPlanReport"  title="Include vPlan grades " description="" checked="${instance.vPlanReport}" inline="true">
+                                                <f:block>
+                                                    <table  style="border-left: 4px solid #1f80b5; margin: 0 0 0 30px;">
+                                                        <f:radioBlock name="ctxInputType" value="basic" title="Basic settings" checked="${instance.ctxInputType == 'basic'}" inline="true">
+                                                            <f:entry title="vPlanx file name" field="vPlanxFileName" description="vPlanx File location (Need full path and accees read rights by the vManager server)">
+                                                                <f:textbox/>
+                                                            </f:entry>
+                                                        </f:radioBlock>
+                                                        <f:radioBlock name="ctxInputType" value="basic" title="Advanced settings" checked="${instance.ctxInputType == 'advance'}" inline="true">
+                                                            <f:entry title="vAPI Context JSON Syntax" field="ctxAdvanceInput;" description="JSON representation of the API input for the summary report (ctxData part).">
+                                                                <f:textarea/>
+                                                            </f:entry>
+                                                        </f:radioBlock>
+                                                            
+                                                        <f:entry title="vPlan view name (optional)" field="vplanViewName" description="View name that you made within vManager for selecting columns during vPlan analysis (leave as 'All_Vplan' if not change is needed).">
+                                                            <f:textbox default="All_Vplan"/>
+                                                        </f:entry>
+                                                        <f:radioBlock name="vPlanInputType" value="basic" title="Basic settings" checked="${instance.vPlanInputType == 'basic'}" inline="true">
+                               
+                                                            <f:entry title="Depth" field="vPlanDepth" description="Number of hierarchy levels the report will produce. Default is 6.">
+                                                                <f:number default="6"/>
+                                                            </f:entry>
+                                                        </f:radioBlock>
+                                                        <f:radioBlock name="vPlanInputType" value="advance" title="Advanced settings" checked="${instance.vPlanInputType == 'advance'}" inline="true">
+                                                            <f:entry title="vAPI vplanData JSON Syntax" field="vPlanAdvanceInput" description="JSON representation of the API input for vPlan summary report (vplanData part).">
+                                                                <f:textarea/>
+                                                            </f:entry>
+                                                        </f:radioBlock>
+                                
+                                                    </table>
+                                                </f:block>
+                                            </f:optionalBlock>
+                                        </table>
+                                    </f:block>  
+                                </f:radioBlock>
+                                <f:radioBlock name="summaryType" value="vapifree" title="Retrieve and Present Job Summary Report (free vAPI syntax)" checked="${instance.summaryType == 'vapifree'}" inline="true">
+                                    <f:block>    
+                                        <table style="margin: 0 0 0 30px;">
+                                            <f:entry title="Free vAPI JSON Syntax" field="freeVAPISyntax" description="JSON representation of the API input for the /reports/generate-summary-report vAPI (entire POST request).">
+                                                <f:textarea/>
+                                            </f:entry>
+                                        </table>
+                                    </f:block>  
+                                </f:radioBlock>   
+                                <f:radioBlock name="summaryType" value="post" title="Present Job Summary Report (view only mode)" checked="${instance.summaryType == 'post'}" inline="true">
+                                    <f:block>    
+                                        <table style="margin: 0 0 0 30px;">
+                                        
+                                        </table>
+                                    </f:block>  
+                                </f:radioBlock>   
+                                
+                            </f:block>  
+                        </f:optionalBlock>
+                    </f:block>
+                </table>
+            </f:block>
+            
+        </f:optionalBlock>
+    </f:block>
+    
 </j:jelly>

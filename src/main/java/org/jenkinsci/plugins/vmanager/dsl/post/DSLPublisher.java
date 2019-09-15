@@ -7,6 +7,7 @@ import hudson.tasks.*;
 import hudson.model.AbstractProject;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import hudson.util.FormValidation;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
@@ -14,31 +15,251 @@ import java.io.IOException;
 import javax.annotation.Nonnull;
 import jenkins.tasks.SimpleBuildStep;
 import java.io.Serializable;
-
+import javax.servlet.ServletException;
+import org.jenkinsci.plugins.vmanager.SummaryReportParams;
+import org.jenkinsci.plugins.vmanager.Utils;
+import org.jenkinsci.plugins.vmanager.VAPIConnectionParam;
+import org.kohsuke.stapler.QueryParameter;
 
 @Extension
 public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializable {
 
-   
     private transient Run<?, ?> build;
+
+    private String vAPIUrl;
+    private boolean authRequired;
+    private boolean advConfig;
+    private String vAPIUser;
+    private String vAPIPassword;
+    private boolean dynamicUserId;
+    private int connTimeout = 1;
+    private int readTimeout = 30;
+
+    private boolean advancedFunctions;
+    private boolean retrieveSummaryReport;
+
+    private boolean runReport;
+    private boolean metricsReport;
+    private boolean vPlanReport;
+
+    private String testsViewName = "Test_Hierarchy";
+    private String metricsViewName = "All_Metrics";
+    private String vplanViewName = "All_Vplan";
+    private int testsDepth = 6;
+    private int metricsDepth = 6;
+    private int vPlanDepth = 6;
+
+    private String metricsInputType = "basic";
+    private String metricsAdvanceInput = SummaryReportParams.metricsData;
+    private String vPlanInputType = "basic";
+    private String vPlanAdvanceInput = SummaryReportParams.vPlanData;
+    private String vPlanxFileName;
+
+    private String summaryType = "pre";
+    private String ctxInputType = "basic";
+    private String ctxAdvanceInput;
+    private String freeVAPISyntax;
+
+    VAPIConnectionParam vAPIConnectionParam;
+    SummaryReportParams summaryReportParams;
+
+    public DSLPublisher() {
+
+    }
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
-    public DSLPublisher() {
-       
+    public DSLPublisher(String vAPIUrl, String vAPIUser, String vAPIPassword, boolean authRequired, boolean advConfig, boolean dynamicUserId, int connTimeout, int readTimeout, boolean advancedFunctions,
+            boolean retrieveSummaryReport, boolean runReport, boolean metricsReport, boolean vPlanReport, String testsViewName, String metricsViewName, String vplanViewName, int testsDepth, int metricsDepth,
+            int vPlanDepth, String metricsInputType, String metricsAdvanceInput, String vPlanInputType, String vPlanAdvanceInput, String vPlanxFileName, String summaryType, String ctxInputType, String ctxAdvanceInput, String freeVAPISyntax) {
+
+        this.vAPIUrl = vAPIUrl;
+        this.authRequired = authRequired;
+        this.advConfig = advConfig;
+        this.vAPIUser = vAPIUser;
+        this.vAPIPassword = vAPIPassword;
+        this.dynamicUserId = dynamicUserId;
+        this.connTimeout = connTimeout;
+        this.readTimeout = readTimeout;
+        this.advancedFunctions = advancedFunctions;
+        this.retrieveSummaryReport = retrieveSummaryReport;
+        this.runReport = runReport;
+        this.metricsReport = metricsReport;
+        this.vPlanReport = vPlanReport;
+        this.testsViewName = testsViewName;
+        this.metricsViewName = metricsViewName;
+        this.vplanViewName = vplanViewName;
+        this.testsDepth = testsDepth;
+        this.metricsDepth = metricsDepth;
+        this.vPlanDepth = vPlanDepth;
+
+        this.metricsInputType = metricsInputType;
+        this.metricsAdvanceInput = metricsAdvanceInput;
+        this.vPlanInputType = vPlanInputType;
+        this.vPlanAdvanceInput = vPlanAdvanceInput;
+        this.vPlanxFileName = vPlanxFileName;
+        this.summaryType = summaryType;
+        this.ctxInputType = ctxInputType;
+        this.ctxAdvanceInput = ctxAdvanceInput;
+        this.freeVAPISyntax = freeVAPISyntax;
+
+        vAPIConnectionParam = new VAPIConnectionParam();
+        vAPIConnectionParam.vAPIUrl = vAPIUrl;
+        vAPIConnectionParam.authRequired = authRequired;
+        vAPIConnectionParam.advConfig = advConfig;
+        vAPIConnectionParam.vAPIUser = vAPIUser;
+        vAPIConnectionParam.vAPIPassword = vAPIPassword;
+        vAPIConnectionParam.connTimeout = connTimeout;
+        vAPIConnectionParam.readTimeout = readTimeout;
+
+        summaryReportParams = new SummaryReportParams();
+        summaryReportParams.runReport = runReport;
+        summaryReportParams.metricsReport = metricsReport;
+        summaryReportParams.vPlanReport = vPlanReport;
+        summaryReportParams.testsViewName = testsViewName;
+        summaryReportParams.metricsViewName = metricsViewName;
+        summaryReportParams.vplanViewName = vplanViewName;
+        summaryReportParams.testsDepth = testsDepth;
+        summaryReportParams.metricsDepth = metricsDepth;
+        summaryReportParams.vPlanDepth = vPlanDepth;
+
+        summaryReportParams.metricsInputType = metricsInputType;
+        summaryReportParams.metricsAdvanceInput = metricsAdvanceInput;
+        summaryReportParams.vPlanInputType = vPlanInputType;
+        summaryReportParams.vPlanAdvanceInput = vPlanAdvanceInput;
+        summaryReportParams.vPlanxFileName = vPlanxFileName;
+        summaryReportParams.summaryType = summaryType;
+        summaryReportParams.ctxInputType = ctxInputType;
+        summaryReportParams.ctxAdvanceInput = ctxAdvanceInput;
+        summaryReportParams.freeVAPISyntax = freeVAPISyntax;
     }
 
-   
-    
+    public String getSummaryType() {
+        return summaryType;
+    }
+
+    public String getCtxInputType() {
+        return ctxInputType;
+    }
+
+    public String getCtxAdvanceInput() {
+        return ctxAdvanceInput;
+    }
+
+    public String getFreeVAPISyntax() {
+        return freeVAPISyntax;
+    }
+
+    public String getMetricsInputType() {
+        return metricsInputType;
+    }
+
+    public String getMetricsAdvanceInput() {
+        return metricsAdvanceInput;
+    }
+
+    public String getvPlanInputType() {
+        return vPlanInputType;
+    }
+
+    public String getvPlanAdvanceInput() {
+        return vPlanAdvanceInput;
+    }
+
+    public String getvPlanxFileName() {
+        return vPlanxFileName;
+    }
+
+    public String getTestsViewName() {
+        return testsViewName;
+    }
+
+    public String getMetricsViewName() {
+        return metricsViewName;
+    }
+
+    public String getVplanViewName() {
+        return vplanViewName;
+    }
+
+    public int getTestsDepth() {
+        return testsDepth;
+    }
+
+    public int getMetricsDepth() {
+        return metricsDepth;
+    }
+
+    public int getvPlanDepth() {
+        return vPlanDepth;
+    }
+
+    public boolean isRunReport() {
+        return runReport;
+    }
+
+    public boolean isMetricsReport() {
+        return metricsReport;
+    }
+
+    public boolean isvPlanReport() {
+        return vPlanReport;
+    }
+
+    public boolean isAdvancedFunctions() {
+        return advancedFunctions;
+    }
+
+    public boolean isRetrieveSummaryReport() {
+        return retrieveSummaryReport;
+    }
+
+    public String getvAPIUrl() {
+        return vAPIUrl;
+    }
+
+    public boolean isAuthRequired() {
+        return authRequired;
+    }
+
+    public boolean isAdvConfig() {
+        return advConfig;
+    }
+
+    public String getvAPIUser() {
+        return vAPIUser;
+    }
+
+    public String getvAPIPassword() {
+        return vAPIPassword;
+    }
+
+    public boolean isDynamicUserId() {
+        return dynamicUserId;
+    }
+
+    public int getConnTimeout() {
+        return connTimeout;
+    }
+
+    public int getReadTimeout() {
+        return readTimeout;
+    }
+
     @Override
     public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath fp, @Nonnull Launcher lnchr, @Nonnull TaskListener tl) throws InterruptedException, IOException {
-        
-        this.build = run;
 
+        this.build = run;
         DSLBuildAction buildAction = new DSLBuildAction("NA", run);
         run.addAction(buildAction);
 
-                
+        if (advancedFunctions) {
+            if (retrieveSummaryReport) {
+                ReportBuildAction reportAction = new ReportBuildAction(run, summaryReportParams, vAPIConnectionParam, tl);
+                run.addAction(reportAction);
+            }
+        }
+
     }
 
     // Overridden for better type safety.
@@ -53,26 +274,18 @@ public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializa
     public BuildStepMonitor getRequiredMonitorService() {
         return BuildStepMonitor.NONE;
     }
-    
-    
-         
-    
+
     @Extension // This indicates to Jenkins that this is an implementation of an extension point.
     public static final class DescriptorImpl extends BuildStepDescriptor<Publisher> {
-       
-                
-       
+
         /**
-         * In order to load the persisted global configuration, you have to
-         * call load() in the constructor.
+         * In order to load the persisted global configuration, you have to call
+         * load() in the constructor.
          */
         public DescriptorImpl() {
             load();
         }
-        
-            
-         
-       
+
         @Override
         public boolean isApplicable(Class<? extends AbstractProject> aClass) {
             // Indicates that this builder can be used with all kinds of project types 
@@ -90,13 +303,37 @@ public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializa
         public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
             // To persist global configuration information,
             // set that to properties and call save().
-            
+
             save();
             return super.configure(req, formData);
         }
 
-      
-        
+        public FormValidation doTestConnection(@QueryParameter("vAPIUser") final String vAPIUser, @QueryParameter("vAPIPassword") final String vAPIPassword,
+                @QueryParameter("vAPIUrl") final String vAPIUrl, @QueryParameter("authRequired") final boolean authRequired) throws IOException,
+                ServletException {
+            try {
+
+                Utils utils = new Utils();
+                String output = utils.checkVAPIConnection(vAPIUrl, authRequired, vAPIUser, vAPIPassword);
+                if (!output.startsWith("Failed")) {
+                    return FormValidation.ok("Success. " + output);
+                } else {
+                    return FormValidation.error(output);
+                }
+            } catch (Exception e) {
+                return FormValidation.error("Client error : " + e.getMessage());
+            }
+        }
+
+        public FormValidation doCheckVAPIUrl(@QueryParameter String value) throws IOException, ServletException {
+            if (value.length() == 0) {
+                return FormValidation.error("Please set the vManager vAPI HOST ");
+            }
+            if (value.length() < 4) {
+                return FormValidation.warning("Isn't the name too short?");
+            }
+            return FormValidation.ok();
+        }
+
     }
 }
-

@@ -45,6 +45,13 @@ import org.kohsuke.stapler.DataBoundConstructor;
  * @author tyanai
  */
  public class VMGRPostLaunchStep extends Step {
+     
+     
+     
+     
+     
+     
+     
     @DataBoundConstructor
     public VMGRPostLaunchStep() {}
 

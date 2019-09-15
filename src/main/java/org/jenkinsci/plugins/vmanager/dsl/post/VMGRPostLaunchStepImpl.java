@@ -46,7 +46,7 @@ public class VMGRPostLaunchStepImpl extends SynchronousNonBlockingStepExecution<
        
        listener.getLogger().println("Running vManager Post Job step.");
 
-       DSLPublisher publisher = new DSLPublisher();
+       DSLPublisher publisher = new DSLPublisher("", "", "", false, false, false, 0, 0, false, false,false,false,false,null,null,null,6,6,6,null,null,null,null,null,null,null,null,null);
        publisher.perform(build, ws, launcher, listener);
 
        return null;
