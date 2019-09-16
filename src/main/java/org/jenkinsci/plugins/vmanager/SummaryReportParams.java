@@ -45,13 +45,14 @@ public class SummaryReportParams {
     public String vPlanAdvanceInput;
     public String vPlanxFileName;
     public String summaryType;
-    public String ctxInputType;
+    public boolean ctxInput;
     public String ctxAdvanceInput;
     public String freeVAPISyntax;
+    public boolean deleteReportSyntaxInputFile;
     
-    public final static String  staticReportParams = "\"override\":true,\"sessionsViewName\":\"All_Sessions\",\"linkOutput\":true,\"title\":\"Summary report\",\"includeSessions\":true,\"includeAll\":false,\"testsViewName\":\"Test_Hierarchy\",\"metricsViewName\":\"All_Metrics\",\"vplanViewName\":\"All_Vplan\",\"testsDepth\":2147483640";
+    public final static String  staticReportParams = "\"jenkins\":true,\"override\":true,\"sessionsViewName\":\"All_Sessions\",\"linkOutput\":true,\"title\":\"Summary report\",\"includeSessions\":true,\"includeAll\":false$test_view_name$metrics_view_name$vplan_view_name$test_depth";
     public boolean includeTests = true;
-    public static String metricsData = "[{\"scope\":\"default\",\"extended\":false,\"instances\":true,\"types\":true,\"depth\":6}]";
-    public static String vPlanData = "[{\"extended\":true,\"instances\":true,\"types\":true,\"depth\":6,\"perspective\":\"APB_UART\",\"vplanNode\":\"\"}]";
-    public static String ctxData = "{\"vplanFile\":\"/home/segal/work/vpm/APB_UART.vplanx\"}";
+    public static String metricsData = "{\"scope\":\"default\",\"extended\":false,\"instances\":true,\"types\":true,\"depth\":6}";
+    public static String vPlanData = "{\"extended\":true,\"instances\":true,\"types\":true,\"depth\":6,\"perspective\":\"APB_UART\",\"vplanNode\":\"\"}";
+    public static String ctxData = "{}";
 }

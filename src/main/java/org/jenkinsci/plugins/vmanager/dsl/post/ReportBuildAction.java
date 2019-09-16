@@ -37,6 +37,7 @@ public class ReportBuildAction extends PostActionBase implements Serializable, R
         return "vManagerSummaryReport";
     }
 
+    /*
     public List<String> getJobSessions() {
 
         Job job = build.getParent();
@@ -48,34 +49,8 @@ public class ReportBuildAction extends PostActionBase implements Serializable, R
 
         return items;
     }
-
-    public String getvManagerLink(boolean buildLevel) {
-        String output = "#";
-        //Check if to add a direct link for last succesfull build
-        //Run lastSuccesfullRun = project.getLastSuccessfulBuild();
-        if (this.build != null) {
-            Job job = this.build.getParent();
-            String workingDir = job.getBuildDir() + File.separator + this.build.getNumber();
-            VMGRRun tmpVmgrRun = new VMGRRun(this.build, workingDir, job.getBuildDir().getAbsolutePath());
-            String id = BuildStatusMap.getValue(tmpVmgrRun.getRun().getId(), tmpVmgrRun.getRun().getNumber(), tmpVmgrRun.getJobWorkingDir() + "", "id", true);
-
-            //If id is having more than 1 sesison, set url to internal list of sessions, not to the vManager outside regression
-            if (id.indexOf(",") > 0) {
-                if (buildLevel) {
-                    output = "vManagerSessionsView";
-                } else {
-                    output = this.build.getNumber() + "/vManagerSessionsView";
-                }
-            } else {
-                String vAPIUrl = BuildStatusMap.getValue(tmpVmgrRun.getRun().getId(), tmpVmgrRun.getRun().getNumber(), tmpVmgrRun.getJobWorkingDir() + "", "url", false);
-                output = Utils.getRegressionURLFromVAPIURL(vAPIUrl) + "?sessionid=" + id;
-            }
-
-        }
-
-        return output;
-
-    }
+*/
+    
 
     public int getBuildNumber() {
         return this.build.number;
@@ -91,6 +66,12 @@ public class ReportBuildAction extends PostActionBase implements Serializable, R
         this.listener = listener;
         
         this.reportManager = new ReportManager(build, summaryReportParams, vAPIConnectionParam, listener);
+        try{
+            this.reportManager.retrievReportFromServer();
+        }catch (Exception e){
+            listener.getLogger().println("Failed to get summary report from server");
+            e.printStackTrace();
+        }
     }
 
     @Override

@@ -71,9 +71,29 @@ public class TestPlugin {
         summaryReportParams.runReport = true;
         summaryReportParams.metricsReport = true;
         summaryReportParams.vPlanReport = true;
+        
+        summaryReportParams.testsDepth = 6;
+        summaryReportParams.vPlanDepth = 6;
+        summaryReportParams.metricsDepth = 6;
+        summaryReportParams.testsViewName = "Tal_ALL";
+        summaryReportParams.vplanViewName = "All_Vplan";
+        summaryReportParams.metricsViewName = "All_Metrics";
+        
+        summaryReportParams.metricsInputType = "basic";
+        summaryReportParams.vPlanInputType = "basic";
+        summaryReportParams.vPlanxFileName = "/home/segal/work/vpm/APB_UART.vplanx";
+        
+        summaryReportParams.summaryType = "freesyntax";
+        
+        
+       
+        
+        
         ReportManager reportManager = new ReportManager(summaryReportParams,vAPIConnectionParam,true);
         reportManager.retrievReportFromServer();
 
+        /*
+        
         //Test Reading VSIF input file
         String[] vsifFileNames = null;
         if ("static".equals(vsifType)) {
@@ -105,6 +125,8 @@ public class TestPlugin {
         //System.out.println("Build status is '" + buildStatus + "'" );
         //utils.executeAPI("{}", "/sessions/count", vAPIUrl, authRequired, vAPIUser, vAPIPassword, "POST", null, false, buildID+"-1", buildNumber, buildArtifactPath,0,0,false);
         //utils.executeAPI("{}", "/runs/get?id=5", vAPIUrl, authRequired, vAPIUser, vAPIPassword, "GET", null, false, buildID+"-2", buildNumber, buildArtifactPath,0,0,false);
+
+*/
     }
 
 }

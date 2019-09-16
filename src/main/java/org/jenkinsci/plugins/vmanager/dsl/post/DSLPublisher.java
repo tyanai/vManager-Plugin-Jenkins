@@ -42,23 +42,24 @@ public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializa
     private boolean metricsReport;
     private boolean vPlanReport;
 
-    private String testsViewName = "Test_Hierarchy";
-    private String metricsViewName = "All_Metrics";
-    private String vplanViewName = "All_Vplan";
+    private String testsViewName;
+    private String metricsViewName;
+    private String vplanViewName;
     private int testsDepth = 6;
     private int metricsDepth = 6;
     private int vPlanDepth = 6;
 
-    private String metricsInputType = "basic";
-    private String metricsAdvanceInput = SummaryReportParams.metricsData;
-    private String vPlanInputType = "basic";
-    private String vPlanAdvanceInput = SummaryReportParams.vPlanData;
+    private String metricsInputType;
+    private String metricsAdvanceInput;
+    private String vPlanInputType;
+    private String vPlanAdvanceInput;
     private String vPlanxFileName;
 
-    private String summaryType = "pre";
-    private String ctxInputType = "basic";
+    private String summaryType;
+    private boolean ctxInput;
     private String ctxAdvanceInput;
     private String freeVAPISyntax;
+    private boolean deleteReportSyntaxInputFile;
 
     VAPIConnectionParam vAPIConnectionParam;
     SummaryReportParams summaryReportParams;
@@ -71,7 +72,8 @@ public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializa
     @DataBoundConstructor
     public DSLPublisher(String vAPIUrl, String vAPIUser, String vAPIPassword, boolean authRequired, boolean advConfig, boolean dynamicUserId, int connTimeout, int readTimeout, boolean advancedFunctions,
             boolean retrieveSummaryReport, boolean runReport, boolean metricsReport, boolean vPlanReport, String testsViewName, String metricsViewName, String vplanViewName, int testsDepth, int metricsDepth,
-            int vPlanDepth, String metricsInputType, String metricsAdvanceInput, String vPlanInputType, String vPlanAdvanceInput, String vPlanxFileName, String summaryType, String ctxInputType, String ctxAdvanceInput, String freeVAPISyntax) {
+            int vPlanDepth, String metricsInputType, String metricsAdvanceInput, String vPlanInputType, String vPlanAdvanceInput, String vPlanxFileName, String summaryType, boolean ctxInput,
+            String ctxAdvanceInput, String freeVAPISyntax, boolean deleteReportSyntaxInputFile) {
 
         this.vAPIUrl = vAPIUrl;
         this.authRequired = authRequired;
@@ -99,9 +101,10 @@ public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializa
         this.vPlanAdvanceInput = vPlanAdvanceInput;
         this.vPlanxFileName = vPlanxFileName;
         this.summaryType = summaryType;
-        this.ctxInputType = ctxInputType;
+        this.ctxInput = ctxInput;
         this.ctxAdvanceInput = ctxAdvanceInput;
         this.freeVAPISyntax = freeVAPISyntax;
+        this.deleteReportSyntaxInputFile = deleteReportSyntaxInputFile;;
 
         vAPIConnectionParam = new VAPIConnectionParam();
         vAPIConnectionParam.vAPIUrl = vAPIUrl;
@@ -129,17 +132,22 @@ public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializa
         summaryReportParams.vPlanAdvanceInput = vPlanAdvanceInput;
         summaryReportParams.vPlanxFileName = vPlanxFileName;
         summaryReportParams.summaryType = summaryType;
-        summaryReportParams.ctxInputType = ctxInputType;
+        summaryReportParams.ctxInput = ctxInput;
         summaryReportParams.ctxAdvanceInput = ctxAdvanceInput;
         summaryReportParams.freeVAPISyntax = freeVAPISyntax;
+        summaryReportParams.deleteReportSyntaxInputFile = deleteReportSyntaxInputFile;
+    }
+
+    public boolean isDeleteReportSyntaxInputFile() {
+        return deleteReportSyntaxInputFile;
     }
 
     public String getSummaryType() {
         return summaryType;
     }
 
-    public String getCtxInputType() {
-        return ctxInputType;
+    public boolean isCtxInputType() {
+        return ctxInput;
     }
 
     public String getCtxAdvanceInput() {

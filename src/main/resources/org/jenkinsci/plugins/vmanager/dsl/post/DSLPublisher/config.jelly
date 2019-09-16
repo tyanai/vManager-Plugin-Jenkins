@@ -64,7 +64,7 @@
                     <f:block>
                         <f:optionalBlock name="retrieveSummaryReport"  title="Job Summary Report" description="If selected, the build step will fetch into Jenkins the vManager summary report (sessions, runs, metrics, vPlan grades)" checked="${instance.retrieveSummaryReport}" inline="true">
                             <f:block>
-                                <f:radioBlock name="summaryType" value="pre" title="Retrieve and Present Job Summary Report" checked="${instance.summaryType == 'pre'}" inline="true">
+                                <f:radioBlock name="summaryType" value="wizard" title="Retrieve and Present Job Summary Report" checked="${instance.summaryType == 'wizard'}" inline="true">
                                     <f:block>
                                         <table style="margin: 0 0 0 30px;">
                                             <f:optionalBlock name="runReport"  title="Include Runs tree grades " description="" checked="${instance.runReport}" inline="true">
@@ -103,18 +103,10 @@
                                             </f:optionalBlock>
                                             <f:optionalBlock name="vPlanReport"  title="Include vPlan grades " description="" checked="${instance.vPlanReport}" inline="true">
                                                 <f:block>
-                                                    <table  style="border-left: 4px solid #1f80b5; margin: 0 0 0 30px;">
-                                                        <f:radioBlock name="ctxInputType" value="basic" title="Basic settings" checked="${instance.ctxInputType == 'basic'}" inline="true">
-                                                            <f:entry title="vPlanx file name" field="vPlanxFileName" description="vPlanx File location (Need full path and accees read rights by the vManager server)">
-                                                                <f:textbox/>
-                                                            </f:entry>
-                                                        </f:radioBlock>
-                                                        <f:radioBlock name="ctxInputType" value="basic" title="Advanced settings" checked="${instance.ctxInputType == 'advance'}" inline="true">
-                                                            <f:entry title="vAPI Context JSON Syntax" field="ctxAdvanceInput;" description="JSON representation of the API input for the summary report (ctxData part).">
-                                                                <f:textarea/>
-                                                            </f:entry>
-                                                        </f:radioBlock>
-                                                            
+                                                    <table  style="border-left: 4px solid #1f80b5; margin: 0 0 0 30px;">                                                 
+                                                        <f:entry title="vPlanx file name" field="vPlanxFileName" description="vPlanx File location (Need full path and accees read rights by the vManager server)">
+                                                            <f:textbox/>
+                                                        </f:entry>
                                                         <f:entry title="vPlan view name (optional)" field="vplanViewName" description="View name that you made within vManager for selecting columns during vPlan analysis (leave as 'All_Vplan' if not change is needed).">
                                                             <f:textbox default="All_Vplan"/>
                                                         </f:entry>
@@ -133,19 +125,32 @@
                                                     </table>
                                                 </f:block>
                                             </f:optionalBlock>
+                                            <f:optionalBlock name="ctxInput"  title="Advanced Context " description="" checked="${instance.ctxInput}" inline="true">
+                                                <f:block>
+                                                    <table  style="border-left: 4px solid #1f80b5; margin: 0 0 0 30px;">   
+                                                        <f:entry title="Advanced Context JSON" field="ctxAdvanceInput;" description="JSON representation of the vAPI input for the summary report (ctxData part).">
+                                                            <f:textarea/>
+                                                        </f:entry>
+                                                    </table>
+                                                </f:block>
+                                            </f:optionalBlock>               
+                                           
                                         </table>
                                     </f:block>  
                                 </f:radioBlock>
-                                <f:radioBlock name="summaryType" value="vapifree" title="Retrieve and Present Job Summary Report (free vAPI syntax)" checked="${instance.summaryType == 'vapifree'}" inline="true">
+                                <f:radioBlock name="summaryType" value="freesyntax" title="Retrieve and Present Job Summary Report (free vAPI syntax)" checked="${instance.summaryType == 'freesyntax'}" inline="true">
                                     <f:block>    
                                         <table style="margin: 0 0 0 30px;">
-                                            <f:entry title="Free vAPI JSON Syntax" field="freeVAPISyntax" description="JSON representation of the API input for the /reports/generate-summary-report vAPI (entire POST request).">
-                                                <f:textarea/>
+                                            <f:entry title="Free vAPI JSON Syntax (File name)" field="freeVAPISyntax" description="A file location with JSON representation of the vAPI input for the /reports/generate-summary-report vAPI (entire POST request).">
+                                                <f:textbox />
+                                            </f:entry>
+                                            <f:entry title="Delete Input File" field="deleteReportSyntaxInputFile" description="If checked, the job will delete the input file name after processing it.">
+                                                <f:checkbox name="deleteReportSyntaxInputFile" checked="${it.deleteReportSyntaxInputFile}"/>
                                             </f:entry>
                                         </table>
                                     </f:block>  
                                 </f:radioBlock>   
-                                <f:radioBlock name="summaryType" value="post" title="Present Job Summary Report (view only mode)" checked="${instance.summaryType == 'post'}" inline="true">
+                                <f:radioBlock name="summaryType" value="viewonly" title="Present Job Summary Report (view only mode)" checked="${instance.summaryType == 'viewonly'}" inline="true">
                                     <f:block>    
                                         <table style="margin: 0 0 0 30px;">
                                         

@@ -236,6 +236,69 @@ public class Utils {
         return output;
     }
     
+    public String loadUserSyntaxForSummaryReport(String buildID, int buildNumber, String workPlacePath, String inputFile, TaskListener listener, boolean deleteInputFile) throws Exception {
+        String output = null;
+        StringBuffer jsonInput = new StringBuffer();
+        BufferedReader reader = null;
+        String fileName = null;
+        boolean notInTestMode = true;
+        if (listener == null) {
+            notInTestMode = false;
+        }
+
+        // Set the right File name.
+        if ("".equals(inputFile) || inputFile == null) {
+            fileName = workPlacePath + File.separator + buildNumber + "." + buildID + "." + "summary_report.input";
+        } else {
+            fileName = inputFile;
+        }
+
+        try {
+
+            reader = this.loadFileFromWorkSpace(buildID, buildNumber, workPlacePath, inputFile, listener, deleteInputFile, "summary_report.input");
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                jsonInput.append(line);
+            }
+
+        } catch (Exception e) {
+
+            if (notInTestMode) {
+                listener.getLogger().print("Failed to read input file for the summary report.  Failed to load file '" + fileName + "'\n");
+            } else {
+
+                System.out.println("Failed to read input file for the summary report.  Failed to load file '" + fileName + "'");
+            }
+
+            throw e;
+        } finally {
+            reader.close();
+        }
+
+        
+
+        if (deleteInputFile) {
+            if (notInTestMode) {
+                listener.getLogger().print("Job set to delete the input file.  Deleting " + fileName + "\n");
+            }
+            try {
+                File fileToDelete = new File(fileName);
+                fileToDelete.renameTo(new File(fileToDelete + ".delete"));
+            } catch (Exception e) {
+                if (notInTestMode) {
+                    listener.getLogger().print("Failed to delete input file from workspace.  Failed to delete file '" + fileName + "'\n");
+
+                } else {
+
+                    System.out.println("Failed to delete the input file from the workspace.  Failed to delete file '" + fileName + "'");
+                }
+                throw e;
+            }
+        }
+        output = jsonInput.toString();
+        return output;
+    }
+    
     
 
     public String[] loadFileCredentials(String buildID, int buildNumber, String workPlacePath, String credentialInputFile, TaskListener listener, boolean deleteInputFile) throws Exception {
