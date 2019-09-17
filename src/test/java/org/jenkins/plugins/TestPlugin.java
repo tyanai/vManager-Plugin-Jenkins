@@ -83,7 +83,9 @@ public class TestPlugin {
         summaryReportParams.vPlanInputType = "basic";
         summaryReportParams.vPlanxFileName = "/home/segal/work/vpm/APB_UART.vplanx";
         
-        summaryReportParams.summaryType = "freesyntax";
+        summaryReportParams.summaryType = "wizard";
+        summaryReportParams.ctxInput = true;
+        summaryReportParams.ctxAdvanceInput = "{\"vplanFile\":\"\\/home\\/segal\\/work\\/vpm\\/APB_UAR.vplanx\"}";
         
         
        

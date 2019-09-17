@@ -128,7 +128,7 @@
                                             <f:optionalBlock name="ctxInput"  title="Advanced Context " description="" checked="${instance.ctxInput}" inline="true">
                                                 <f:block>
                                                     <table  style="border-left: 4px solid #1f80b5; margin: 0 0 0 30px;">   
-                                                        <f:entry title="Advanced Context JSON" field="ctxAdvanceInput;" description="JSON representation of the vAPI input for the summary report (ctxData part).">
+                                                        <f:entry title="Advanced Context JSON" field="ctxAdvanceInput" description="JSON representation of the vAPI input for the summary report (ctxData part).">
                                                             <f:textarea/>
                                                         </f:entry>
                                                     </table>

@@ -12749,21 +12749,47 @@ function runTheReportScript(){
  
 
 //document.getElementById("reportContent").style.height = 200;
-var textArea = document.createElement('textarea');
-textArea.innerHTML = document.getElementById('reportContent').textContent;
-//document.getElementById("reportContent").style.height= 0;
-document.getElementById('main-panel').style.padding = "15px 15px 0px 15px";
-resizeReport();
+
+//first check if this is an error message
+if (document.getElementById('reportContent').textContent.indexOf('microAgentWaiting') > 0){
+    jQuery.noConflict();
+    var textArea = document.createElement('textarea');
+    textArea.innerHTML = document.getElementById('reportContent').textContent;
+    //document.getElementById("reportContent").style.height= 0;
+    document.getElementById('main-panel').style.padding = "15px 15px 0px 15px";
+    jQuery('#reportContent').html(textArea.value);
+    document.getElementById("reportContent").style.height = 'auto';
+    jQuery('#reportLoading').hide();
+    jQuery('#reportContent').show();
+} else {
+        
+    var textArea = document.createElement('textarea');
+    textArea.innerHTML = document.getElementById('reportContent').textContent;
+    //document.getElementById("reportContent").style.height= 0;
+    document.getElementById('main-panel').style.padding = "15px 15px 0px 15px";
+    resizeReport();
+    jQuery.noConflict();
+    jQuery('#reportContent').html(textArea.value);
+    try{
+        runTheReportScript();
+   
+        jQuery('#reportLoading').hide();
+        jQuery('#reportContent').show();
+        window.addEventListener("resize", resizeReport);
+     }catch(e){
+        jQuery('#reportContent').html('<div class="microAgentWaiting"><div class="spinnerMicroAgentMessage"><p><img src="/plugin/vmanager-plugin/img/support-icon.png"></img></p><p>Failed the parse the report data.<br>Please check the content of the report data file.<br>(Report data is located within the build directory, and ends with *.summary.report)</p></div></div>');
+    }
+}
+
+ 
 
 
-jQuery.noConflict();
-jQuery('#reportContent').html(textArea.value);
-runTheReportScript();
-jQuery('#reportLoading').hide();
-jQuery('#reportContent').show();
 
 
-window.addEventListener("resize", resizeReport);
+
+
+
+
 
 
 

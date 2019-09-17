@@ -146,7 +146,7 @@ public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializa
         return summaryType;
     }
 
-    public boolean isCtxInputType() {
+    public boolean isCtxInput() {
         return ctxInput;
     }
 

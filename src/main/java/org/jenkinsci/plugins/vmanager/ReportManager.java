@@ -23,7 +23,6 @@
  */
 package org.jenkinsci.plugins.vmanager;
 
-
 import hudson.model.Job;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -289,7 +288,7 @@ public class ReportManager {
         String thePath = vAPIConnectionParam.vAPIUrl + "/rest/reports" + urlObject.get("path");
         URL url = new URL(thePath);
         URLConnection uc = url.openConnection();
-        
+
         if (vAPIConnectionParam.authRequired) {
             // ----------------------------------------------------------------------------------------
             // Authentication
@@ -326,12 +325,12 @@ public class ReportManager {
             conn.setRequestProperty("Authorization", "Basic " + authStringEnc);
              */
             // ----------------------------------------------------------------------------------------
-            
+
             String userpass = username + ":" + vAPIConnectionParam.vAPIPassword;
             String basicAuth = "Basic " + javax.xml.bind.DatatypeConverter.printBase64Binary(userpass.getBytes());
             uc.setRequestProperty("Authorization", basicAuth);
         }
-        
+
         InputStream is = uc.getInputStream();
         int ptr = 0;
         StringBuffer buffer = new StringBuffer();
@@ -400,12 +399,30 @@ public class ReportManager {
                 //writer.flush();
                 //writer.close();
 
+            } else {
+                
+                BufferedReader br = new BufferedReader(new InputStreamReader((conn.getErrorStream())));
+                
+                
+                String output;
+                String fileOutput = jobWorkingDir + File.separator + buildNumber + "." + buildId + ".summary.report";
+                FileWriter writer = new FileWriter(fileOutput);
+                writer.append("<div class=\"microAgentWaiting\"><div class=\"spinnerMicroAgentMessage\"><p><img src=\"/plugin/vmanager-plugin/img/support-icon.png\"></img></p><p>");
+                writer.append("Failure to retrieve the report from the vManager server for this build.  Check your parameters.<br>Below you can find the exception that was thrown during the retrieval process:<br>br>");
+                while ((output = br.readLine()) != null) {
+                    writer.append(output + "<br>");
+                }
+                writer.append("</p></div></div>");
+                writer.flush();
+                writer.close();
+
+
             }
         } catch (Exception e) {
             if (this.testMode) {
                 e.printStackTrace();
             } else {
-                listener.error("Failed to retrieve report from the vManager server.", e);
+                listener.getLogger().println("Failed to retrieve report from the vManager server.");
             }
             throw e;
 
@@ -416,14 +433,15 @@ public class ReportManager {
 
     }
 
-    public String getReportFromWorkspace() {
+    public String getReportFromWorkspace() throws IOException {
 
         String fileInput = vmgrRun.getJobWorkingDir() + File.separator + vmgrRun.getRun().getNumber() + "." + vmgrRun.getRun().getId() + ".summary.report";
-        String output = "<div>NO REPORT WAS FOUND.</div>";
+        String output = "<div class=\"microAgentWaiting\"><div class=\"spinnerMicroAgentMessage\"><p><img src=\"/plugin/vmanager-plugin/img/weblinks.png\"></img></p><p>Failed to find a report file for this build.<br>Please check that the following file exist:<br>"+fileInput+"</p></div></div>";
         try {
             output = new String(Files.readAllBytes(Paths.get(fileInput)));
         } catch (IOException ex) {
-            listener.error("vManager Action - Can't find file for loading report: " + fileInput);
+            System.out.println("vManager Action - Can't find file for loading report: " + fileInput);
+            return output;
         }
 
         return output;
@@ -434,7 +452,8 @@ public class ReportManager {
             if (conn.getResponseCode() != HttpURLConnection.HTTP_OK && conn.getResponseCode() != HttpURLConnection.HTTP_NO_CONTENT && conn.getResponseCode() != HttpURLConnection.HTTP_ACCEPTED
                     && conn.getResponseCode() != HttpURLConnection.HTTP_CREATED && conn.getResponseCode() != HttpURLConnection.HTTP_PARTIAL && conn.getResponseCode() != HttpURLConnection.HTTP_RESET
                     && conn.getResponseCode() != 406) {
-                System.out.println("Error - Got wrong response from /reports/stream-summary-report - " + conn.getResponseCode());
+                //System.out.println("Error - Got wrong response from /reports/stream-summary-report - " + conn.getResponseCode()  );
+                listener.getLogger().println("Error - Got wrong response from /reports/stream-summary-report - " + conn.getResponseCode());
                 return false;
             } else {
                 return true;
@@ -459,8 +478,6 @@ public class ReportManager {
 
                 public void checkServerTrusted(X509Certificate[] certs, String authType) {
                 }
-
-           
 
             }
         };
