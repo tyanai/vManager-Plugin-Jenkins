@@ -21,7 +21,7 @@ import org.jenkinsci.plugins.vmanager.Utils;
 import org.jenkinsci.plugins.vmanager.VAPIConnectionParam;
 import org.kohsuke.stapler.QueryParameter;
 
-@Extension
+
 public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializable {
 
     private transient Run<?, ?> build;
@@ -35,7 +35,7 @@ public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializa
     private int connTimeout = 1;
     private int readTimeout = 30;
 
-    private boolean advancedFunctions;
+    private boolean advancedFunctions = false;
     private boolean retrieveSummaryReport;
 
     private boolean runReport;
@@ -64,9 +64,7 @@ public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializa
     VAPIConnectionParam vAPIConnectionParam;
     SummaryReportParams summaryReportParams;
 
-    public DSLPublisher() {
-
-    }
+    
 
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
@@ -137,6 +135,11 @@ public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializa
         summaryReportParams.freeVAPISyntax = freeVAPISyntax;
         summaryReportParams.deleteReportSyntaxInputFile = deleteReportSyntaxInputFile;
     }
+    
+    @DataBoundConstructor
+    public DSLPublisher() {
+
+    }
 
     public boolean isDeleteReportSyntaxInputFile() {
         return deleteReportSyntaxInputFile;
@@ -166,15 +169,15 @@ public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializa
         return metricsAdvanceInput;
     }
 
-    public String getvPlanInputType() {
+    public String getVPlanInputType() {
         return vPlanInputType;
     }
 
-    public String getvPlanAdvanceInput() {
+    public String getVPlanAdvanceInput() {
         return vPlanAdvanceInput;
     }
 
-    public String getvPlanxFileName() {
+    public String getVPlanxFileName() {
         return vPlanxFileName;
     }
 
@@ -198,7 +201,7 @@ public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializa
         return metricsDepth;
     }
 
-    public int getvPlanDepth() {
+    public int getVPlanDepth() {
         return vPlanDepth;
     }
 
@@ -210,7 +213,7 @@ public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializa
         return metricsReport;
     }
 
-    public boolean isvPlanReport() {
+    public boolean isVPlanReport() {
         return vPlanReport;
     }
 
@@ -222,7 +225,7 @@ public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializa
         return retrieveSummaryReport;
     }
 
-    public String getvAPIUrl() {
+    public String getVAPIUrl() {
         return vAPIUrl;
     }
 
@@ -234,11 +237,11 @@ public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializa
         return advConfig;
     }
 
-    public String getvAPIUser() {
+    public String getVAPIUser() {
         return vAPIUser;
     }
 
-    public String getvAPIPassword() {
+    public String getVAPIPassword() {
         return vAPIPassword;
     }
 

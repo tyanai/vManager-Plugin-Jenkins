@@ -408,11 +408,11 @@ public class ReportManager {
                 String fileOutput = jobWorkingDir + File.separator + buildNumber + "." + buildId + ".summary.report";
                 FileWriter writer = new FileWriter(fileOutput);
                 writer.append("<div class=\"microAgentWaiting\"><div class=\"spinnerMicroAgentMessage\"><p><img src=\"/plugin/vmanager-plugin/img/support-icon.png\"></img></p><p>");
-                writer.append("Failure to retrieve the report from the vManager server for this build.  Check your parameters.<br>Below you can find the exception that was thrown during the retrieval process:<br>br>");
+                writer.append("Failure to retrieve the report from the vManager server for this build.  Check your parameters.<br>Below you can find the exception that was thrown during the retrieval process:<br><br><strong>");
                 while ((output = br.readLine()) != null) {
                     writer.append(output + "<br>");
                 }
-                writer.append("</p></div></div>");
+                writer.append("</strong></p></div></div>");
                 writer.flush();
                 writer.close();
 

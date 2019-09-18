@@ -1,0 +1,21 @@
+<div>
+    In case of a need to take advantage of the full summary report flags, you can use a json structure to define the rest of the flags the vAPI supports.</br>
+    The following structure addresses the flags relevant for the metrics part only (for more information, check the full vAPI electronic docs on the web):</br>
+    {</br>
+      "depth": 4,</br>
+      "instances": true,</br>
+      "types": true,</br>
+      "extended": true,</br>
+      "path": "string",</br>
+      "scope": "string"</br>
+    }</br></br>
+    
+    depth:	integer ($int32) (Metrics tree level depth. Default value is the whole tree)</br>
+    scope:	string (Metrics verification scope)</br>
+    path:	string (Full Path to entity in Metrics tree.)</br>
+    instances:	boolean (Specify if vPlan entity is in the instances hierarchy)</br>
+    types:	boolean (Specify if vPlan entity is in the types hierarchy)</br>
+    extended:	boolean (Enables or disables extended metrics report, if not specified the report would be extended according to metrics configuration)</br></br>
+    
+    None of the fields are mandatory to exclude "depth".
+</div>

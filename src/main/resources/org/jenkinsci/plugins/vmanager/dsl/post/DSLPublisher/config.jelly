@@ -62,7 +62,7 @@
                 </f:optionalBlock-->
                 <table style="width: 100% ; border: 1px solid black ;border-collapse: initial;">
                     <f:block>
-                        <f:optionalBlock name="retrieveSummaryReport"  title="Job Summary Report" description="If selected, the build step will fetch into Jenkins the vManager summary report (sessions, runs, metrics, vPlan grades)" checked="${instance.retrieveSummaryReport}" inline="true">
+                        <f:optionalBlock name="retrieveSummaryReport"  title="Job Summary Report (vManager 19.09 and above only)" description="If selected, the build step will fetch into Jenkins the vManager summary report (sessions, runs, metrics, vPlan grades)" checked="${instance.retrieveSummaryReport}" inline="true">
                             <f:block>
                                 <f:radioBlock name="summaryType" value="wizard" title="Retrieve and Present Job Summary Report" checked="${instance.summaryType == 'wizard'}" inline="true">
                                     <f:block>

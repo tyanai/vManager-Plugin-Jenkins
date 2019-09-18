@@ -30,8 +30,15 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import hudson.util.FormValidation;
+import java.io.IOException;
 import java.util.Set;
 import javax.annotation.Nonnull;
+import javax.servlet.ServletException;
+import net.sf.json.JSONObject;
+import org.jenkinsci.plugins.vmanager.SummaryReportParams;
+import org.jenkinsci.plugins.vmanager.Utils;
+import org.jenkinsci.plugins.vmanager.VAPIConnectionParam;
 //import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 //import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.Step;
@@ -39,6 +46,8 @@ import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepDescriptor;
 import org.jenkinsci.plugins.workflow.steps.StepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.QueryParameter;
+import org.kohsuke.stapler.StaplerRequest;
 
 /**
  *
@@ -47,15 +56,203 @@ import org.kohsuke.stapler.DataBoundConstructor;
  public class VMGRPostLaunchStep extends Step {
      
      
-     
-     
-     
-     
-     
-    @DataBoundConstructor
-    public VMGRPostLaunchStep() {}
+    private String vAPIUrl;
+    private boolean authRequired;
+    private boolean advConfig;
+    private String vAPIUser;
+    private String vAPIPassword;
+    private boolean dynamicUserId;
+    private int connTimeout = 1;
+    private int readTimeout = 30;
 
- 
+    private boolean advancedFunctions;
+    private boolean retrieveSummaryReport;
+
+    private boolean runReport;
+    private boolean metricsReport;
+    private boolean vPlanReport;
+
+    private String testsViewName;
+    private String metricsViewName;
+    private String vplanViewName;
+    private int testsDepth = 6;
+    private int metricsDepth = 6;
+    private int vPlanDepth = 6;
+
+    private String metricsInputType;
+    private String metricsAdvanceInput;
+    private String vPlanInputType;
+    private String vPlanAdvanceInput;
+    private String vPlanxFileName;
+
+    private String summaryType;
+    private boolean ctxInput;
+    private String ctxAdvanceInput;
+    private String freeVAPISyntax;
+    private boolean deleteReportSyntaxInputFile;
+
+  
+     
+     
+     
+    // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
+    @DataBoundConstructor
+    public VMGRPostLaunchStep(String vAPIUrl, String vAPIUser, String vAPIPassword, boolean authRequired, boolean advConfig, boolean dynamicUserId, int connTimeout, int readTimeout, boolean advancedFunctions,
+            boolean retrieveSummaryReport, boolean runReport, boolean metricsReport, boolean vPlanReport, String testsViewName, String metricsViewName, String vplanViewName, int testsDepth, int metricsDepth,
+            int vPlanDepth, String metricsInputType, String metricsAdvanceInput, String vPlanInputType, String vPlanAdvanceInput, String vPlanxFileName, String summaryType, boolean ctxInput,
+            String ctxAdvanceInput, String freeVAPISyntax, boolean deleteReportSyntaxInputFile) {
+
+        this.vAPIUrl = vAPIUrl;
+        this.authRequired = authRequired;
+        this.advConfig = advConfig;
+        this.vAPIUser = vAPIUser;
+        this.vAPIPassword = vAPIPassword;
+        this.dynamicUserId = dynamicUserId;
+        this.connTimeout = connTimeout;
+        this.readTimeout = readTimeout;
+        this.advancedFunctions = advancedFunctions;
+        this.retrieveSummaryReport = retrieveSummaryReport;
+        this.runReport = runReport;
+        this.metricsReport = metricsReport;
+        this.vPlanReport = vPlanReport;
+        this.testsViewName = testsViewName;
+        this.metricsViewName = metricsViewName;
+        this.vplanViewName = vplanViewName;
+        this.testsDepth = testsDepth;
+        this.metricsDepth = metricsDepth;
+        this.vPlanDepth = vPlanDepth;
+
+        this.metricsInputType = metricsInputType;
+        this.metricsAdvanceInput = metricsAdvanceInput;
+        this.vPlanInputType = vPlanInputType;
+        this.vPlanAdvanceInput = vPlanAdvanceInput;
+        this.vPlanxFileName = vPlanxFileName;
+        this.summaryType = summaryType;
+        this.ctxInput = ctxInput;
+        this.ctxAdvanceInput = ctxAdvanceInput;
+        this.freeVAPISyntax = freeVAPISyntax;
+        this.deleteReportSyntaxInputFile = deleteReportSyntaxInputFile;;
+
+        
+    }
+
+   
+
+    public boolean isDeleteReportSyntaxInputFile() {
+        return deleteReportSyntaxInputFile;
+    }
+
+    public String getSummaryType() {
+        return summaryType;
+    }
+
+    public boolean isCtxInput() {
+        return ctxInput;
+    }
+
+    public String getCtxAdvanceInput() {
+        return ctxAdvanceInput;
+    }
+
+    public String getFreeVAPISyntax() {
+        return freeVAPISyntax;
+    }
+
+    public String getMetricsInputType() {
+        return metricsInputType;
+    }
+
+    public String getMetricsAdvanceInput() {
+        return metricsAdvanceInput;
+    }
+
+    public String getVPlanInputType() {
+        return vPlanInputType;
+    }
+
+    public String getVPlanAdvanceInput() {
+        return vPlanAdvanceInput;
+    }
+
+    public String getVPlanxFileName() {
+        return vPlanxFileName;
+    }
+
+    public String getTestsViewName() {
+        return testsViewName;
+    }
+
+    public String getMetricsViewName() {
+        return metricsViewName;
+    }
+
+    public String getVplanViewName() {
+        return vplanViewName;
+    }
+
+    public int getTestsDepth() {
+        return testsDepth;
+    }
+
+    public int getMetricsDepth() {
+        return metricsDepth;
+    }
+
+    public int getVPlanDepth() {
+        return vPlanDepth;
+    }
+
+    public boolean isRunReport() {
+        return runReport;
+    }
+
+    public boolean isMetricsReport() {
+        return metricsReport;
+    }
+
+    public boolean isVPlanReport() {
+        return vPlanReport;
+    }
+
+    public boolean isAdvancedFunctions() {
+        return advancedFunctions;
+    }
+
+    public boolean isRetrieveSummaryReport() {
+        return retrieveSummaryReport;
+    }
+
+    public String getVAPIUrl() {
+        return vAPIUrl;
+    }
+
+    public boolean isAuthRequired() {
+        return authRequired;
+    }
+
+    public boolean isAdvConfig() {
+        return advConfig;
+    }
+
+    public String getVAPIUser() {
+        return vAPIUser;
+    }
+
+    public String getVAPIPassword() {
+        return vAPIPassword;
+    }
+
+    public boolean isDynamicUserId() {
+        return dynamicUserId;
+    }
+
+    public int getConnTimeout() {
+        return connTimeout;
+    }
+
+    public int getReadTimeout() {
+        return readTimeout;
+    }
     
     @Override
     public StepExecution start(StepContext context) throws Exception {
@@ -79,10 +276,44 @@ import org.kohsuke.stapler.DataBoundConstructor;
         public String getDisplayName() {
             return "vManager Post Build Actions";
         }
+        
+         @Override
+        public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
+
+            save();
+            return super.configure(req, formData);
+        }
 
        @Override
         public Set<Class<?>> getRequiredContext() {
             return ImmutableSet.of(FilePath.class, Run.class, Launcher.class, TaskListener.class,EnvVars.class);
+        }
+        
+        public FormValidation doTestConnection(@QueryParameter("vAPIUser") final String vAPIUser, @QueryParameter("vAPIPassword") final String vAPIPassword,
+                @QueryParameter("vAPIUrl") final String vAPIUrl, @QueryParameter("authRequired") final boolean authRequired) throws IOException,
+                ServletException {
+            try {
+
+                Utils utils = new Utils();
+                String output = utils.checkVAPIConnection(vAPIUrl, authRequired, vAPIUser, vAPIPassword);
+                if (!output.startsWith("Failed")) {
+                    return FormValidation.ok("Success. " + output);
+                } else {
+                    return FormValidation.error(output);
+                }
+            } catch (Exception e) {
+                return FormValidation.error("Client error : " + e.getMessage());
+            }
+        }
+
+        public FormValidation doCheckVAPIUrl(@QueryParameter String value) throws IOException, ServletException {
+            if (value.length() == 0) {
+                return FormValidation.error("Please set the vManager vAPI HOST ");
+            }
+            if (value.length() < 4) {
+                return FormValidation.warning("Isn't the name too short?");
+            }
+            return FormValidation.ok();
         }
     }
 }   
