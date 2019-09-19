@@ -22,7 +22,7 @@ public class ReportBuildAction extends PostActionBase implements Serializable, R
     private transient TaskListener listener;
     private transient ReportManager reportManager;
 
-    @Override
+    @Override 
     public String getIconFileName() {
         return "/plugin/vmanager-plugin/img/report.png";
     }
@@ -67,12 +67,12 @@ public class ReportBuildAction extends PostActionBase implements Serializable, R
         
         this.reportManager = new ReportManager(build, summaryReportParams, vAPIConnectionParam, listener);
         try{
-            this.reportManager.retrievReportFromServer();
+            this.reportManager.retrievReportFromServer(false);
         }catch (Exception e){
             listener.getLogger().println("Failed to get summary report from server");
             e.printStackTrace();
         }
-    }
+    } 
 
     @Override
     public void onAttached(Run<?, ?> run) {

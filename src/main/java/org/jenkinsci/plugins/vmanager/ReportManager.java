@@ -316,16 +316,7 @@ public class ReportManager {
                     reader.close();
                 }
             }
-            /*
-            String authString = user + ":" + password;
-            UserUsedForLogin = user;
-            PasswordUsedForLogin = password;
-            byte[] authEncBytes = Base64.encodeBase64(authString.getBytes());
-            String authStringEnc = new String(authEncBytes);
-            conn.setRequestProperty("Authorization", "Basic " + authStringEnc);
-             */
-            // ----------------------------------------------------------------------------------------
-
+         
             String userpass = username + ":" + vAPIConnectionParam.vAPIPassword;
             String basicAuth = "Basic " + javax.xml.bind.DatatypeConverter.printBase64Binary(userpass.getBytes());
             uc.setRequestProperty("Authorization", basicAuth);
@@ -337,16 +328,41 @@ public class ReportManager {
         String fileOutput = jobWorkingDir + File.separator + buildNumber + "." + buildId + ".summary.report";
         FileWriter writer = new FileWriter(fileOutput);
         while ((ptr = is.read()) != -1) {
-            //buffer.append((char) ptr);
-            writer.append((char) ptr);
+            buffer.append((char) ptr);
         }
-
+        
+             
+        
+        String output = buffer.toString();
+        int start = output.indexOf("<head>");
+        int end = output.indexOf("</head>") + 7;
+        output = output.substring(0,start) + output.substring(end,output.length());
+        
+        
+        start = output.indexOf("<style>");
+        end = output.indexOf("</style>") + 8;
+        output = output.substring(0,start) + output.substring(end,output.length());
+        
+        start = output.indexOf("<script>");
+        end = output.indexOf("</script>") + 9;
+        output = output.substring(0,start) + output.substring(end,output.length());
+        
+        start = output.indexOf("<script>");
+        end = output.indexOf("</script>") + 9;
+        output = output.substring(0,start) + output.substring(end,output.length());
+        
+        output = output.replace("<html>", "");
+        output = output.replace("</html>", "");
+        output = output.replace("<body>", "");
+        output = output.replace("</body>", "");
+        
+        writer.append(output);
         writer.flush();
         writer.close();
 
     }
 
-    public void retrievReportFromServer() throws Exception {
+    public void retrievReportFromServer(boolean isStreamingOn) throws Exception {
 
         //In case user choose to bring the report manualy skip and return
         if (summaryReportParams.summaryType.equals("viewonly")) {
@@ -356,6 +372,9 @@ public class ReportManager {
         HttpURLConnection conn = null;
         Utils utils = new Utils();
         String apiURL = vAPIConnectionParam.vAPIUrl + "/rest/reports/generate-summary-report";
+        if (isStreamingOn) {
+            apiURL = vAPIConnectionParam.vAPIUrl + "/rest/reports/stream-summary-report";
+        }
 
         int buildNumber = 20;
         String buildId = "20";
@@ -384,26 +403,32 @@ public class ReportManager {
             os.flush();
 
             if (checkResponseCode(conn)) {
+                
                 BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
 
-                //String fileOutput = jobWorkingDir + File.separator + buildNumber + "." + buildId + ".summary.report";
-                //FileWriter writer = new FileWriter(fileOutput);
-                StringBuffer sb = new StringBuffer();
+                String fileOutput;
+                StringBuffer sb;
                 String output;
-                while ((output = br.readLine()) != null) {
-                    //writer.append(output);
-                    sb.append(output);
+                if (isStreamingOn) {
+                    fileOutput = jobWorkingDir + File.separator + buildNumber + "." + buildId + ".summary.report";
+                    FileWriter writer = new FileWriter(fileOutput);
+                    while ((output = br.readLine()) != null) {
+                        writer.append(output);
+                    }
+                    writer.flush();
+                    writer.close();
+                } else {
+                    sb = new StringBuffer();
+                    while ((output = br.readLine()) != null) {
+                        sb.append(output);
+                    }
+                    fetchFromRemoteURL(sb.toString());
                 }
 
-                fetchFromRemoteURL(sb.toString());
-                //writer.flush();
-                //writer.close();
-
             } else {
-                
+
                 BufferedReader br = new BufferedReader(new InputStreamReader((conn.getErrorStream())));
-                
-                
+
                 String output;
                 String fileOutput = jobWorkingDir + File.separator + buildNumber + "." + buildId + ".summary.report";
                 FileWriter writer = new FileWriter(fileOutput);
@@ -415,7 +440,6 @@ public class ReportManager {
                 writer.append("</strong></p></div></div>");
                 writer.flush();
                 writer.close();
-
 
             }
         } catch (Exception e) {
@@ -433,17 +457,19 @@ public class ReportManager {
 
     }
 
-    public String getReportFromWorkspace() throws IOException {
+    public String getReportFromWorkspace() {
 
         String fileInput = vmgrRun.getJobWorkingDir() + File.separator + vmgrRun.getRun().getNumber() + "." + vmgrRun.getRun().getId() + ".summary.report";
-        String output = "<div class=\"microAgentWaiting\"><div class=\"spinnerMicroAgentMessage\"><p><img src=\"/plugin/vmanager-plugin/img/weblinks.png\"></img></p><p>Failed to find a report file for this build.<br>Please check that the following file exist:<br>"+fileInput+"</p></div></div>";
+        String output = "<div class=\"microAgentWaiting\"><div class=\"spinnerMicroAgentMessage\"><p><img src=\"/plugin/vmanager-plugin/img/weblinks.png\"></img></p><p>Failed to find a report file for this build.<br>Please check that the following file exist:<br>" + fileInput + "</p></div></div>";
         try {
             output = new String(Files.readAllBytes(Paths.get(fileInput)));
         } catch (IOException ex) {
             System.out.println("vManager Action - Can't find file for loading report: " + fileInput);
             return output;
         }
-
+        
+     
+        
         return output;
     }
 

@@ -8,6 +8,7 @@ import hudson.model.AbstractProject;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
@@ -60,6 +61,9 @@ public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializa
     private String ctxAdvanceInput;
     private String freeVAPISyntax;
     private boolean deleteReportSyntaxInputFile;
+    private String vManagerVersion;
+    private boolean sendEmail;
+    private String emailList;
 
     VAPIConnectionParam vAPIConnectionParam;
     SummaryReportParams summaryReportParams;
@@ -71,7 +75,7 @@ public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializa
     public DSLPublisher(String vAPIUrl, String vAPIUser, String vAPIPassword, boolean authRequired, boolean advConfig, boolean dynamicUserId, int connTimeout, int readTimeout, boolean advancedFunctions,
             boolean retrieveSummaryReport, boolean runReport, boolean metricsReport, boolean vPlanReport, String testsViewName, String metricsViewName, String vplanViewName, int testsDepth, int metricsDepth,
             int vPlanDepth, String metricsInputType, String metricsAdvanceInput, String vPlanInputType, String vPlanAdvanceInput, String vPlanxFileName, String summaryType, boolean ctxInput,
-            String ctxAdvanceInput, String freeVAPISyntax, boolean deleteReportSyntaxInputFile) {
+            String ctxAdvanceInput, String freeVAPISyntax, boolean deleteReportSyntaxInputFile,String vManagerVersion,boolean sendEmail,String emailList) {
 
         this.vAPIUrl = vAPIUrl;
         this.authRequired = authRequired;
@@ -102,7 +106,10 @@ public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializa
         this.ctxInput = ctxInput;
         this.ctxAdvanceInput = ctxAdvanceInput;
         this.freeVAPISyntax = freeVAPISyntax;
-        this.deleteReportSyntaxInputFile = deleteReportSyntaxInputFile;;
+        this.deleteReportSyntaxInputFile = deleteReportSyntaxInputFile;
+        this.vManagerVersion = vManagerVersion;
+        this.sendEmail = sendEmail;
+        this.emailList = emailList;
 
         vAPIConnectionParam = new VAPIConnectionParam();
         vAPIConnectionParam.vAPIUrl = vAPIUrl;
@@ -134,6 +141,9 @@ public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializa
         summaryReportParams.ctxAdvanceInput = ctxAdvanceInput;
         summaryReportParams.freeVAPISyntax = freeVAPISyntax;
         summaryReportParams.deleteReportSyntaxInputFile = deleteReportSyntaxInputFile;
+        summaryReportParams.vManagerVersion = vManagerVersion;
+        summaryReportParams.sendEmail = sendEmail;
+        summaryReportParams.emailList = emailList;
     }
     
     @DataBoundConstructor
@@ -141,6 +151,19 @@ public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializa
 
     }
 
+    
+    public String getVManagerVersion() {
+        return vManagerVersion;
+    }
+
+    public boolean isSendEmail() {
+        return sendEmail;
+    }
+
+    public String getEmailList() {
+        return emailList;
+    }
+    
     public boolean isDeleteReportSyntaxInputFile() {
         return deleteReportSyntaxInputFile;
     }
@@ -301,6 +324,13 @@ public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializa
         public boolean isApplicable(Class<? extends AbstractProject> aClass) {
             // Indicates that this builder can be used with all kinds of project types 
             return true;
+        }
+        
+        public ListBoxModel doFillVManagerVersionItems() {
+            ListBoxModel items = new ListBoxModel();
+            items.add("19.09 and above", "stream");
+            items.add("Lower than 19.09", "html");
+            return items;
         }
 
         /**

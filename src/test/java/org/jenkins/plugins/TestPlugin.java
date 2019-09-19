@@ -85,14 +85,14 @@ public class TestPlugin {
         
         summaryReportParams.summaryType = "wizard";
         summaryReportParams.ctxInput = true;
-        summaryReportParams.ctxAdvanceInput = "{\"vplanFile\":\"\\/home\\/segal\\/work\\/vpm\\/APB_UAR.vplanx\"}";
+        summaryReportParams.ctxAdvanceInput = "{\"vplanFile\":\"\\/home\\/segal\\/work\\/vpm\\/APB_UART.vplanx\"}";
         
         
        
         
         
         ReportManager reportManager = new ReportManager(summaryReportParams,vAPIConnectionParam,true);
-        reportManager.retrievReportFromServer();
+        reportManager.retrievReportFromServer(false);
 
         /*
         

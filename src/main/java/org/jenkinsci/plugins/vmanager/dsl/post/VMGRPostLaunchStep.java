@@ -90,7 +90,9 @@ import org.kohsuke.stapler.StaplerRequest;
     private String ctxAdvanceInput;
     private String freeVAPISyntax;
     private boolean deleteReportSyntaxInputFile;
-
+    private String vManagerVersion;
+    private boolean sendEmail;
+    private String emailList;
   
      
      
@@ -100,7 +102,7 @@ import org.kohsuke.stapler.StaplerRequest;
     public VMGRPostLaunchStep(String vAPIUrl, String vAPIUser, String vAPIPassword, boolean authRequired, boolean advConfig, boolean dynamicUserId, int connTimeout, int readTimeout, boolean advancedFunctions,
             boolean retrieveSummaryReport, boolean runReport, boolean metricsReport, boolean vPlanReport, String testsViewName, String metricsViewName, String vplanViewName, int testsDepth, int metricsDepth,
             int vPlanDepth, String metricsInputType, String metricsAdvanceInput, String vPlanInputType, String vPlanAdvanceInput, String vPlanxFileName, String summaryType, boolean ctxInput,
-            String ctxAdvanceInput, String freeVAPISyntax, boolean deleteReportSyntaxInputFile) {
+            String ctxAdvanceInput, String freeVAPISyntax, boolean deleteReportSyntaxInputFile,String vManagerVersion,boolean sendEmail,String emailList) {
 
         this.vAPIUrl = vAPIUrl;
         this.authRequired = authRequired;
@@ -131,13 +133,27 @@ import org.kohsuke.stapler.StaplerRequest;
         this.ctxInput = ctxInput;
         this.ctxAdvanceInput = ctxAdvanceInput;
         this.freeVAPISyntax = freeVAPISyntax;
-        this.deleteReportSyntaxInputFile = deleteReportSyntaxInputFile;;
-
+        this.deleteReportSyntaxInputFile = deleteReportSyntaxInputFile;
+        
+        this.vManagerVersion = vManagerVersion;
+        this.sendEmail = sendEmail;
+        this.emailList = emailList;
         
     }
 
-   
+    public String getVManagerVersion() {
+        return vManagerVersion;
+    }
 
+    public boolean isSendEmail() {
+        return sendEmail;
+    }
+
+    public String getEmailList() {
+        return emailList;
+    }
+
+      
     public boolean isDeleteReportSyntaxInputFile() {
         return deleteReportSyntaxInputFile;
     }

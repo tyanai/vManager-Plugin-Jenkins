@@ -21,6 +21,7 @@
         border-width: 1px;
         border-style: none;
         border-color: black;
+        width: 100%;
         }
 
         table.info_header, table.info_header_aligned {
@@ -443,8 +444,8 @@
         }
 
         .wht_wider {
-        background-color: #1f80b5;
-        color: #ffffff;
+        background-color: #f9f9f9;
+        color: #000000;
         padding: 0px 4px 1px 4px;
         border-style: solid;
         border-color: black;
