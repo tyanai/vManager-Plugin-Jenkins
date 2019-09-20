@@ -37,19 +37,7 @@ public class ReportBuildAction extends PostActionBase implements Serializable, R
         return "vManagerSummaryReport";
     }
 
-    /*
-    public List<String> getJobSessions() {
-
-        Job job = build.getParent();
-        String workingDir = job.getBuildDir() + File.separator + build.getNumber();
-        vmgrRun = new VMGRRun(build, workingDir, job.getBuildDir().getAbsolutePath());
-
-        String ids = BuildStatusMap.getValue(vmgrRun.getRun().getId(), vmgrRun.getRun().getNumber(), vmgrRun.getJobWorkingDir() + "", "id", true);
-        List<String> items = Arrays.asList(ids.split("\\s*,\\s*"));
-
-        return items;
-    }
-*/
+  
     
 
     public int getBuildNumber() {
@@ -67,7 +55,12 @@ public class ReportBuildAction extends PostActionBase implements Serializable, R
         
         this.reportManager = new ReportManager(build, summaryReportParams, vAPIConnectionParam, listener);
         try{
-            this.reportManager.retrievReportFromServer(false);
+            boolean isStreaming = false;
+            if ("stream".equals(summaryReportParams.vManagerVersion)){
+               isStreaming = true; 
+            }
+            this.reportManager.retrievReportFromServer(isStreaming);
+            this.reportManager.emailSummaryReport();
         }catch (Exception e){
             listener.getLogger().println("Failed to get summary report from server");
             e.printStackTrace();

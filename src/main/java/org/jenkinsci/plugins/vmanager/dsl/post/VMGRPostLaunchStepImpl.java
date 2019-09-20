@@ -38,11 +38,10 @@ public class VMGRPostLaunchStepImpl extends SynchronousNonBlockingStepExecution<
            publisher = new DSLPublisher(step.getVAPIUrl(), step.getVAPIUser(), step.getVAPIPassword(), step.isAuthRequired(), step.isAdvConfig(), step.isDynamicUserId(), step.getConnTimeout(), step.getReadTimeout(), step.isAdvancedFunctions(),
             step.isRetrieveSummaryReport(), step.isRunReport(), step.isMetricsReport(), step.isVPlanReport(), step.getTestsViewName(), step.getMetricsViewName(), step.getVplanViewName(), step.getTestsDepth(), step.getMetricsDepth(),
             step.getVPlanDepth(), step.getMetricsInputType(), step.getMetricsAdvanceInput(), step.getVPlanInputType(), step.getVPlanAdvanceInput(), step.getVPlanxFileName(), step.getSummaryType(), step.isCtxInput(),
-            step.getCtxAdvanceInput(), step.getFreeVAPISyntax(), step.isDeleteReportSyntaxInputFile(),step.getVManagerVersion(), step.isSendEmail(), step.getEmailList());
+            step.getCtxAdvanceInput(), step.getFreeVAPISyntax(), step.isDeleteReportSyntaxInputFile(),step.getVManagerVersion(), step.isSendEmail(), step.getEmailList(),step.getEmailType(), step.getEmailInputFile(),step.isDeleteEmailInputFile());
            
        } else {
            publisher = new DSLPublisher();
-           //publisher = new DSLPublisher("", "", "", false, false, false, 0, 0, false, false,false,false,false,null,null,null,6,6,6,null,null,null,null,null,null,false,null,null,false);
        }
        
        publisher.perform(build, ws, launcher, listener);

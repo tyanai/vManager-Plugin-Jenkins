@@ -31,6 +31,7 @@ import hudson.Launcher;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
 import java.io.IOException;
 import java.util.Set;
 import javax.annotation.Nonnull;
@@ -93,6 +94,9 @@ import org.kohsuke.stapler.StaplerRequest;
     private String vManagerVersion;
     private boolean sendEmail;
     private String emailList;
+    private String emailType;
+    private String emailInputFile;
+    private boolean deleteEmailInputFile;
   
      
      
@@ -102,7 +106,7 @@ import org.kohsuke.stapler.StaplerRequest;
     public VMGRPostLaunchStep(String vAPIUrl, String vAPIUser, String vAPIPassword, boolean authRequired, boolean advConfig, boolean dynamicUserId, int connTimeout, int readTimeout, boolean advancedFunctions,
             boolean retrieveSummaryReport, boolean runReport, boolean metricsReport, boolean vPlanReport, String testsViewName, String metricsViewName, String vplanViewName, int testsDepth, int metricsDepth,
             int vPlanDepth, String metricsInputType, String metricsAdvanceInput, String vPlanInputType, String vPlanAdvanceInput, String vPlanxFileName, String summaryType, boolean ctxInput,
-            String ctxAdvanceInput, String freeVAPISyntax, boolean deleteReportSyntaxInputFile,String vManagerVersion,boolean sendEmail,String emailList) {
+            String ctxAdvanceInput, String freeVAPISyntax, boolean deleteReportSyntaxInputFile,String vManagerVersion,boolean sendEmail,String emailList,String emailType, String emailInputFile,boolean deleteEmailInputFile) {
 
         this.vAPIUrl = vAPIUrl;
         this.authRequired = authRequired;
@@ -138,9 +142,25 @@ import org.kohsuke.stapler.StaplerRequest;
         this.vManagerVersion = vManagerVersion;
         this.sendEmail = sendEmail;
         this.emailList = emailList;
+        this.emailType = emailType;
+        this.emailInputFile = emailInputFile; 
+        this.deleteEmailInputFile = deleteEmailInputFile; 
+        
         
     }
 
+    public String getEmailType() {
+        return emailType;
+    }
+
+    public String getEmailInputFile() {
+        return emailInputFile;
+    }
+
+    public boolean isDeleteEmailInputFile() {
+        return deleteEmailInputFile;
+    }
+    
     public String getVManagerVersion() {
         return vManagerVersion;
     }
@@ -320,6 +340,13 @@ import org.kohsuke.stapler.StaplerRequest;
             } catch (Exception e) {
                 return FormValidation.error("Client error : " + e.getMessage());
             }
+        }
+        
+        public ListBoxModel doFillVManagerVersionItems() {
+            ListBoxModel items = new ListBoxModel();
+            items.add("19.09 and above", "stream");
+            items.add("Lower than 19.09", "html");
+            return items;
         }
 
         public FormValidation doCheckVAPIUrl(@QueryParameter String value) throws IOException, ServletException {

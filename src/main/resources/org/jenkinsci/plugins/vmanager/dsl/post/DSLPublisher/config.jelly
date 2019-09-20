@@ -10,8 +10,8 @@
                         <f:textbox />
                     </f:entry>
   
-                     <f:block>
-                         <table style="border-left: 4px solid #1f80b5; margin: 0 0 0 30px;">
+                    <f:block>
+                        <table style="border-left: 4px solid #1f80b5; margin: 0 0 0 30px;">
  
                             <f:optionalBlock name="authRequired"  title="Authentication Required" description="If checked, User/Password are required." checked="${instance.authRequired}" inline="true">
      
@@ -31,7 +31,7 @@
                         </table>
                     </f:block>
       
-                     <f:block>
+                    <f:block>
                         <table style="border-left: 4px solid #1f80b5; margin: 0 0 0 30px;">
  
                             <f:optionalBlock name="advConfig"  title="Override Default Configuration" description="" checked="${instance.advConfig}" inline="true">
@@ -56,19 +56,7 @@
                 </table>
             
            
-                <table style="width: 100% ; border: 1px solid black ;border-collapse: initial;">
-                    <f:block>
-                        <f:optionalBlock name="sendEmail"  title="Email the Regression Summary Report " description="" checked="${instance.sendEmail}" inline="true">
-                            <f:block>
-                                <table  style="border-left: 4px solid #1f80b5; margin: 0 0 0 30px;">   
-                                    <f:entry title="Email addresses" field="emailList" description="Comma separated list of emails.">
-                                        <f:textarea/>
-                                    </f:entry>
-                                </table>
-                            </f:block>
-                        </f:optionalBlock>   
-                    </f:block>    
-                </table>         
+                
                 <table style="width: 100% ; border: 1px solid black ;border-collapse: initial;">
                     <f:block>
                         <f:optionalBlock name="retrieveSummaryReport"  title="Job Summary Report (vManager 19.09 and above only)" description="If selected, the build step will fetch into Jenkins the vManager summary report (sessions, runs, metrics, vPlan grades)" checked="${instance.retrieveSummaryReport}" inline="true">
@@ -171,6 +159,30 @@
                                 </f:radioBlock>   
                                 
                             </f:block>  
+                          
+                            <f:block>
+                                <f:optionalBlock name="sendEmail"  title="Email the Regression Summary Report " description="" checked="${instance.sendEmail}" inline="true">
+                                    <f:block>
+                                        <table  style="border-left: 4px solid #1f80b5; margin: 0 0 0 30px;">   
+                                            <f:radioBlock name="emailType" value="static" title="Static list of email addresses" checked="${instance.emailType == 'static'}" inline="true">
+                                                <f:entry title="Email addresses" field="emailList" description="Comma separated list of emails.">
+                                                    <f:textarea/>
+                                                </f:entry>
+                                            </f:radioBlock>   
+                                            <f:radioBlock name="emailType" value="dynamic" title="Dynamic list of email addresses" checked="${instance.emailType == 'dynamic'}" inline="true">
+    
+                                                <f:entry title="Name of input file" field="emailInputFile" description="Name of input file with one or more email addresses (not mandatory)">
+                                                    <f:textbox />
+                                                </f:entry>
+                                                <f:entry title="Delete Input File" field="deleteEmailInputFile" description="If checked, the job will delete the input file name after processing it.">
+                                                    <f:checkbox name="deleteEmailInputFile" checked="${it.deleteEmailInputFile}"/>
+                                                </f:entry>
+                                            </f:radioBlock>                                
+                                        </table>
+                                    </f:block>
+                                </f:optionalBlock>   
+                            </f:block>    
+                  
                         </f:optionalBlock>
                     </f:block>
                 </table>

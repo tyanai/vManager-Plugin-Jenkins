@@ -107,9 +107,21 @@ public class ReportManager {
         }
         return result;
     }
+    
+    private String getReportEmailAddresses(){
+        return null;
+    }
 
-    public String buildPostParamForSummaryReport() throws Exception {
-
+    public String buildPostParamForSummaryReport(boolean email) throws Exception {
+        
+        if(email){
+            listener.getLogger().println("Starting to build the POST API part for sending the report email.");
+        } else {
+            listener.getLogger().println("Starting to build the POST API part for creating summary report.");
+        }
+        
+        
+        
         JSONParser jsonParser = new JSONParser();
         String postData = "";
 
@@ -147,6 +159,20 @@ public class ReportManager {
                 staticParams = staticParams.replace("$vplan_view_name", vplanViewName);
             } else {
                 staticParams = staticParams.replace("$vplan_view_name", "");
+            }
+            
+            //set if stream mode of not based on vManager version
+            if ("stream".equals(summaryReportParams.vManagerVersion)){
+                staticParams = staticParams.replace("$jenkins_mode", "true");
+            } else {
+                staticParams = staticParams.replace("$jenkins_mode", "false");
+            }
+            
+            //If this is an email send operation, set the emails and remove the url link
+            if (email){
+                staticParams = staticParams.replace("$link_output", "false");
+                staticParams = staticParams.replace("$jenkins_mode", "false");
+                staticParams = "\"emails\":" + getReportEmailAddresses() + "," + staticParams;
             }
 
             postData = postData + "{" + staticParams + ",\"includeTests\":" + summaryReportParams.includeTests;
@@ -316,7 +342,7 @@ public class ReportManager {
                     reader.close();
                 }
             }
-         
+
             String userpass = username + ":" + vAPIConnectionParam.vAPIPassword;
             String basicAuth = "Basic " + javax.xml.bind.DatatypeConverter.printBase64Binary(userpass.getBytes());
             uc.setRequestProperty("Authorization", basicAuth);
@@ -330,35 +356,34 @@ public class ReportManager {
         while ((ptr = is.read()) != -1) {
             buffer.append((char) ptr);
         }
-        
-             
-        
+
         String output = buffer.toString();
         int start = output.indexOf("<head>");
         int end = output.indexOf("</head>") + 7;
-        output = output.substring(0,start) + output.substring(end,output.length());
-        
-        
+        output = output.substring(0, start) + output.substring(end, output.length());
+
         start = output.indexOf("<style>");
         end = output.indexOf("</style>") + 8;
-        output = output.substring(0,start) + output.substring(end,output.length());
-        
+        output = output.substring(0, start) + output.substring(end, output.length());
+
         start = output.indexOf("<script>");
         end = output.indexOf("</script>") + 9;
-        output = output.substring(0,start) + output.substring(end,output.length());
-        
+        output = output.substring(0, start) + output.substring(end, output.length());
+
         start = output.indexOf("<script>");
         end = output.indexOf("</script>") + 9;
-        output = output.substring(0,start) + output.substring(end,output.length());
-        
+        output = output.substring(0, start) + output.substring(end, output.length());
+
         output = output.replace("<html>", "");
         output = output.replace("</html>", "");
         output = output.replace("<body>", "");
         output = output.replace("</body>", "");
-        
+
         writer.append(output);
         writer.flush();
         writer.close();
+        
+        listener.getLogger().println("Report Summary was created succesfully.");
 
     }
 
@@ -392,7 +417,7 @@ public class ReportManager {
             conn = utils.getVAPIConnection(apiURL, vAPIConnectionParam.authRequired, vAPIConnectionParam.vAPIUser, vAPIConnectionParam.vAPIPassword, "POST", vAPIConnectionParam.dynamicUserId, buildId, buildNumber, jobRootDir, listener, vAPIConnectionParam.connTimeout, vAPIConnectionParam.readTimeout, vAPIConnectionParam.advConfig);
 
             OutputStream os = conn.getOutputStream();
-            String postData = buildPostParamForSummaryReport();
+            String postData = buildPostParamForSummaryReport(false);
             if (!this.testMode) {
                 listener.getLogger().println("ReportManager is using the following POST data for getting the summary report:\n" + postData);
             } else {
@@ -403,7 +428,7 @@ public class ReportManager {
             os.flush();
 
             if (checkResponseCode(conn)) {
-                
+
                 BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
 
                 String fileOutput;
@@ -417,6 +442,7 @@ public class ReportManager {
                     }
                     writer.flush();
                     writer.close();
+                    listener.getLogger().println("Report Summary was created succesfully.");
                 } else {
                     sb = new StringBuffer();
                     while ((output = br.readLine()) != null) {
@@ -457,6 +483,73 @@ public class ReportManager {
 
     }
 
+    public void emailSummaryReport() throws Exception {
+
+        //In case user choose to bring the report manualy skip and return
+        if (!summaryReportParams.sendEmail) {
+            return;
+        }
+
+        HttpURLConnection conn = null;
+        Utils utils = new Utils();
+        String apiURL = vAPIConnectionParam.vAPIUrl + "/rest/reports/generate-summary-report";
+
+        int buildNumber = 20;
+        String buildId = "20";
+        String jobWorkingDir = "c://temp";
+        String jobRootDir = "c://temp";
+
+        if (!this.testMode) {
+            buildNumber = vmgrRun.getRun().getNumber();
+            buildId = vmgrRun.getRun().getId();
+            jobWorkingDir = vmgrRun.getJobWorkingDir();
+            jobRootDir = build.getRootDir().getAbsolutePath();
+        }
+
+        try {
+            conn = utils.getVAPIConnection(apiURL, vAPIConnectionParam.authRequired, vAPIConnectionParam.vAPIUser, vAPIConnectionParam.vAPIPassword, "POST", vAPIConnectionParam.dynamicUserId, buildId, buildNumber, jobRootDir, listener, vAPIConnectionParam.connTimeout, vAPIConnectionParam.readTimeout, vAPIConnectionParam.advConfig);
+
+            OutputStream os = conn.getOutputStream();
+            String postData = buildPostParamForSummaryReport(true);
+            if (!this.testMode) {
+                listener.getLogger().println("ReportManager is using the following POST data for sending the summary report email:\n" + postData);
+            } else {
+                System.out.println(postData);
+            }
+
+            os.write(postData.getBytes());
+            os.flush();
+
+            if (!checkResponseCode(conn)) {
+
+                BufferedReader br = new BufferedReader(new InputStreamReader((conn.getErrorStream())));
+
+                String output;
+                StringBuffer sb = new StringBuffer();
+
+                while ((output = br.readLine()) != null) {
+                    sb.append(output);
+                }
+                
+                listener.getLogger().println("Failed to send report using the vManager server.  Exception is:\n"+sb.toString());
+            } else {
+                listener.getLogger().println("Report Summary email was sent succesfully.");
+            }
+        } catch (Exception e) {
+            if (this.testMode) {
+                e.printStackTrace();
+            } else {
+                listener.getLogger().println("Failed to send report using the vManager server.");
+            }
+            throw e;
+
+        } finally {
+            conn.disconnect();
+
+        }
+
+    }
+
     public String getReportFromWorkspace() {
 
         String fileInput = vmgrRun.getJobWorkingDir() + File.separator + vmgrRun.getRun().getNumber() + "." + vmgrRun.getRun().getId() + ".summary.report";
@@ -467,9 +560,7 @@ public class ReportManager {
             System.out.println("vManager Action - Can't find file for loading report: " + fileInput);
             return output;
         }
-        
-     
-        
+
         return output;
     }
 
