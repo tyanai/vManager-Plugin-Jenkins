@@ -47,6 +47,7 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import org.json.simple.JSONArray;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -158,6 +159,8 @@ public class ReportManager {
 
         if (summaryReportParams.summaryType.equals("wizard")) {
 
+            listener.getLogger().println("ReportManager - Using wizrd based json to bring the report...");
+            
             JSONObject metricsData;
             JSONObject vplanData;
             JSONObject ctxData = null;
@@ -197,7 +200,7 @@ public class ReportManager {
             //If this is an email send operation, set the emails and remove the url link
             if (email) {
                 staticParams = staticParams.replace("$link_output", "false");
-                staticParams = staticParams.replace("$jenkins_mode", "false");
+                staticParams = staticParams.replace("$jenkins_mode", "");
                 staticParams = "\"emails\":[" + getReportEmailAddresses() + "]," + staticParams;
             } else {
                 staticParams = staticParams.replace("$link_output", "true");
@@ -205,9 +208,9 @@ public class ReportManager {
             
              //set if stream mode of not based on vManager version
             if ("stream".equals(summaryReportParams.vManagerVersion)) {
-                staticParams = staticParams.replace("$jenkins_mode", "true");
+                staticParams = staticParams.replace("$jenkins_mode", "\"jenkins\":true,");
             } else {
-                staticParams = staticParams.replace("$jenkins_mode", "false");
+                staticParams = staticParams.replace("$jenkins_mode", "");
             }
 
             postData = postData + "{" + staticParams + ",\"includeTests\":" + summaryReportParams.includeTests;
@@ -286,7 +289,7 @@ public class ReportManager {
 
         } else {
             //User choose to place his own full vAPI request.  All we need to do is to add the RS part and send it over.
-
+            listener.getLogger().println("ReportManager - Using user freestyle json to bring the report...");
             //Load json from file
             Utils utils = new Utils();
             String freeVAPISyntax;
@@ -296,6 +299,8 @@ public class ReportManager {
                 freeVAPISyntax = utils.loadUserSyntaxForSummaryReport(vmgrRun.getRun().getId(), vmgrRun.getRun().getNumber(), "" + vmgrRun.getJobWorkingDir(), summaryReportParams.freeVAPISyntax, listener, summaryReportParams.deleteReportSyntaxInputFile);
             }
 
+            listener.getLogger().println("ReportManager - User freestyle syntax is:\n" + freeVAPISyntax + "\n");
+            
             JSONObject userSyntaxData;
             try {
                 userSyntaxData = (JSONObject) jsonParser.parse(freeVAPISyntax);
@@ -313,6 +318,32 @@ public class ReportManager {
                 throw e;
             }
             userSyntaxData.put("rs", rsData);
+            
+            //If this is 19.09 server adds the jenkins:true key, otherwise remove the key
+            if (userSyntaxData.containsKey("jenkins")){
+                 userSyntaxData.remove("jenkins");
+            }
+            if ("stream".equals(summaryReportParams.vManagerVersion)){
+                userSyntaxData.put("jenkins", true);
+            } 
+            
+            //Add the email part
+            //If this is an email send operation, set the emails and remove the url link
+            if (email) {
+                //If user set his own email, continue and skip
+                if (!userSyntaxData.containsKey("emails")){
+                   JSONArray jsonArray =  (JSONArray)jsonParser.parse("[" + getReportEmailAddresses() + "]");
+                   userSyntaxData.put("emails", jsonArray);
+                }
+                //Also no need for jenkins:true
+                if (userSyntaxData.containsKey("jenkins")){
+                     userSyntaxData.remove("jenkins");
+                }
+                //Also no need for link_output:true
+                if (userSyntaxData.containsKey("linkOutput")){
+                     userSyntaxData.remove("linkOutput");
+                }
+            } 
 
             postData = userSyntaxData.toJSONString();
 
