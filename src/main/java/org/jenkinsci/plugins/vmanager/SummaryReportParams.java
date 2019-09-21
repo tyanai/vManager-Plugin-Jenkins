@@ -52,6 +52,7 @@ public class SummaryReportParams {
     public String vManagerVersion;
     public boolean sendEmail;
     public String emailList;
+    public String summaryMode;
     
     public String emailType;
     public String emailInputFile; 

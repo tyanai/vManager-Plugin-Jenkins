@@ -107,21 +107,52 @@ public class ReportManager {
         }
         return result;
     }
-    
-    private String getReportEmailAddresses(){
-        return null;
+
+    private String getReportEmailAddresses() {
+        Utils utils = new Utils();
+        String[] emails;
+        String output = null;
+
+        if ("static".equals(summaryReportParams.emailType)) {
+            String[] values = summaryReportParams.emailList.split(",");
+            output = "";
+            for (String email : values) {
+                output = output + "\"" + email.trim() + "\",";
+            }
+            //Remove the last comma
+            if (output.length() > 2) {
+                output = output.substring(0, output.length() - 1);
+            }
+        } else {
+            try {
+                emails = utils.loadDataFromInputFiles(vmgrRun.getRun().getId(), vmgrRun.getRun().getNumber(), "" + vmgrRun.getJobWorkingDir(), summaryReportParams.emailInputFile, listener, summaryReportParams.deleteEmailInputFile, "emails", "emails.input");
+                output = "";
+                for (String email : emails) {
+                    output = output + "\"" + email.trim() + "\",";
+                }
+
+                //Remove the last comma
+                if (output.length() > 2) {
+                    output = output.substring(0, output.length() - 1);
+                }
+
+            } catch (Exception e) {
+                listener.getLogger().println("Failed to find the email input file " + summaryReportParams.emailInputFile + " or any email file within the workspace for this build.\n " + e.getMessage());
+            }
+        }
+
+        return output;
+
     }
 
     public String buildPostParamForSummaryReport(boolean email) throws Exception {
-        
-        if(email){
+
+        if (email) {
             listener.getLogger().println("Starting to build the POST API part for sending the report email.");
         } else {
             listener.getLogger().println("Starting to build the POST API part for creating summary report.");
         }
-        
-        
-        
+
         JSONParser jsonParser = new JSONParser();
         String postData = "";
 
@@ -160,19 +191,23 @@ public class ReportManager {
             } else {
                 staticParams = staticParams.replace("$vplan_view_name", "");
             }
+
+           
+
+            //If this is an email send operation, set the emails and remove the url link
+            if (email) {
+                staticParams = staticParams.replace("$link_output", "false");
+                staticParams = staticParams.replace("$jenkins_mode", "false");
+                staticParams = "\"emails\":[" + getReportEmailAddresses() + "]," + staticParams;
+            } else {
+                staticParams = staticParams.replace("$link_output", "true");
+            }
             
-            //set if stream mode of not based on vManager version
-            if ("stream".equals(summaryReportParams.vManagerVersion)){
+             //set if stream mode of not based on vManager version
+            if ("stream".equals(summaryReportParams.vManagerVersion)) {
                 staticParams = staticParams.replace("$jenkins_mode", "true");
             } else {
                 staticParams = staticParams.replace("$jenkins_mode", "false");
-            }
-            
-            //If this is an email send operation, set the emails and remove the url link
-            if (email){
-                staticParams = staticParams.replace("$link_output", "false");
-                staticParams = staticParams.replace("$jenkins_mode", "false");
-                staticParams = "\"emails\":" + getReportEmailAddresses() + "," + staticParams;
             }
 
             postData = postData + "{" + staticParams + ",\"includeTests\":" + summaryReportParams.includeTests;
@@ -382,7 +417,7 @@ public class ReportManager {
         writer.append(output);
         writer.flush();
         writer.close();
-        
+
         listener.getLogger().println("Report Summary was created succesfully.");
 
     }
@@ -390,7 +425,7 @@ public class ReportManager {
     public void retrievReportFromServer(boolean isStreamingOn) throws Exception {
 
         //In case user choose to bring the report manualy skip and return
-        if (summaryReportParams.summaryType.equals("viewonly")) {
+        if (summaryReportParams.summaryMode.equals("selfmade")) {
             return;
         }
 
@@ -463,6 +498,16 @@ public class ReportManager {
                 while ((output = br.readLine()) != null) {
                     writer.append(output + "<br>");
                 }
+                
+                if (conn.getResponseCode() == 500){
+                    //This is an error with the existance of the acctual API call.  Probably because the version is too old
+                    if ("stream".equals(summaryReportParams.vManagerVersion)){
+                        writer.append("<br><br>");
+                        writer.append("Hint: This error usually indicates that you choosed the wrong vManager version at the plugin configuration section for vManagerVersion.<br>");
+                        writer.append("If that's the case, and if your vManager server version is below 19.09 - set vManagerVersion as \"html\" (if pipeline dsl is used), or \"Lower than 19.09\" for regular post configuration mode.<br>");
+                    }
+                }
+                
                 writer.append("</strong></p></div></div>");
                 writer.flush();
                 writer.close();
@@ -487,6 +532,10 @@ public class ReportManager {
 
         //In case user choose to bring the report manualy skip and return
         if (!summaryReportParams.sendEmail) {
+            return;
+        }
+
+        if (summaryReportParams.summaryMode.equals("selfmade")) {
             return;
         }
 
@@ -530,8 +579,8 @@ public class ReportManager {
                 while ((output = br.readLine()) != null) {
                     sb.append(output);
                 }
-                
-                listener.getLogger().println("Failed to send report using the vManager server.  Exception is:\n"+sb.toString());
+
+                listener.getLogger().println("Failed to send report using the vManager server.  Exception is:\n" + sb.toString());
             } else {
                 listener.getLogger().println("Report Summary email was sent succesfully.");
             }
@@ -570,7 +619,11 @@ public class ReportManager {
                     && conn.getResponseCode() != HttpURLConnection.HTTP_CREATED && conn.getResponseCode() != HttpURLConnection.HTTP_PARTIAL && conn.getResponseCode() != HttpURLConnection.HTTP_RESET
                     && conn.getResponseCode() != 406) {
                 //System.out.println("Error - Got wrong response from /reports/stream-summary-report - " + conn.getResponseCode()  );
-                listener.getLogger().println("Error - Got wrong response from /reports/stream-summary-report - " + conn.getResponseCode());
+                if ("html".equals(summaryReportParams.vManagerVersion)){
+                    listener.getLogger().println("Error - Got wrong response from /reports/generate-summary-report - " + conn.getResponseCode());
+                } else {
+                    listener.getLogger().println("Error - Got wrong response from /reports/stream-summary-report - " + conn.getResponseCode());
+                }
                 return false;
             } else {
                 return true;

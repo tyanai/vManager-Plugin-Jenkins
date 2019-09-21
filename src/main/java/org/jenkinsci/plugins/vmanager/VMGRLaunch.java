@@ -468,7 +468,7 @@ public class VMGRLaunch extends Builder {
                         listener.getLogger().println("The session input file chosen is static. Sessions input file name is: '" + sessionsInputFile.trim() + "'");
                     }
 
-                    sessionNames = utils.loadSessionsFileNames(build.getId(), build.getNumber(), "" + build.getWorkspace(), sessionsInputFile, listener, deleteSessionInputFile);
+                    sessionNames = utils.loadDataFromInputFiles(build.getId(), build.getNumber(), "" + build.getWorkspace(), sessionsInputFile, listener, deleteSessionInputFile,"session names","sessions.input");
             } else {
                 if ("static".equals(vsifType)) {
                     listener.getLogger().println("The VSIF file chosen is static. VSIF file static location is: '" + vSIFName + "'");
@@ -481,7 +481,7 @@ public class VMGRLaunch extends Builder {
                         listener.getLogger().println("The VSIF file chosen is static. VSIF file name is: '" + vSIFInputFile.trim() + "'");
                     }
 
-                    vsifFileNames = utils.loadVSIFFileNames(build.getId(), build.getNumber(), "" + build.getWorkspace(), vSIFInputFile, listener, deleteInputFile);
+                    vsifFileNames = utils.loadDataFromInputFiles(build.getId(), build.getNumber(), "" + build.getWorkspace(), vSIFInputFile, listener, deleteInputFile, "VSIF", "vsif.input");
 
                 }
 

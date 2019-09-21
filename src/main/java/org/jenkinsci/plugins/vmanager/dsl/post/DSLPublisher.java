@@ -67,6 +67,7 @@ public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializa
     private String emailType;
     private String emailInputFile;
     private boolean deleteEmailInputFile;
+    private String summaryMode;
 
     
     
@@ -81,7 +82,7 @@ public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializa
     public DSLPublisher(String vAPIUrl, String vAPIUser, String vAPIPassword, boolean authRequired, boolean advConfig, boolean dynamicUserId, int connTimeout, int readTimeout, boolean advancedFunctions,
             boolean retrieveSummaryReport, boolean runReport, boolean metricsReport, boolean vPlanReport, String testsViewName, String metricsViewName, String vplanViewName, int testsDepth, int metricsDepth,
             int vPlanDepth, String metricsInputType, String metricsAdvanceInput, String vPlanInputType, String vPlanAdvanceInput, String vPlanxFileName, String summaryType, boolean ctxInput,
-            String ctxAdvanceInput, String freeVAPISyntax, boolean deleteReportSyntaxInputFile,String vManagerVersion,boolean sendEmail,String emailList,String emailType, String emailInputFile,boolean deleteEmailInputFile) {
+            String ctxAdvanceInput, String freeVAPISyntax, boolean deleteReportSyntaxInputFile,String vManagerVersion,boolean sendEmail,String emailList,String emailType, String emailInputFile,boolean deleteEmailInputFile, String summaryMode) {
 
         this.vAPIUrl = vAPIUrl;
         this.authRequired = authRequired;
@@ -119,6 +120,7 @@ public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializa
         this.emailType = emailType;
         this.emailInputFile = emailInputFile; 
         this.deleteEmailInputFile = deleteEmailInputFile; 
+        this.summaryMode = summaryMode;
         
         
         
@@ -160,6 +162,7 @@ public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializa
         summaryReportParams.emailType = emailType;
         summaryReportParams.emailInputFile = emailInputFile; 
         summaryReportParams.deleteEmailInputFile = deleteEmailInputFile;
+        summaryReportParams.summaryMode = summaryMode;
     }
     
     @DataBoundConstructor
@@ -167,6 +170,10 @@ public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializa
 
     }
 
+    public String getSummaryMode() {
+        return summaryMode;
+    }
+  
     public String getEmailType() {
         return emailType;
     }

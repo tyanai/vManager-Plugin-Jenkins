@@ -189,7 +189,7 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
                     listener.getLogger().println("The session input file chosen is static. Sessions input file name is: '" + step.getSessionsInputFile().trim() + "'");
                 }
 
-                sessionNames = utils.loadSessionsFileNames(buildId, buildNumber, "" + workspace, step.getSessionsInputFile(), listener, step.isDeleteSessionInputFile());
+                sessionNames = utils.loadDataFromInputFiles(buildId, buildNumber, "" + workspace, step.getSessionsInputFile(), listener, step.isDeleteSessionInputFile(),"session names","sessions.input");
             } else {
 
                 if ("static".equals(step.getVsifType())) {
@@ -203,7 +203,7 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
                         listener.getLogger().println("The VSIF file chosen is static. VSIF file name is: '" + step.getVSIFInputFile().trim() + "'");
                     }
 
-                    vsifFileNames = utils.loadVSIFFileNames(buildId, buildNumber, "" + workspace, step.getVSIFInputFile(), listener, step.isDeleteInputFile());
+                    vsifFileNames = utils.loadDataFromInputFiles(buildId, buildNumber, "" + workspace, step.getVSIFInputFile(), listener, step.isDeleteInputFile(), "VSIF", "vsif.input");
 
                 }
 

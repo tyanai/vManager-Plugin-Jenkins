@@ -75,10 +75,8 @@ public class Utils {
 
     }
     
-    
-    
-
-    public String[] loadVSIFFileNames(String buildID, int buildNumber, String workPlacePath, String vSIFInputFile, TaskListener listener, boolean deleteInputFile) throws Exception {
+    /*
+    public String[] loadVSIFFileNames(String buildID, int buildNumber, String workPlacePath, String inputFile, TaskListener listener, boolean deleteInputFile) throws Exception {
         String[] output = null;
         List<String> listOfNames = new LinkedList<String>();
         BufferedReader reader = null;
@@ -89,15 +87,15 @@ public class Utils {
         }
 
         // Set the right File name.
-        if ("".equals(vSIFInputFile) || vSIFInputFile == null) {
+        if ("".equals(inputFile) || inputFile == null) {
             fileName = workPlacePath + File.separator + buildNumber + "." + buildID + "." + "vsif.input";
         } else {
-            fileName = vSIFInputFile;
+            fileName = inputFile;
         }
 
         try {
 
-            reader = this.loadFileFromWorkSpace(buildID, buildNumber, workPlacePath, vSIFInputFile, listener, deleteInputFile, "vsif.input");
+            reader = this.loadFileFromWorkSpace(buildID, buildNumber, workPlacePath, inputFile, listener, deleteInputFile, "vsif.input");
             String line = null;
             while ((line = reader.readLine()) != null) {
                 listOfNames.add(line);
@@ -123,15 +121,100 @@ public class Utils {
         if (notInTestMode) {
             listener.getLogger().print("Found the following VSIF files for vManager launch:\n");
         }
-        String vsiffileName = null;
+        String theFileName = null;
         while (iter.hasNext()) {
-            vsiffileName = new String(iter.next());
-            output[i++] = vsiffileName;
+            theFileName = new String(iter.next());
+            output[i++] = theFileName;
             if (notInTestMode) {
-                listener.getLogger().print(i + " '" + vsiffileName + "'\n");
+                listener.getLogger().print(i + " '" + theFileName + "'\n");
             } else {
 
-                System.out.println(i + " '" + vsiffileName + "'");
+                System.out.println(i + " '" + theFileName + "'");
+            }
+        }
+
+        if (deleteInputFile) {
+            if (notInTestMode) {
+                listener.getLogger().print("Job set to delete the input file.  Deleting " + fileName + "\n");
+            }
+            try {
+                File fileToDelete = new File(fileName);
+                fileToDelete.renameTo(new File(fileToDelete + ".delete"));
+            } catch (Exception e) {
+                if (notInTestMode) {
+                    listener.getLogger().print("Failed to delete input file from workspace.  Failed to delete file '" + fileName + "'\n");
+
+                } else {
+
+                    System.out.println("Failed to delete the input file from the workspace.  Failed to delete file '" + fileName + "'");
+                }
+                throw e;
+            }
+        }
+
+        return output;
+    }
+    */
+
+    public String[] loadDataFromInputFiles(String buildID, int buildNumber, String workPlacePath, String inputFile, TaskListener listener, boolean deleteInputFile, String type, String fileEnding) throws Exception {
+        String[] output = null;
+        List<String> listOfNames = new LinkedList<String>();
+        BufferedReader reader = null;
+        String fileName = null;
+        boolean notInTestMode = true;
+        if (listener == null) {
+            notInTestMode = false;
+        }
+        
+        if (notInTestMode) {
+            listener.getLogger().print("Lookin for " + type + " input:\n");
+        }
+
+
+        // Set the right File name.
+        if ("".equals(inputFile) || inputFile == null) {
+            fileName = workPlacePath + File.separator + buildNumber + "." + buildID + "." + fileEnding;
+        } else {
+            fileName = inputFile;
+        }
+
+        try {
+
+            reader = this.loadFileFromWorkSpace(buildID, buildNumber, workPlacePath, inputFile, listener, deleteInputFile, fileEnding);
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                listOfNames.add(line);
+            }
+
+        } catch (Exception e) {
+
+            if (notInTestMode) {
+                listener.getLogger().print("Failed to read input file for the " + type + " targets.  Failed to load file '" + fileName + "'\n");
+            } else {
+
+                System.out.println("Failed to open the read file for the " + type + " targets.  Failed to load file '" + fileName + "'");
+            }
+
+            throw e;
+        } finally {
+            reader.close();
+        }
+
+        Iterator<String> iter = listOfNames.iterator();
+        output = new String[listOfNames.size()];
+        int i = 0;
+        if (notInTestMode) {
+            listener.getLogger().print("Found the following " + type + " files for vManager plugin:\n");
+        }
+        String theFileName = null;
+        while (iter.hasNext()) {
+            theFileName = new String(iter.next());
+            output[i++] = theFileName;
+            if (notInTestMode) {
+                listener.getLogger().print(i + " '" + theFileName + "'\n");
+            } else {
+
+                System.out.println(i + " '" + theFileName + "'");
             }
         }
 
@@ -157,6 +240,7 @@ public class Utils {
         return output;
     }
 
+    /*
     public String[] loadSessionsFileNames(String buildID, int buildNumber, String workPlacePath, String sessionsInputFile, TaskListener listener, boolean deleteSessionInputFile) throws Exception {
         String[] output = null;
         List<String> listOfNames = new LinkedList<String>();
@@ -235,6 +319,8 @@ public class Utils {
 
         return output;
     }
+
+*/
     
     public String loadUserSyntaxForSummaryReport(String buildID, int buildNumber, String workPlacePath, String inputFile, TaskListener listener, boolean deleteInputFile) throws Exception {
         String output = null;

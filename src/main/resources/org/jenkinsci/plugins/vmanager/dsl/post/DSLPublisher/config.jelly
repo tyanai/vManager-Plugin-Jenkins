@@ -60,129 +60,138 @@
                 <table style="width: 100% ; border: 1px solid black ;border-collapse: initial;">
                     <f:block>
                         <f:optionalBlock name="retrieveSummaryReport"  title="Job Summary Report (vManager 19.09 and above only)" description="If selected, the build step will fetch into Jenkins the vManager summary report (sessions, runs, metrics, vPlan grades)" checked="${instance.retrieveSummaryReport}" inline="true">
-                            <f:block>
-                                <f:entry title="vManager Server version:" field="vManagerVersion" >
-                                    <f:select />
-                                </f:entry>
-                                <f:radioBlock name="summaryType" value="wizard" title="Retrieve and Present Job Summary Report" checked="${instance.summaryType == 'wizard'}" inline="true">
-                                    <f:block>
-                                        <table style="margin: 0 0 0 30px;">
-                                            <f:optionalBlock name="runReport"  title="Include Runs tree grades " description="" checked="${instance.runReport}" inline="true">
-                                                <f:block>
-                                                    <table style="border-left: 4px solid #1f80b5; margin: 0 0 0 30px;">
-                                                        <f:entry title="Tests view name (optional)" field="testsViewName" description="View name that you made within vManager for selecting columns during test failure analysis (leave as 'Test_Hierarchy' if not change is needed).">
-                                                            <f:textbox default="Test_Hierarchy"/>
-                                                        </f:entry>
-                                                        <f:entry title="Depth" field="testsDepth" description="Number of hierarchy levels the report will produce. Default is 6.">
-                                                            <f:number default="6"/>
-                                                        </f:entry>
-                                                    </table>
-                                                </f:block>
-                                            </f:optionalBlock>
-                                            <f:optionalBlock name="metricsReport"  title="Include Metrics grades " description="" checked="${instance.metricsReport}" inline="true">
-                                                <f:block>
-                                                    <table style="border-left: 4px solid #1f80b5; margin: 0 0 0 30px;">
-                                                        <f:entry title="Metrics view name (optional)" field="metricsViewName" description="View name that you made within vManager for selecting columns during Coverage (metrics) analysis (leave as 'All_Metrics' if not change is needed).">
-                                                            <f:textbox default="All_Metrics"/>
-                                                        </f:entry>
+                            <f:block>  
                                 
-                                                        <f:radioBlock name="metricsInputType" value="basic" title="Basic settings" checked="${instance.metricsInputType == 'basic'}" inline="true">
-                                                            <f:entry title="Depth" field="metricsDepth" description="Number of hierarchy levels the report will produce. Default is 6.">
-                                                                <f:number default="6"/>
-                                                            </f:entry>
-                                                        </f:radioBlock>
-                                                        <f:radioBlock name="metricsInputType" value="advance" title="Advanced settings" checked="${instance.metricsInputType == 'advance'}" inline="true">
-                                                            <f:entry title="vAPI metricsData JSON Syntax" field="metricsAdvanceInput" description="JSON representation of the API input for Metrics summary report (metricsData part).">
-                                                                <f:textarea/>
-                                                            </f:entry>
-                                                        </f:radioBlock>
-                                
-                                
-                                                    </table>
-                                                </f:block>
-                                            </f:optionalBlock>
-                                            <f:optionalBlock name="vPlanReport"  title="Include vPlan grades " description="" checked="${instance.vPlanReport}" inline="true">
-                                                <f:block>
-                                                    <table  style="border-left: 4px solid #1f80b5; margin: 0 0 0 30px;">                                                 
-                                                        <f:entry title="vPlanx file name" field="vPlanxFileName" description="vPlanx File location (Need full path and accees read rights by the vManager server)">
-                                                            <f:textbox/>
-                                                        </f:entry>
-                                                        <f:entry title="vPlan view name (optional)" field="vplanViewName" description="View name that you made within vManager for selecting columns during vPlan analysis (leave as 'All_Vplan' if not change is needed).">
-                                                            <f:textbox default="All_Vplan"/>
-                                                        </f:entry>
-                                                        <f:radioBlock name="vPlanInputType" value="basic" title="Basic settings" checked="${instance.vPlanInputType == 'basic'}" inline="true">
-                               
-                                                            <f:entry title="Depth" field="vPlanDepth" description="Number of hierarchy levels the report will produce. Default is 6.">
-                                                                <f:number default="6"/>
-                                                            </f:entry>
-                                                        </f:radioBlock>
-                                                        <f:radioBlock name="vPlanInputType" value="advance" title="Advanced settings" checked="${instance.vPlanInputType == 'advance'}" inline="true">
-                                                            <f:entry title="vAPI vplanData JSON Syntax" field="vPlanAdvanceInput" description="JSON representation of the API input for vPlan summary report (vplanData part).">
-                                                                <f:textarea/>
-                                                            </f:entry>
-                                                        </f:radioBlock>
-                                
-                                                    </table>
-                                                </f:block>
-                                            </f:optionalBlock>
-                                            <f:optionalBlock name="ctxInput"  title="Advanced Context " description="" checked="${instance.ctxInput}" inline="true">
-                                                <f:block>
-                                                    <table  style="border-left: 4px solid #1f80b5; margin: 0 0 0 30px;">   
-                                                        <f:entry title="Advanced Context JSON" field="ctxAdvanceInput" description="JSON representation of the vAPI input for the summary report (ctxData part).">
-                                                            <f:textarea/>
-                                                        </f:entry>
-                                                    </table>
-                                                </f:block>
-                                            </f:optionalBlock>               
-                                           
-                                        </table>
-                                    </f:block>  
-                                </f:radioBlock>
-                                <f:radioBlock name="summaryType" value="freesyntax" title="Retrieve and Present Job Summary Report (free vAPI syntax)" checked="${instance.summaryType == 'freesyntax'}" inline="true">
+                                <f:radioBlock name="summaryMode" value="full" title="Build, view and email by the plugin" checked="${instance.summaryMode == 'full'}" inline="true">
                                     <f:block>    
                                         <table style="margin: 0 0 0 30px;">
-                                            <f:entry title="Free vAPI JSON Syntax (File name)" field="freeVAPISyntax" description="A file location with JSON representation of the vAPI input for the /reports/generate-summary-report vAPI (entire POST request).">
-                                                <f:textbox />
-                                            </f:entry>
-                                            <f:entry title="Delete Input File" field="deleteReportSyntaxInputFile" description="If checked, the job will delete the input file name after processing it.">
-                                                <f:checkbox name="deleteReportSyntaxInputFile" checked="${it.deleteReportSyntaxInputFile}"/>
-                                            </f:entry>
+                            
+                                            <f:block>
+                                                <f:entry title="vManager Server version:" field="vManagerVersion" >
+                                                    <f:select />
+                                                </f:entry>
+                                                <f:radioBlock name="summaryType" value="wizard" title="Retrieve and Present Job Summary Report" checked="${instance.summaryType == 'wizard'}" inline="true">
+                                                    <f:block>
+                                                        <table style="margin: 0 0 0 30px;">
+                                                            <f:optionalBlock name="runReport"  title="Include Runs tree grades " description="" checked="${instance.runReport}" inline="true">
+                                                                <f:block>
+                                                                    <table style="border-left: 4px solid #1f80b5; margin: 0 0 0 30px;">
+                                                                        <f:entry title="Tests view name (optional)" field="testsViewName" description="View name that you made within vManager for selecting columns during test failure analysis (leave as 'Test_Hierarchy' if not change is needed).">
+                                                                            <f:textbox default="Test_Hierarchy"/>
+                                                                        </f:entry>
+                                                                        <f:entry title="Depth" field="testsDepth" description="Number of hierarchy levels the report will produce. Default is 6.">
+                                                                            <f:number default="6"/>
+                                                                        </f:entry>
+                                                                    </table>
+                                                                </f:block>
+                                                            </f:optionalBlock>
+                                                            <f:optionalBlock name="metricsReport"  title="Include Metrics grades " description="" checked="${instance.metricsReport}" inline="true">
+                                                                <f:block>
+                                                                    <table style="border-left: 4px solid #1f80b5; margin: 0 0 0 30px;">
+                                                                        <f:entry title="Metrics view name (optional)" field="metricsViewName" description="View name that you made within vManager for selecting columns during Coverage (metrics) analysis (leave as 'All_Metrics' if not change is needed).">
+                                                                            <f:textbox default="All_Metrics"/>
+                                                                        </f:entry>
+                                
+                                                                        <f:radioBlock name="metricsInputType" value="basic" title="Basic settings" checked="${instance.metricsInputType == 'basic'}" inline="true">
+                                                                            <f:entry title="Depth" field="metricsDepth" description="Number of hierarchy levels the report will produce. Default is 6.">
+                                                                                <f:number default="6"/>
+                                                                            </f:entry>
+                                                                        </f:radioBlock>
+                                                                        <f:radioBlock name="metricsInputType" value="advance" title="Advanced settings" checked="${instance.metricsInputType == 'advance'}" inline="true">
+                                                                            <f:entry title="vAPI metricsData JSON Syntax" field="metricsAdvanceInput" description="JSON representation of the API input for Metrics summary report (metricsData part).">
+                                                                                <f:textarea/>
+                                                                            </f:entry>
+                                                                        </f:radioBlock>
+                                
+                                
+                                                                    </table>
+                                                                </f:block>
+                                                            </f:optionalBlock>
+                                                            <f:optionalBlock name="vPlanReport"  title="Include vPlan grades " description="" checked="${instance.vPlanReport}" inline="true">
+                                                                <f:block>
+                                                                    <table  style="border-left: 4px solid #1f80b5; margin: 0 0 0 30px;">                                                 
+                                                                        <f:entry title="vPlanx file name" field="vPlanxFileName" description="vPlanx File location (Need full path and accees read rights by the vManager server)">
+                                                                            <f:textbox/>
+                                                                        </f:entry>
+                                                                        <f:entry title="vPlan view name (optional)" field="vplanViewName" description="View name that you made within vManager for selecting columns during vPlan analysis (leave as 'All_Vplan' if not change is needed).">
+                                                                            <f:textbox default="All_Vplan"/>
+                                                                        </f:entry>
+                                                                        <f:radioBlock name="vPlanInputType" value="basic" title="Basic settings" checked="${instance.vPlanInputType == 'basic'}" inline="true">
+                               
+                                                                            <f:entry title="Depth" field="vPlanDepth" description="Number of hierarchy levels the report will produce. Default is 6.">
+                                                                                <f:number default="6"/>
+                                                                            </f:entry>
+                                                                        </f:radioBlock>
+                                                                        <f:radioBlock name="vPlanInputType" value="advance" title="Advanced settings" checked="${instance.vPlanInputType == 'advance'}" inline="true">
+                                                                            <f:entry title="vAPI vplanData JSON Syntax" field="vPlanAdvanceInput" description="JSON representation of the API input for vPlan summary report (vplanData part).">
+                                                                                <f:textarea/>
+                                                                            </f:entry>
+                                                                        </f:radioBlock>
+                                
+                                                                    </table>
+                                                                </f:block>
+                                                            </f:optionalBlock>
+                                                            <f:optionalBlock name="ctxInput"  title="Advanced Context " description="" checked="${instance.ctxInput}" inline="true">
+                                                                <f:block>
+                                                                    <table  style="border-left: 4px solid #1f80b5; margin: 0 0 0 30px;">   
+                                                                        <f:entry title="Advanced Context JSON" field="ctxAdvanceInput" description="JSON representation of the vAPI input for the summary report (ctxData part).">
+                                                                            <f:textarea/>
+                                                                        </f:entry>
+                                                                    </table>
+                                                                </f:block>
+                                                            </f:optionalBlock>               
+                                           
+                                                        </table>
+                                                    </f:block>  
+                                                </f:radioBlock>
+                                                <f:radioBlock name="summaryType" value="freesyntax" title="Retrieve and Present Job Summary Report (free vAPI syntax)" checked="${instance.summaryType == 'freesyntax'}" inline="true">
+                                                    <f:block>    
+                                                        <table style="margin: 0 0 0 30px;">
+                                                            <f:entry title="Free vAPI JSON Syntax (File name)" field="freeVAPISyntax" description="A file location with JSON representation of the vAPI input for the /reports/generate-summary-report vAPI (entire POST request).">
+                                                                <f:textbox />
+                                                            </f:entry>
+                                                            <f:entry title="Delete Input File" field="deleteReportSyntaxInputFile" description="If checked, the job will delete the input file name after processing it.">
+                                                                <f:checkbox name="deleteReportSyntaxInputFile" checked="${it.deleteReportSyntaxInputFile}"/>
+                                                            </f:entry>
+                                                        </table>
+                                                    </f:block>  
+                                                </f:radioBlock>   
+                                                              
+                                            </f:block>  
+                          
+                                            <f:block>
+                                                <f:optionalBlock name="sendEmail"  title="Email the Regression Summary Report " description="" checked="${instance.sendEmail}" inline="true">
+                                                    <f:block>
+                                                        <table  style="border-left: 4px solid #1f80b5; margin: 0 0 0 30px;">   
+                                                            <f:radioBlock name="emailType" value="static" title="Static list of email addresses" checked="${instance.emailType == 'static'}" inline="true">
+                                                                <f:entry title="Email addresses" field="emailList" description="Comma separated list of emails.">
+                                                                    <f:textarea/>
+                                                                </f:entry>
+                                                            </f:radioBlock>   
+                                                            <f:radioBlock name="emailType" value="dynamic" title="Dynamic list of email addresses" checked="${instance.emailType == 'dynamic'}" inline="true">
+    
+                                                                <f:entry title="Name of input file" field="emailInputFile" description="Name of input file with one or more email addresses (not mandatory)">
+                                                                    <f:textbox />
+                                                                </f:entry>
+                                                                <f:entry title="Delete Input File" field="deleteEmailInputFile" description="If checked, the job will delete the input file name after processing it.">
+                                                                    <f:checkbox name="deleteEmailInputFile" checked="${it.deleteEmailInputFile}"/>
+                                                                </f:entry>
+                                                            </f:radioBlock>                                
+                                                        </table>
+                                                    </f:block>
+                                                </f:optionalBlock>   
+                                            </f:block>    
                                         </table>
                                     </f:block>  
-                                </f:radioBlock>   
-                                <f:radioBlock name="summaryType" value="viewonly" title="Present Job Summary Report (view only mode)" checked="${instance.summaryType == 'viewonly'}" inline="true">
+                                </f:radioBlock>  
+                                <f:radioBlock name="summaryMode" value="selfmade" title="Bring the summary report yourself (view mode only)" checked="${instance.summaryMode == 'selfmade'}" inline="true">
                                     <f:block>    
                                         <table style="margin: 0 0 0 30px;">
                                         
                                         </table>
                                     </f:block>  
                                 </f:radioBlock>   
-                                
-                            </f:block>  
-                          
-                            <f:block>
-                                <f:optionalBlock name="sendEmail"  title="Email the Regression Summary Report " description="" checked="${instance.sendEmail}" inline="true">
-                                    <f:block>
-                                        <table  style="border-left: 4px solid #1f80b5; margin: 0 0 0 30px;">   
-                                            <f:radioBlock name="emailType" value="static" title="Static list of email addresses" checked="${instance.emailType == 'static'}" inline="true">
-                                                <f:entry title="Email addresses" field="emailList" description="Comma separated list of emails.">
-                                                    <f:textarea/>
-                                                </f:entry>
-                                            </f:radioBlock>   
-                                            <f:radioBlock name="emailType" value="dynamic" title="Dynamic list of email addresses" checked="${instance.emailType == 'dynamic'}" inline="true">
-    
-                                                <f:entry title="Name of input file" field="emailInputFile" description="Name of input file with one or more email addresses (not mandatory)">
-                                                    <f:textbox />
-                                                </f:entry>
-                                                <f:entry title="Delete Input File" field="deleteEmailInputFile" description="If checked, the job will delete the input file name after processing it.">
-                                                    <f:checkbox name="deleteEmailInputFile" checked="${it.deleteEmailInputFile}"/>
-                                                </f:entry>
-                                            </f:radioBlock>                                
-                                        </table>
-                                    </f:block>
-                                </f:optionalBlock>   
-                            </f:block>    
-                  
+                            </f:block>   
                         </f:optionalBlock>
                     </f:block>
                 </table>
