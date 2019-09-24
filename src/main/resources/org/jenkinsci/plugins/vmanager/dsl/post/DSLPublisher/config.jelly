@@ -3,7 +3,7 @@
     
     
     <f:block>
-        <f:optionalBlock name="advancedFunctions"  title="Advanced Functions" description="More post functions that require a remote access to the vManager server." checked="${instance.advancedFunctions}" inline="true">
+        <f:optionalBlock name="advancedFunctions"  title="Advanced Functions (can only be used post the 'vManager Launcher' Action execution)" description="More post functions that require a remote access to the vManager server." checked="${instance.advancedFunctions}" inline="true">
             <f:block>
                 <table style="width: 100% ; border: 1px solid black ;border-collapse: initial;">
                     <f:entry title="vManager Server API Url" field="vAPIUrl" description="vManager Server API Url">
@@ -59,7 +59,7 @@
                 
                 <table style="width: 100% ; border: 1px solid black ;border-collapse: initial;">
                     <f:block>
-                        <f:optionalBlock name="retrieveSummaryReport"  title="Job Summary Report (vManager 19.09 and above only)" description="If selected, the build step will fetch into Jenkins the vManager summary report (sessions, runs, metrics, vPlan grades)" checked="${instance.retrieveSummaryReport}" inline="true">
+                        <f:optionalBlock name="retrieveSummaryReport"  title="Job Summary Report" description="If selected, the build step will fetch into Jenkins the vManager summary report (sessions, runs, metrics, vPlan grades)" checked="${instance.retrieveSummaryReport}" inline="true">
                             <f:block>  
                                 
                                 <f:radioBlock name="summaryMode" value="full" title="Build, view and email by the plugin" checked="${instance.summaryMode == 'full'}" inline="true">
@@ -184,7 +184,7 @@
                                         </table>
                                     </f:block>  
                                 </f:radioBlock>  
-                                <f:radioBlock name="summaryMode" value="selfmade" title="Bring the summary report yourself (view mode only)" checked="${instance.summaryMode == 'selfmade'}" inline="true">
+                                <f:radioBlock name="summaryMode" value="selfmade" title="Bring the summary report yourself (view mode only) - 19.09 and above only" checked="${instance.summaryMode == 'selfmade'}" inline="true">
                                     <f:block>    
                                         <table style="margin: 0 0 0 30px;">
                                         

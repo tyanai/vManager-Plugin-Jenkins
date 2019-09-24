@@ -96,7 +96,7 @@
  </f:block>  
  </f:radioBlock>  
  
- <f:radioBlock name="executionType" value="batch" title="Continue from a pre-launched session" checked="${instance.executionType == 'batch'}" inline="true">
+ <f:radioBlock name="executionType" value="batch" title="Continue from a pre-launched session / Collect mode" checked="${instance.executionType == 'batch'}" inline="true">
   <f:block>
   
   <table style="width: 100% ; border: 1px solid black ;border-collapse: initial;margin-left: 18px;">
