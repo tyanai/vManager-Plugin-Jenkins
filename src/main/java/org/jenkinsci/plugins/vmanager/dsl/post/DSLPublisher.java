@@ -165,7 +165,7 @@ public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializa
         summaryReportParams.summaryMode = summaryMode;
     }
     
-    @DataBoundConstructor
+    
     public DSLPublisher() {
 
     }
