@@ -70,6 +70,7 @@
                                                 <f:entry title="vManager Server version:" field="vManagerVersion" >
                                                     <f:select />
                                                 </f:entry>
+                                                <f:entry title="Ignore SSL/TLS Errors " field="ignoreSSLError" description="If checked, the plugin will also accept self-signed SSL certificate"><f:checkbox name="ignoreSSLError" checked="${it.ignoreSSLError}"/></f:entry>
                                                 <f:radioBlock name="summaryType" value="wizard" title="Retrieve and Present Job Summary Report" checked="${instance.summaryType == 'wizard'}" inline="true">
                                                     <f:block>
                                                         <table style="margin: 0 0 0 30px;">

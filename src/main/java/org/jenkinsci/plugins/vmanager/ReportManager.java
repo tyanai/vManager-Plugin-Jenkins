@@ -28,25 +28,35 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.vmanager.BuildStatusMap;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.KeyManagementException;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.X509Certificate;
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
+import org.apache.commons.httpclient.HttpStatus;
+import org.apache.http.HttpEntity;
+import org.apache.http.StatusLine;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.HttpClientConnectionManager;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.ssl.SSLContexts;
+import org.apache.http.util.EntityUtils;
 import org.json.simple.JSONArray;
 
 import org.json.simple.JSONObject;
@@ -149,18 +159,23 @@ public class ReportManager {
     public String buildPostParamForSummaryReport(boolean email) throws Exception {
 
         if (email) {
-            listener.getLogger().println("Starting to build the POST API part for sending the report email.");
+            if (!this.testMode) {
+                listener.getLogger().println("Starting to build the POST API part for sending the report email.");
+            }
         } else {
-            listener.getLogger().println("Starting to build the POST API part for creating summary report.");
+            if (!this.testMode) {
+                listener.getLogger().println("Starting to build the POST API part for creating summary report.");
+            }
         }
 
         JSONParser jsonParser = new JSONParser();
         String postData = "";
 
         if (summaryReportParams.summaryType.equals("wizard")) {
+            if (!this.testMode) {
+                listener.getLogger().println("ReportManager - Using wizrd based json to bring the report...");
+            }
 
-            listener.getLogger().println("ReportManager - Using wizrd based json to bring the report...");
-            
             JSONObject metricsData;
             JSONObject vplanData;
             JSONObject ctxData = null;
@@ -195,8 +210,6 @@ public class ReportManager {
                 staticParams = staticParams.replace("$vplan_view_name", "");
             }
 
-           
-
             //If this is an email send operation, set the emails and remove the url link
             if (email) {
                 staticParams = staticParams.replace("$link_output", "false");
@@ -205,8 +218,8 @@ public class ReportManager {
             } else {
                 staticParams = staticParams.replace("$link_output", "true");
             }
-            
-             //set if stream mode of not based on vManager version
+
+            //set if stream mode of not based on vManager version
             if ("stream".equals(summaryReportParams.vManagerVersion)) {
                 staticParams = staticParams.replace("$jenkins_mode", "\"jenkins\":true,");
             } else {
@@ -289,7 +302,9 @@ public class ReportManager {
 
         } else {
             //User choose to place his own full vAPI request.  All we need to do is to add the RS part and send it over.
-            listener.getLogger().println("ReportManager - Using user freestyle json to bring the report...");
+            if (!this.testMode) {
+                listener.getLogger().println("ReportManager - Using user freestyle json to bring the report...");
+            }
             //Load json from file
             Utils utils = new Utils();
             String freeVAPISyntax;
@@ -298,9 +313,10 @@ public class ReportManager {
             } else {
                 freeVAPISyntax = utils.loadUserSyntaxForSummaryReport(vmgrRun.getRun().getId(), vmgrRun.getRun().getNumber(), "" + vmgrRun.getJobWorkingDir(), summaryReportParams.freeVAPISyntax, listener, summaryReportParams.deleteReportSyntaxInputFile);
             }
+            if (!this.testMode) {
+                listener.getLogger().println("ReportManager - User freestyle syntax is:\n" + freeVAPISyntax + "\n");
+            }
 
-            listener.getLogger().println("ReportManager - User freestyle syntax is:\n" + freeVAPISyntax + "\n");
-            
             JSONObject userSyntaxData;
             try {
                 userSyntaxData = (JSONObject) jsonParser.parse(freeVAPISyntax);
@@ -318,32 +334,32 @@ public class ReportManager {
                 throw e;
             }
             userSyntaxData.put("rs", rsData);
-            
+
             //If this is 19.09 server adds the jenkins:true key, otherwise remove the key
-            if (userSyntaxData.containsKey("jenkins")){
-                 userSyntaxData.remove("jenkins");
+            if (userSyntaxData.containsKey("jenkins")) {
+                userSyntaxData.remove("jenkins");
             }
-            if ("stream".equals(summaryReportParams.vManagerVersion)){
+            if ("stream".equals(summaryReportParams.vManagerVersion)) {
                 userSyntaxData.put("jenkins", true);
-            } 
-            
+            }
+
             //Add the email part
             //If this is an email send operation, set the emails and remove the url link
             if (email) {
                 //If user set his own email, continue and skip
-                if (!userSyntaxData.containsKey("emails")){
-                   JSONArray jsonArray =  (JSONArray)jsonParser.parse("[" + getReportEmailAddresses() + "]");
-                   userSyntaxData.put("emails", jsonArray);
+                if (!userSyntaxData.containsKey("emails")) {
+                    JSONArray jsonArray = (JSONArray) jsonParser.parse("[" + getReportEmailAddresses() + "]");
+                    userSyntaxData.put("emails", jsonArray);
                 }
                 //Also no need for jenkins:true
-                if (userSyntaxData.containsKey("jenkins")){
-                     userSyntaxData.remove("jenkins");
+                if (userSyntaxData.containsKey("jenkins")) {
+                    userSyntaxData.remove("jenkins");
                 }
                 //Also no need for link_output:true
-                if (userSyntaxData.containsKey("linkOutput")){
-                     userSyntaxData.remove("linkOutput");
+                if (userSyntaxData.containsKey("linkOutput")) {
+                    userSyntaxData.remove("linkOutput");
                 }
-            } 
+            }
 
             postData = userSyntaxData.toJSONString();
 
@@ -375,11 +391,19 @@ public class ReportManager {
             jobWorkingDir = vmgrRun.getJobWorkingDir();
             jobRootDir = build.getRootDir().getAbsolutePath();
         }
-        fixUntrustCertificate();
+
+        //Fix for SECURITY-1615 - Use Apache dedicated instead
+        CloseableHttpClient httpClient = null;
+        if (summaryReportParams.ignoreSSLError) {
+            httpClient = fixUntrustCertificate();
+        } else {
+            httpClient = HttpClients.createDefault();
+        }
+
         String username = vAPIConnectionParam.vAPIUser;
         String thePath = vAPIConnectionParam.vAPIUrl + "/rest/reports" + urlObject.get("path");
-        URL url = new URL(thePath);
-        URLConnection uc = url.openConnection();
+
+        HttpGet httpGet = new HttpGet(thePath);
 
         if (vAPIConnectionParam.authRequired) {
             // ----------------------------------------------------------------------------------------
@@ -411,45 +435,53 @@ public class ReportManager {
 
             String userpass = username + ":" + vAPIConnectionParam.vAPIPassword;
             String basicAuth = "Basic " + javax.xml.bind.DatatypeConverter.printBase64Binary(userpass.getBytes());
-            uc.setRequestProperty("Authorization", basicAuth);
+            httpGet.setHeader("Authorization", basicAuth);
         }
 
-        InputStream is = uc.getInputStream();
-        int ptr = 0;
-        StringBuffer buffer = new StringBuffer();
-        String fileOutput = jobWorkingDir + File.separator + buildNumber + "." + buildId + ".summary.report";
-        FileWriter writer = new FileWriter(fileOutput);
-        while ((ptr = is.read()) != -1) {
-            buffer.append((char) ptr);
+        CloseableHttpResponse httpResponse = httpClient.execute(httpGet);
+        StatusLine statusLine = httpResponse.getStatusLine();
+        if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            try {
+                HttpEntity entity = httpResponse.getEntity();
+                entity.writeTo(outputStream);
+                EntityUtils.consume(entity);
+
+                String output = outputStream.toString();
+                int start = output.indexOf("<head>");
+                int end = output.indexOf("</head>") + 7;
+                output = output.substring(0, start) + output.substring(end, output.length());
+
+                start = output.indexOf("<style>");
+                end = output.indexOf("</style>") + 8;
+                output = output.substring(0, start) + output.substring(end, output.length());
+
+                start = output.indexOf("<script>");
+                end = output.indexOf("</script>") + 9;
+                output = output.substring(0, start) + output.substring(end, output.length());
+
+                start = output.indexOf("<script>");
+                end = output.indexOf("</script>") + 9;
+                output = output.substring(0, start) + output.substring(end, output.length());
+
+                output = output.replace("<html>", "");
+                output = output.replace("</html>", "");
+                output = output.replace("<body>", "");
+                output = output.replace("</body>", "");
+
+                String fileOutput = jobWorkingDir + File.separator + buildNumber + "." + buildId + ".summary.report";
+                FileWriter writer = new FileWriter(fileOutput);
+                writer.append(output);
+                writer.flush();
+                writer.close();
+
+                if (!this.testMode) {
+                    listener.getLogger().println("Report Summary was created succesfully.");
+                }
+            } finally {
+                httpResponse.close();
+            }
         }
-
-        String output = buffer.toString();
-        int start = output.indexOf("<head>");
-        int end = output.indexOf("</head>") + 7;
-        output = output.substring(0, start) + output.substring(end, output.length());
-
-        start = output.indexOf("<style>");
-        end = output.indexOf("</style>") + 8;
-        output = output.substring(0, start) + output.substring(end, output.length());
-
-        start = output.indexOf("<script>");
-        end = output.indexOf("</script>") + 9;
-        output = output.substring(0, start) + output.substring(end, output.length());
-
-        start = output.indexOf("<script>");
-        end = output.indexOf("</script>") + 9;
-        output = output.substring(0, start) + output.substring(end, output.length());
-
-        output = output.replace("<html>", "");
-        output = output.replace("</html>", "");
-        output = output.replace("<body>", "");
-        output = output.replace("</body>", "");
-
-        writer.append(output);
-        writer.flush();
-        writer.close();
-
-        listener.getLogger().println("Report Summary was created succesfully.");
 
     }
 
@@ -508,7 +540,9 @@ public class ReportManager {
                     }
                     writer.flush();
                     writer.close();
-                    listener.getLogger().println("Report Summary was created succesfully.");
+                    if (!this.testMode) {
+                        listener.getLogger().println("Report Summary was created succesfully.");
+                    }
                 } else {
                     sb = new StringBuffer();
                     while ((output = br.readLine()) != null) {
@@ -529,16 +563,16 @@ public class ReportManager {
                 while ((output = br.readLine()) != null) {
                     writer.append(output + "<br>");
                 }
-                
-                if (conn.getResponseCode() == 500){
+
+                if (conn.getResponseCode() == 500) {
                     //This is an error with the existance of the acctual API call.  Probably because the version is too old
-                    if ("stream".equals(summaryReportParams.vManagerVersion)){
+                    if ("stream".equals(summaryReportParams.vManagerVersion)) {
                         writer.append("<br><br>");
                         writer.append("Hint: This error usually indicates that you choosed the wrong vManager version at the plugin configuration section for vManagerVersion.<br>");
                         writer.append("If that's the case, and if your vManager server version is below 19.09 - set vManagerVersion as \"html\" (if pipeline dsl is used), or \"Lower than 19.09\" for regular post configuration mode.<br>");
                     }
                 }
-                
+
                 writer.append("</strong></p></div></div>");
                 writer.flush();
                 writer.close();
@@ -548,7 +582,18 @@ public class ReportManager {
             if (this.testMode) {
                 e.printStackTrace();
             } else {
-                listener.getLogger().println("Failed to retrieve report from the vManager server.");
+                if (!this.testMode) {
+                    listener.getLogger().println("Failed to retrieve report from the vManager server.");
+                    
+                    String fileOutput = jobWorkingDir + File.separator + buildNumber + "." + buildId + ".summary.report";
+                    FileWriter writer = new FileWriter(fileOutput);
+                    writer.append("<div class=\"microAgentWaiting\"><div class=\"spinnerMicroAgentMessage\"><p><img src=\"/plugin/vmanager-plugin/img/support-icon.png\"></img></p><p>");
+                    writer.append("Failure to retrieve the report from the vManager server for this build.  Check your parameters.<br>Below you can find the exception that was thrown during the retrieval process:<br><br><strong>");
+                    writer.append(e.getMessage());
+                    writer.append("</strong></p></div></div>");
+                    writer.flush();
+                    writer.close();
+                }
             }
             throw e;
 
@@ -610,16 +655,21 @@ public class ReportManager {
                 while ((output = br.readLine()) != null) {
                     sb.append(output);
                 }
-
-                listener.getLogger().println("Failed to send report using the vManager server.  Exception is:\n" + sb.toString());
+                if (!this.testMode) {
+                    listener.getLogger().println("Failed to send report using the vManager server.  Exception is:\n" + sb.toString());
+                }
             } else {
-                listener.getLogger().println("Report Summary email was sent succesfully.");
+                if (!this.testMode) {
+                    listener.getLogger().println("Report Summary email was sent succesfully.");
+                }
             }
         } catch (Exception e) {
             if (this.testMode) {
                 e.printStackTrace();
             } else {
-                listener.getLogger().println("Failed to send report using the vManager server.");
+                if (!this.testMode) {
+                    listener.getLogger().println("Failed to send report using the vManager server.");
+                }
             }
             throw e;
 
@@ -650,10 +700,14 @@ public class ReportManager {
                     && conn.getResponseCode() != HttpURLConnection.HTTP_CREATED && conn.getResponseCode() != HttpURLConnection.HTTP_PARTIAL && conn.getResponseCode() != HttpURLConnection.HTTP_RESET
                     && conn.getResponseCode() != 406) {
                 //System.out.println("Error - Got wrong response from /reports/stream-summary-report - " + conn.getResponseCode()  );
-                if ("html".equals(summaryReportParams.vManagerVersion)){
-                    listener.getLogger().println("Error - Got wrong response from /reports/generate-summary-report - " + conn.getResponseCode());
+                if ("html".equals(summaryReportParams.vManagerVersion)) {
+                    if (!this.testMode) {
+                        listener.getLogger().println("Error - Got wrong response from /reports/generate-summary-report - " + conn.getResponseCode());
+                    }
                 } else {
-                    listener.getLogger().println("Error - Got wrong response from /reports/stream-summary-report - " + conn.getResponseCode());
+                    if (!this.testMode) {
+                        listener.getLogger().println("Error - Got wrong response from /reports/stream-summary-report - " + conn.getResponseCode());
+                    }
                 }
                 return false;
             } else {
@@ -666,35 +720,13 @@ public class ReportManager {
         }
     }
 
-    public void fixUntrustCertificate() throws KeyManagementException, NoSuchAlgorithmException {
-
-        TrustManager[] trustAllCerts = new TrustManager[]{
-            new X509TrustManager() {
-                public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                    return null;
-                }
-
-                public void checkClientTrusted(X509Certificate[] certs, String authType) {
-                }
-
-                public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                }
-
-            }
-        };
-
-        javax.net.ssl.SSLContext sc = javax.net.ssl.SSLContext.getInstance("SSL");
-        sc.init(null, trustAllCerts, new java.security.SecureRandom());
-        HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-
-        HostnameVerifier allHostsValid = new HostnameVerifier() {
-            public boolean verify(String hostname, SSLSession session) {
-                return true;
-            }
-        };
-
-        // set the  allTrusting verifier
-        HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
+    public CloseableHttpClient fixUntrustCertificate() throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+        javax.net.ssl.SSLContext sslContext = SSLContexts.custom().loadTrustMaterial(new TrustSelfSignedStrategy()).build();
+        SSLConnectionSocketFactory socketFactory = new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
+        Registry<ConnectionSocketFactory> reg = RegistryBuilder.<ConnectionSocketFactory>create().register("https", socketFactory).build();
+        HttpClientConnectionManager cm = new PoolingHttpClientConnectionManager(reg);
+        CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(cm).build();
+        return httpClient;
     }
 
 }

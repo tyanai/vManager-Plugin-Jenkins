@@ -57,6 +57,7 @@ public class SummaryReportParams {
     public String emailType;
     public String emailInputFile; 
     public boolean deleteEmailInputFile;
+    public boolean ignoreSSLError;
     
     public final static String  staticReportParams = "$jenkins_mode\"override\":true,\"sessionsViewName\":\"All_Sessions\",\"linkOutput\":$link_output,\"title\":\"Summary report\",\"includeSessions\":true,\"includeAll\":false$test_view_name$metrics_view_name$vplan_view_name$test_depth";
     public boolean includeTests = true;

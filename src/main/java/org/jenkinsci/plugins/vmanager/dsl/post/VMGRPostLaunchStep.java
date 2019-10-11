@@ -98,6 +98,7 @@ import org.kohsuke.stapler.StaplerRequest;
     private String emailInputFile;
     private boolean deleteEmailInputFile;
     private String summaryMode;
+    private boolean ignoreSSLError;
   
      
      
@@ -107,7 +108,7 @@ import org.kohsuke.stapler.StaplerRequest;
     public VMGRPostLaunchStep(String vAPIUrl, String vAPIUser, String vAPIPassword, boolean authRequired, boolean advConfig, boolean dynamicUserId, int connTimeout, int readTimeout, boolean advancedFunctions,
             boolean retrieveSummaryReport, boolean runReport, boolean metricsReport, boolean vPlanReport, String testsViewName, String metricsViewName, String vplanViewName, int testsDepth, int metricsDepth,
             int vPlanDepth, String metricsInputType, String metricsAdvanceInput, String vPlanInputType, String vPlanAdvanceInput, String vPlanxFileName, String summaryType, boolean ctxInput,
-            String ctxAdvanceInput, String freeVAPISyntax, boolean deleteReportSyntaxInputFile,String vManagerVersion,boolean sendEmail,String emailList,String emailType, String emailInputFile,boolean deleteEmailInputFile,String summaryMode) {
+            String ctxAdvanceInput, String freeVAPISyntax, boolean deleteReportSyntaxInputFile,String vManagerVersion,boolean sendEmail,String emailList,String emailType, String emailInputFile,boolean deleteEmailInputFile,String summaryMode, boolean ignoreSSLError) {
 
         this.vAPIUrl = vAPIUrl;
         this.authRequired = authRequired;
@@ -147,6 +148,7 @@ import org.kohsuke.stapler.StaplerRequest;
         this.emailInputFile = emailInputFile; 
         this.deleteEmailInputFile = deleteEmailInputFile; 
         this.summaryMode = summaryMode;
+        this.ignoreSSLError = ignoreSSLError;
         
         
     }
@@ -165,6 +167,10 @@ import org.kohsuke.stapler.StaplerRequest;
 
     public boolean isDeleteEmailInputFile() {
         return deleteEmailInputFile;
+    }
+    
+    public boolean isIgnoreSSLError() {
+        return ignoreSSLError;
     }
     
     public String getVManagerVersion() {
