@@ -158,8 +158,14 @@ public class SessionStatusHolder {
 			if ("ZZZZZZZZZZZZZZZZ".equals(session.getString("name"))){
 				sessionData.setName("Mixed");
 			} else {
+                            try{
 				sessionData.setName(cutSessionNameDate(session.getString("name")));
 				sessionData.setSessionCode(cutSessionCodeDate(session.getString("name")));
+                            }catch (Exception e){
+                                sessionData.setName(session.getString("name"));
+                                sessionData.setSessionCode("");
+                                e.printStackTrace();
+                            }
 				
 			}
 			

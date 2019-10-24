@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>2.5</version>
+    <version>3.8</version>
   </parent>
 
   <artifactId>vmanager-plugin</artifactId>
@@ -21,6 +21,8 @@
   
   <properties>
     <findbugs.failOnError>false</findbugs.failOnError> <!-- TODO fix -->
+    <java.level>8</java.level>
+    <jenkins.version>2.68</jenkins.version>
   </properties>
   
   <developers>
@@ -57,7 +59,7 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>dashboard-view</artifactId>
-      <version>2.9.10</version>
+      <version>2.10</version>
       <exclusions>
         <exclusion>
           <groupId>org.jenkins-ci.main</groupId>
@@ -65,21 +67,16 @@
         </exclusion>
       </exclusions>
     </dependency>
-    <!-- dependencies on Jenkins Pipeline plugins -->
-    <!--dependency>
-	<groupId>org.jenkins-ci.plugins.workflow</groupId>
-	<artifactId>workflow-job</artifactId>
-	<version>2.7</version>
-    </dependency>
     <dependency>
-	<groupId>org.jenkins-ci.plugins.workflow</groupId>
-	<artifactId>workflow-cps</artifactId>
-	<version>2.7</version>
-    </dependency-->
+      <groupId>org.jenkins-ci.plugins</groupId>
+      <artifactId>token-macro</artifactId>
+      <version>2.3</version>
+    </dependency>
+    <!-- dependencies on Jenkins Pipeline plugins -->
     <dependency>
 	<groupId>org.jenkins-ci.plugins.workflow</groupId>
 	<artifactId>workflow-step-api</artifactId>
-	<version>2.7</version>
+	<version>2.14</version>
     </dependency>
     <dependency>
         <groupId>com.googlecode.json-simple</groupId>
@@ -87,9 +84,9 @@
         <version>1.1.1</version>
     </dependency>
 	<dependency>
-        <groupId>org.apache.httpcomponents</groupId>
-        <artifactId>httpclient</artifactId>
-        <version>4.5.10</version>
+        <groupId>org.jenkins-ci.plugins</groupId>
+        <artifactId>apache-httpcomponents-client-4-api</artifactId>
+        <version>4.5.10-1.0</version>
     </dependency>
   </dependencies>
  
@@ -98,7 +95,7 @@
   	<url>www.cadence.com</url>
   </organization>
   <name>Cadence vManager Plugin for Jenkins</name>
-    <build>
+    <!--build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -109,5 +106,5 @@
                 </configuration>
             </plugin>
         </plugins>
-    </build>
+    </build-->
 </project>

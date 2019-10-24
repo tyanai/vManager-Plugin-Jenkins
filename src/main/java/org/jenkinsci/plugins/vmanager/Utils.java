@@ -898,6 +898,11 @@ public class Utils {
             //Treat sessions that were launched by the user's batch 
             SessionNameIdHolder sessionNameIdHolder = new SessionNameIdHolder();
             listOfSessions = sessionNameIdHolder.getSessionNames(sessionNames, url, requireAuth, user, password, listener, dynamicUserId, buildID, buildNumber, workPlacePath, connConnTimeOut, connReadTimeout, advConfig);
+            if (listOfSessions.size() == 0){
+               listener.getLogger().print("Couldn't find any data for the given project and the supplied session names.\n"); 
+               return "Please check the input file that lists the session names and make sure you have the full session names as listed in vManager.";
+               
+            }
             
         } else {
 

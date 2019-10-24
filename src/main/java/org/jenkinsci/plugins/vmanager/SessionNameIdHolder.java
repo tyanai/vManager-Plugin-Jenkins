@@ -48,6 +48,8 @@ public class SessionNameIdHolder {
 		listener.getLogger().print("Trying to get session ID for the session names supplied:\n");
 		String apiURL = url + "/rest/sessions/list";
                 List<String> sessionList = new ArrayList<String>();
+                
+                
 		
 		try {
 			conn = utils.getVAPIConnection(apiURL, requireAuth, user, password, "POST", dynamicUserId, buildID, buildNumber, workPlacePath, listener, connConnTimeOut, connReadTimeout, advConfig);
@@ -56,6 +58,7 @@ public class SessionNameIdHolder {
                         
                         String postData = this.postSessionData.replaceAll("######", buildPostDataSessionPart(sessionNames));
                         
+                        //listener.getLogger().print("Post is: " + postData); 
                                                
 			os.write(postData.getBytes());
 			os.flush();

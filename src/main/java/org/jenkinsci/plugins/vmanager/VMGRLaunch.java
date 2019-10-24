@@ -24,6 +24,8 @@ import java.util.logging.Logger;
 import javax.servlet.ServletException;
 
 import net.sf.json.JSONObject;
+import org.apache.commons.lang.exception.ExceptionUtils;
+import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
@@ -86,6 +88,16 @@ public class VMGRLaunch extends Builder {
     private final String executionType;
     private final String sessionsInputFile;
     private final boolean deleteSessionInputFile;
+
+    //Variable that might contain macros
+    private String sessionsInputFileFix;
+    private String vSIFInputFileFix;
+    private String vSIFNameFix;
+    private String credentialInputFileFix;
+    private String envSourceInputFileFix;
+    private String envVaribleFileFix;
+    private String attrValuesFileFix;
+    private String famModeLocationFix;
 
     // Fields in config.jelly must match the parameter names in the
     // "DataBoundConstructor"
@@ -365,12 +377,36 @@ public class VMGRLaunch extends Builder {
         //Check if this is user's batch or launch
         listener.getLogger().println("The execution type set is " + executionType);
         if ("batch".equals(executionType)) {
-            listener.getLogger().println("The session input file name is: " + sessionsInputFile);
+            try {
+                sessionsInputFileFix = TokenMacro.expandAll(build, listener, sessionsInputFile);
+            } catch (Exception e) {
+                e.printStackTrace();
+                listener.getLogger().println("Failed to extract out macro from the input of sessionsInputFile: " + sessionsInputFile);
+                sessionsInputFileFix = sessionsInputFile;
+            }
+            listener.getLogger().println("The session input file name is: " + sessionsInputFileFix);
             listener.getLogger().println("The deleteSessionInputFile : " + deleteSessionInputFile);
         } else {
             listener.getLogger().println("The vsif to be executed is is " + vsifType);
-            listener.getLogger().println("The vSIFName is: " + vSIFName);
-            listener.getLogger().println("The vSIFPathForExternalVSIF Input is: " + vSIFInputFile);
+            
+            try {
+                vSIFNameFix = TokenMacro.expandAll(build, listener, vSIFName);
+            } catch (Exception e) {
+                e.printStackTrace();
+                listener.getLogger().println("Failed to extract out macro from the input of vSIFName: " + vSIFName);
+                vSIFNameFix = vSIFName;
+            }
+            listener.getLogger().println("The vSIFName is: " + vSIFNameFix);
+            
+            
+            try {
+                vSIFInputFileFix = TokenMacro.expandAll(build, listener, vSIFInputFile);
+            } catch (Exception e) {
+                e.printStackTrace();
+                listener.getLogger().println("Failed to extract out macro from the input of vSIFInputFile: " + vSIFInputFile);
+                vSIFInputFileFix = vSIFInputFile;
+            }
+            listener.getLogger().println("The vSIF Path For External VSIF Input is: " + vSIFInputFileFix);
             listener.getLogger().println("The deleteInputFile for vAPI is: " + deleteInputFile);
             if (envVarible) {
                 listener.getLogger().println("An environment varible file was selected.");
@@ -388,11 +424,25 @@ public class VMGRLaunch extends Builder {
                 listener.getLogger().println("User is using private stored SSH key: " + userPrivateSSHKey);
 
                 if ("dynamic".equals(userFarmType)) {
-                    listener.getLogger().println("The credential file is: " + credentialInputFile);
+                    try {
+                        credentialInputFileFix = TokenMacro.expandAll(build, listener, credentialInputFile);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        listener.getLogger().println("Failed to extract out macro from the input of credentialInputFile: " + credentialInputFile);
+                        credentialInputFileFix = credentialInputFile;
+                    }
+                    listener.getLogger().println("The credential file is: " + credentialInputFileFix);
                     listener.getLogger().println("The credential file was set to be deleted after use: " + deleteCredentialInputFile);
                 }
                 if (!"".equals(envSourceInputFile.trim())) {
-                    listener.getLogger().println("The User's source file is: " + envSourceInputFile);
+                    try {
+                        envSourceInputFileFix = TokenMacro.expandAll(build, listener, envSourceInputFile);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        listener.getLogger().println("Failed to extract out macro from the input of envSourceInputFile: " + envSourceInputFile);
+                        envSourceInputFileFix = envSourceInputFile;
+                    }
+                    listener.getLogger().println("The User's source file is: " + envSourceInputFileFix);
                 } else {
                     listener.getLogger().println("The User's source file wasn't set");
                 }
@@ -440,13 +490,20 @@ public class VMGRLaunch extends Builder {
             listener.getLogger().println("Use dedicated credentials for deleting the session: " + genericCredentialForSessionDelete);
             listener.getLogger().println("Use FAM Mode: " + famMode);
             if ("true".equals(famMode)) {
-                listener.getLogger().println("FAM Mode Location: " + famModeLocation);
+                try {
+                    famModeLocationFix = TokenMacro.expandAll(build, listener, famModeLocation);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    listener.getLogger().println("Failed to extract out macro from the input of famModeLocation: " + famModeLocation);
+                    famModeLocationFix = famModeLocation;
+                }
+                listener.getLogger().println("FAM Mode Location: " + famModeLocationFix);
             }
             if (genericCredentialForSessionDelete) {
                 listener.getLogger().println("Dedicated User for session delete: " + archiveUser);
                 listener.getLogger().println("Dedicated password for session delete: *******");
             }
-            vMGRBuildArchiver = new VMGRBuildArchiver(vMGRBuildArchive, deleteAlsoSessionDirectory, genericCredentialForSessionDelete, archiveUser, archivePassword, famMode, famModeLocation);
+            vMGRBuildArchiver = new VMGRBuildArchiver(vMGRBuildArchive, deleteAlsoSessionDirectory, genericCredentialForSessionDelete, archiveUser, archivePassword, famMode, famModeLocationFix);
 
         }
 
@@ -463,25 +520,25 @@ public class VMGRLaunch extends Builder {
 
             if ("batch".equals(executionType)) {
                 if (sessionsInputFile == null || sessionsInputFile.trim().equals("")) {
-                        listener.getLogger().println("The session input file chosen is dynamic. Dynamic workspace directory: '" + build.getWorkspace() + "'");
-                    } else {
-                        listener.getLogger().println("The session input file chosen is static. Sessions input file name is: '" + sessionsInputFile.trim() + "'");
-                    }
+                    listener.getLogger().println("The session input file chosen is dynamic. Dynamic workspace directory: '" + build.getWorkspace() + "'");
+                } else {
+                    listener.getLogger().println("The session input file chosen is static. Sessions input file name is: '" + sessionsInputFileFix.trim() + "'");
+                }
 
-                    sessionNames = utils.loadDataFromInputFiles(build.getId(), build.getNumber(), "" + build.getWorkspace(), sessionsInputFile, listener, deleteSessionInputFile,"session names","sessions.input");
+                sessionNames = utils.loadDataFromInputFiles(build.getId(), build.getNumber(), "" + build.getWorkspace(), sessionsInputFileFix, listener, deleteSessionInputFile, "session names", "sessions.input");
             } else {
                 if ("static".equals(vsifType)) {
-                    listener.getLogger().println("The VSIF file chosen is static. VSIF file static location is: '" + vSIFName + "'");
+                    listener.getLogger().println("The VSIF file chosen is static. VSIF file static location is: '" + vSIFNameFix + "'");
                     vsifFileNames = new String[1];
-                    vsifFileNames[0] = vSIFName;
+                    vsifFileNames[0] = vSIFNameFix;
                 } else {
                     if (vSIFInputFile == null || vSIFInputFile.trim().equals("")) {
                         listener.getLogger().println("The VSIF file chosen is dynamic. VSIF directory dynamic workspace directory: '" + build.getWorkspace() + "'");
                     } else {
-                        listener.getLogger().println("The VSIF file chosen is static. VSIF file name is: '" + vSIFInputFile.trim() + "'");
+                        listener.getLogger().println("The VSIF file chosen is dynamic. VSIF file name is: '" + vSIFInputFileFix.trim() + "'");
                     }
 
-                    vsifFileNames = utils.loadDataFromInputFiles(build.getId(), build.getNumber(), "" + build.getWorkspace(), vSIFInputFile, listener, deleteInputFile, "VSIF", "vsif.input");
+                    vsifFileNames = utils.loadDataFromInputFiles(build.getId(), build.getNumber(), "" + build.getWorkspace(), vSIFInputFileFix, listener, deleteInputFile, "VSIF", "vsif.input");
 
                 }
 
@@ -490,9 +547,9 @@ public class VMGRLaunch extends Builder {
                     if (envVaribleFile == null || envVaribleFile.trim().equals("")) {
                         listener.getLogger().println("The environment varible file chosen is dynamic. Env File directory dynamic workspace directory: '" + build.getWorkspace() + "'");
                     } else {
-                        listener.getLogger().println("The environment varible file chosen is static. Environment file name is: '" + envVaribleFile.trim() + "'");
+                        listener.getLogger().println("The environment varible file chosen is static. Environment file name is: '" + envVaribleFileFix.trim() + "'");
                     }
-                    jsonEnvInput = utils.loadJSONEnvInput(build.getId(), build.getNumber(), "" + build.getWorkspace(), envVaribleFile, listener);
+                    jsonEnvInput = utils.loadJSONEnvInput(build.getId(), build.getNumber(), "" + build.getWorkspace(), envVaribleFileFix, listener);
                     listener.getLogger().println("Found the following environment for the vsif: " + jsonEnvInput);
                 }
 
@@ -501,20 +558,19 @@ public class VMGRLaunch extends Builder {
                     if (attrValuesFile == null || attrValuesFile.trim().equals("")) {
                         listener.getLogger().println("The attribute values file chosen is dynamic. Env File directory dynamic workspace directory: '" + build.getWorkspace() + "'");
                     } else {
-                        listener.getLogger().println("The attribute values file chosen is static. Attribute values file name is: '" + attrValuesFile.trim() + "'");
+                        listener.getLogger().println("The attribute values file chosen is static. Attribute values file name is: '" + attrValuesFileFix.trim() + "'");
                     }
-                    jsonAttrValuesInput = utils.loadJSONAttrValuesInput(build.getId(), build.getNumber(), "" + build.getWorkspace(), attrValuesFile, listener);
+                    jsonAttrValuesInput = utils.loadJSONAttrValuesInput(build.getId(), build.getNumber(), "" + build.getWorkspace(), attrValuesFileFix, listener);
                     listener.getLogger().println("Found the following attribute values for the vsif: " + jsonAttrValuesInput);
                 }
 
-                
                 if ("dynamic".equals(userFarmType)) {
                     if (credentialInputFile == null || credentialInputFile.trim().equals("")) {
                         listener.getLogger().println("The credential file chosen is dynamic. Credential directory dynamic workspace directory: '" + build.getWorkspace() + "'");
                     } else {
-                        listener.getLogger().println("The credential file chosen is static. Credential file name is: '" + credentialInputFile.trim() + "'");
+                        listener.getLogger().println("The credential file chosen is static. Credential file name is: '" + credentialInputFileFix.trim() + "'");
                     }
-                    farmUserPassword = utils.loadFileCredentials(build.getId(), build.getNumber(), "" + build.getWorkspace(), credentialInputFile, listener, deleteCredentialInputFile);
+                    farmUserPassword = utils.loadFileCredentials(build.getId(), build.getNumber(), "" + build.getWorkspace(), credentialInputFileFix, listener, deleteCredentialInputFile);
 
                     //Tal Yanai
                     //In case this is a private user SSH, use the dynamic information for the vAPI login as well
@@ -528,7 +584,7 @@ public class VMGRLaunch extends Builder {
             // Now call the actual launch
             // ----------------------------------------------------------------------------------------------------------------
             String output = utils.executeVSIFLaunch(vsifFileNames, vAPIUrl, authRequired, tempUser, tempPassword, listener, dynamicUserId, build.getId(), build.getNumber(),
-                    "" + build.getWorkspace(), connTimeout, readTimeout, advConfig, jsonEnvInput, useUserOnFarm, userFarmType, farmUserPassword, stepHolder, envSourceInputFile, workingJobDir, vMGRBuildArchiver, userPrivateSSHKey, jsonAttrValuesInput, executionType, sessionNames);
+                    "" + build.getWorkspace(), connTimeout, readTimeout, advConfig, jsonEnvInput, useUserOnFarm, userFarmType, farmUserPassword, stepHolder, envSourceInputFileFix, workingJobDir, vMGRBuildArchiver, userPrivateSSHKey, jsonAttrValuesInput, executionType, sessionNames);
             if (!"success".equals(output)) {
                 listener.getLogger().println("Failed to launch vsifs for build " + build.getId() + " " + build.getNumber() + "\n");
                 listener.getLogger().println(output + "\n");
@@ -543,6 +599,8 @@ public class VMGRLaunch extends Builder {
                 listener.getLogger().println(" " + ste);
             }
 
+            listener.getLogger().println(ExceptionUtils.getFullStackTrace(e));
+            
             return false;
         }
 
