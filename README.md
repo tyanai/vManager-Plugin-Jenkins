@@ -1,4 +1,5 @@
-  ----------------------------------------------------------------------------------------------------------
+  
+  ----------------------------------------------------------------------------------------------------------
   This plugin adds an ability to perform REST over HTTP calls to Cadence vManager as a step in your build.
   ----------------------------------------------------------------------------------------------------------
 
@@ -36,18 +37,15 @@ build process.
 -   Support the ability to delete sessions with every manual/automatic
     build removal (plugin ver 2.5.2 and above).
 -   Adds a link within the project page for direct access to the
-    vManager web [analysis (post-build
-    action).]
--   [Adds a table of sessions within the project\'s page to track the
+    vManager web analysis (post-build action).
+-   Adds a table of sessions within the project\'s page to track the
     session\'s history and give high level overview about the progress
-    (post-build action).]
--   [Adds an ability to embed the vManager Summary Report within Jenkins
-    as part of the build page.]
--   [[Adds an ability to send vManager Summary Report to dynamically
-    selective users at the end of the
-    regression.]]
--   [[Support Collect
-    Mode.]]
+    (post-build action).
+-   Adds an ability to embed the vManager Summary Report within Jenkins
+    as part of the build page.
+-   Adds an ability to send vManager Summary Report to dynamically
+    selective users at the end of the regression.
+-   Support Collect Mode.
 
 ### Configuration
 
@@ -62,11 +60,9 @@ selection.
 -   Choose \"**vManager Session Launcher**\" if you need to add a step
     for remote launching vsif (one or more).
 
-\
 
 ![A new post-build
-type](./docs/images/postbuild.png "Jenkins > Cadence vManager Plugin > postbuild.png (A new post-build type)"){.confluence-embedded-image
-.confluence-content-image-border width="410" height="400"}
+type](./docs/images/postbuild.png "Jenkins > Cadence vManager Plugin > postbuild.png (A new post-build type)")
 
 -   Choose \"**vManager Post Build Actions**\" if you need analysis
     links and session triage table at the Project (job) and Build (run)
@@ -76,7 +72,7 @@ type](./docs/images/postbuild.png "Jenkins > Cadence vManager Plugin > postbuild
 
 ### Usage
 
-##### *[[**vManager API**]{style="color: rgb(0,0,0);"}]{.underline}*
+##### *[[**vManager API**]]*
 
 The step takes care for the following:
 
@@ -88,15 +84,13 @@ The step takes care for the following:
 The below is an example of defining a **static vAPI call** for getting a
 list of runs with session id equals to 1 or 2:
 
-![](./docs/images/apistatic.png "Jenkins > Cadence vManager Plugin > apistatic.png"){.confluence-embedded-image
-.confluence-content-image-border}\
-[*Adding static vAPI input*]{style="color: rgb(136,136,136);"}
+![](./docs/images/apistatic.png "Jenkins > Cadence vManager Plugin > apistatic.png")\
+[*Adding static vAPI input*]
 
 The below is an example of defining a **dynamic vAPI call**:
 
-![](./docs/images/dynamicapi.png "Jenkins > Cadence vManager Plugin > dynamicapi.png"){.confluence-embedded-image
-.confluence-content-image-border}\
-[*Adding dynamic vAPI input*]{style="color: rgb(136,136,136);"}
+![](./docs/images/dynamicapi.png "Jenkins > Cadence vManager Plugin > dynamicapi.png")\
+[*Adding dynamic vAPI input*]
 
 In case of a need in dynamically change the jSON input for the API per
 job, the pre-job should place into the workspace directory a file with
@@ -108,7 +102,7 @@ this field is empty, The file name need to be:
 Please fill this field only in case, you want to hard code the input
 file name, to be consist across all builds.
 
-##### *[[**vManager Session Launcher**]{style="color: rgb(0,0,0);"}]{.underline}*
+##### *[**vManager Session Launcher**]
 
 [There are two modes for launching a session using the vManager Session
 Launcher action:]{style="color: rgb(0,0,0);"}
