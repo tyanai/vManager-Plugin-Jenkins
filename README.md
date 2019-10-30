@@ -1,9 +1,4 @@
  
-
-+-----------------------------------------------------------------------+
-|     {jenkins-plugin-info:vmanager-plugin}                             |
-+-----------------------------------------------------------------------+
-
   ----------------------------------------------------------------------------------------------------------
   This plugin adds an ability to perform REST over HTTP calls to Cadence vManager as a step in your build.
   ----------------------------------------------------------------------------------------------------------
@@ -17,10 +12,8 @@ install this plugin.
 Also, in case you want to chart over the runs results, install the
 **Junit Plugin** as well.
 
-![](./docs/images/JunitA.png "Jenkins > Cadence vManager Plugin > JunitA.png"){.confluence-embedded-image
-.confluence-thumbnail width="100"}
-![](./docs/images/Dashboard.png "Jenkins > Cadence vManager Plugin > Dashboard.png"){.confluence-embedded-image
-.confluence-thumbnail width="300"}
+![](./docs/images/JunitA.png "Jenkins > Cadence vManager Plugin > JunitA.png")
+![](./docs/images/Dashboard.png "Jenkins > Cadence vManager Plugin > Dashboard.png")
 
 ### Why this plugin ?
 
