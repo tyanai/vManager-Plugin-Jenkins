@@ -322,7 +322,7 @@ Pipeline syntax:
 **Setting Jenkins to delete the build\'s sessions from vManager DB when
 a build is being removed**
 
-![](./docs/images/delete.png "Jenkins > Cadence vManager Plugin > delete.png")\
+![](./docs/images/delete.png "Jenkins > Cadence vManager Plugin > delete.png")
 
 
 <div>
@@ -396,7 +396,7 @@ The job will pick the userid which is in the file, and connect to vAPI
 using this userid and the vAPI secret key.
 
 
-[***vManager Post Build Actions***]\
+***vManager Post Build Actions***\
 The vManager Plugin also supports a post-build action that brings:
 
 -   High level view at the  session\'s states launched by the various
@@ -415,8 +415,8 @@ The vManager Plugin also supports a post-build action that brings:
 The action is also available for pipeline usage using the
 function **vmanagerPostBuildActions()**
 
-[*Pre-requisite and limitation when using the post build
-action:*]
+*Pre-requisite and limitation when using the post build
+action:*
 1.  The post-build action uses information that is gathered by the
     Launcher Action.  In order for the launcher action to generate the
     relevant information, please make sure \"Wait for launched session
@@ -436,31 +436,27 @@ action:*]
 
 [*Session View at the Project level*]
 
-\
 
 ![](./docs/images/buildlevel.png "Jenkins > Cadence vManager Plugin > buildlevel.png")
 
 [*Session Triage View at the Build
 level*]
 
-\
 
 ![](./docs/images/buildlevellink.png "Jenkins > Cadence vManager Plugin > buildlevellink.png")
 
 [*Links at the build level for doing analysis on the launched
 session. (vManager Analysis)*]
 
-\
 
 ![](./docs/images/projectlevellink.png "Jenkins > Cadence vManager Plugin > projectlevellink.png")
 [*Links at the project level for doing analysis on the last completed
 build. (vManager Analysis)*]
 
-\
 
 **Summary Report and Email**
 
-[*^**\*\*Security\ issue**\ was\ introduced\ in\ version\ 2.7.0. \ Please\ use\ version\ 2.7.1\ and\ above\ if\ possible. \ If\ you\ are\ already\ using\ the\ below\ capability\ on\ 2.7.0,\ upgrading\ to\ 2.7.1\ will\ add\ a\ new\ checkbox\ to\ get\ your\ consent\ regard\ SSL\ validation. \ Please\ check\ for\ more\ information\ within\ the\ plugin\'s\ configurations.  ^*]
+*Security issue* was introduced in version 2.7.0. Please use version 2.7.1 and above if possible. If you are already using the below capability on 2.7.0, upgrading to 2.7.1 will add a new checkbox to get your consent regard SSL validation.  Please check for more information within the plugin\'s configurations.
 
 1.  The vManager 2.7.0 post-build now have the ability to embed into
     Jenkins the vManager Summary Report.  This gives you the ability to
@@ -478,7 +474,6 @@ supported as part of pipeline dsl or traditional post plugin.
 
 ![](./docs/images/report_metrics.png "Jenkins > Cadence vManager Plugin > report_metrics.png")
 
-\
 
 The summary report support 3 modes for bringing the report into the
 Jenkins environment:
@@ -521,7 +516,6 @@ Server Email capability.  Please make sure that Sendmail package is
 installed on your Linux machine where the vManager server is installed
 if you would like to use this capability.
 
-\
 
 **Bring the summary report yourself (view mode only)**
 
@@ -539,7 +533,6 @@ the following format within the job working directory: 
 
 \"**Email**\" is not offered as part of this mode.
 
-\
 
 ![](./docs/images/report_conf.png "Jenkins > Cadence vManager Plugin > report_conf.png")
 
