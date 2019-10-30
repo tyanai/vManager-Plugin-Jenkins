@@ -72,7 +72,7 @@ type](./docs/images/postbuild.png "Jenkins > Cadence vManager Plugin > postbuild
 
 ### Usage
 
-##### *[[**vManager API**]]*
+##### **vManager API**
 
 The step takes care for the following:
 
@@ -102,10 +102,10 @@ this field is empty, The file name need to be:
 Please fill this field only in case, you want to hard code the input
 file name, to be consist across all builds.
 
-##### *[**vManager Session Launcher**]
+##### *[**vManager Session Launcher**]*
 
 [There are two modes for launching a session using the vManager Session
-Launcher action:]{style="color: rgb(0,0,0);"}
+Launcher action:]
 
 -   **Launcher mode (default)** - choose this if you want the plugin to
     take over the actual launch operation with all the relevant setting,
@@ -114,8 +114,7 @@ Launcher action:]{style="color: rgb(0,0,0);"}
     yourself using shell/batch as part of a pre-step for this action.
 
    
-  ![](./docs/images/executiontype.png "Jenkins > Cadence vManager Plugin > executiontype.png"){.confluence-embedded-image
-.confluence-thumbnail .confluence-content-image-border width="300"}
+  ![](./docs/images/executiontype.png "Jenkins > Cadence vManager Plugin > executiontype.png")
 
 \
 
@@ -129,17 +128,15 @@ The step takes care for the following:
 
 The below is an example of defining a **static vsif call.**
 
-![](./docs/images/staticvsif.png "Jenkins > Cadence vManager Plugin > staticvsif.png"){.confluence-embedded-image
-.confluence-content-image-border}\
-[*Launching a static vsif file*]{style="color: rgb(136,136,136);"}
+![](./docs/images/staticvsif.png "Jenkins > Cadence vManager Plugin > staticvsif.png")\
+[*Launching a static vsif file*]
 
 The below is an example of defining a **dynamic launch call with
  multiple vsif files.**
 
-![](./docs/images/dynamicvsif.png "Jenkins > Cadence vManager Plugin > dynamicvsif.png"){.confluence-embedded-image
-.confluence-content-image-border}\
+![](./docs/images/dynamicvsif.png "Jenkins > Cadence vManager Plugin > dynamicvsif.png")\
 [*Launching more than one vsif file
-dynamically *]{style="color: rgb(136,136,136);"}
+dynamically *]
 
 In case of a need in dynamically selecting the vsif files to get
 launched per job, the pre-job should place into the workspace directory
@@ -154,52 +151,49 @@ file name, to be consist across all builds.
 \
 
 **Batch mode  ([Continue from a pre-launched
-session)]{style="color: rgb(51,51,51);"}**
+session)]**
 
 [The below is an example of defining a continues action from a previous
-launched session:]{style="color: rgb(51,51,51);"}
+launched session:]
 
-![](./docs/images/batchmode.png "Jenkins > Cadence vManager Plugin > batchmode.png"){.confluence-embedded-image
-.confluence-content-image-border height="150"}
+![](./docs/images/batchmode.png "Jenkins > Cadence vManager Plugin > batchmode.png")
 
 [This option is useful for those who wish to take benefit of their own
 environment and scripts for launching sessions using batch, but still
 want the benefit of having the Job waiting for the execution to end,
 generates JUnit report, produce triage link, real time view of the
-run\'s progress, etc\']{style="color: rgb(51,51,51);"}\
+run\'s progress, etc\']\
 [In this option, there is an assumption that a pre-step (usually from
 shell type) is taking over the session launch operation, and as such, in
 order for this plugin to continue monitor those sessions - the session
 names need to be exchange between the shell step and this
-step.]{style="color: rgb(51,51,51);"}\
+step.]\
 \
 [In case of a need to launch the sessions using batch as a pre-step to
 this one, the pre-step should place into the workspace directory a file
 with the session or session names that were launched - new line for each
-session name.]{style="color: rgb(51,51,51);"}\
+session name.]\
 [The input file should be place into the working directory. In case this
 field is empty, The file name need to be:
-\${BUILD\_NUMBER}.\${BUILD\_ID}.sessions.input]{style="color: rgb(51,51,51);"}\
+\${BUILD\_NUMBER}.\${BUILD\_ID}.sessions.input]\
 [Please fill this field only in case, you want to hard code the input
 file name, to be consist across all
-builds.]{style="color: rgb(51,51,51);"}\
+builds.]\
 \
 [The vManager plugin will look for the any of the input files mentioned
 above, and query the server for their respective id automatically. From
 that point and on, the flow continues as if the sessions were launched
-by this plugin.]{style="color: rgb(51,51,51);"}
+by this plugin.]
 
 \
 
 **Collect mode  ([Continue post
-\'collect\')]{style="color: rgb(51,51,51);"}**
+\'collect\')]**
 
 [The below is an example of defining a continues action from a previous
-launched session:]{style="color: rgb(51,51,51);"}
+launched session:]
 
-[![](./docs/images/batchmode.png "Jenkins > Cadence vManager Plugin > batchmode.png"){.confluence-embedded-image
-.confluence-content-image-border
-height="150"}]{style="color: rgb(51,51,51);"}
+[![](./docs/images/batchmode.png "Jenkins > Cadence vManager Plugin > batchmode.png")]
 
 [This option is useful for those who wish to take advantage of this
 plugin, but are not using the vManager Runner, and uses \"**collect**\"
@@ -225,9 +219,9 @@ file name, to be consist across all builds.\
 the vManager plugin will look for any of the input files mentioned
 above, and query the server for their respective id automatically. From
 that point and on, the flow continues as if the sessions were collected
-by this plugin.]{style="color: rgb(51,51,51);"}
+by this plugin.]
 
-**[Important:]{style="color: rgb(51,51,51);"}**
+**[Important:]**
 
 [please make sure \"**Wait for launched session to end**\" is checked
 \'on\' within the plugin configuration.  Basically, your collected
@@ -238,7 +232,7 @@ different states for the plugin to continue, if you like.\
 \
 The output of all IDs of the launched/collected sessions can be found
 at:
-\${BUILD\_NUMBER}.\${BUILD\_ID}.session\_launch.output]{style="color: rgb(51,51,51);"}
+\${BUILD\_NUMBER}.\${BUILD\_ID}.session\_launch.output]
 
 \
 
@@ -249,76 +243,74 @@ the vManager side, please check the \'wait for launched session to end\"
 check box.
 
  
-![](./docs/images/wait.png "Jenkins > Cadence vManager Plugin > wait.png"){.confluence-embedded-image}
+![](./docs/images/wait.png "Jenkins > Cadence vManager Plugin > wait.png")
 
 [The above setup allow you to select how the build will behave in each
 of the state where the session stop from
-running:]{style="color: rgb(51,51,51);"}
+running:]
 
-[**Continue**]{style="color: rgb(51,51,51);"}\
+[**Continue**]\
 [In case you select to continue, the build will assume (on the chosen
 state) for a given session that it can continue and finish the wait on
-this specific session.]{style="color: rgb(51,51,51);"}\
+this specific session.]\
 [Please note that in case there are multiple sessions that are being
 executed by this step, the build will wait till all sessions got into a
-state that allow it to continue. ]{style="color: rgb(51,51,51);"}
+state that allow it to continue. ]
 
-[**Ignore**]{style="color: rgb(51,51,51);"}\
+[**Ignore**]\
 [In case you select to continue, the build will assume (on the chosen
 state) for a given session that it can ignore the chosen state and keep
 waiting for other state (until get the \'completed\'
-state). ]{style="color: rgb(51,51,51);"}
+state). ]
 
-[**Fail**]{style="color: rgb(51,51,51);"}\
+[**Fail**]\
 [In case you select to fail, the build will assume (on the chosen state)
 for a given session that it should mark this build as a failure
-build. ]{style="color: rgb(51,51,51);"}[**Note: **]{style="color: rgb(51,51,51);"}[If
+build. ][**Note: **][If
 you have multiple sessions on this build step, it is enough for one
 single session to be marked as \'failed\' in order to mark the entire
-build as a failed build. ]{style="color: rgb(51,51,51);"}
+build as a failed build. ]
 
-[**Other Waiting Considerations**]{style="color: rgb(51,51,51);"}\
+[**Other Waiting Considerations**]\
 [1. When all sessions on this build step are having the state
 \'completed\' the build will be marked as
-success.]{style="color: rgb(51,51,51);"}\
+success.]\
 [2. When the vManager server goes down, the build step will keep waiting
 till the server will go back up. The build step will only change its
-state based on sessions state changes.]{style="color: rgb(51,51,51);"}\
+state based on sessions state changes.]\
 [3. If the session was manually deleted on the vManager server, before
 reaching into final state, the build will be marked as a failure
-build.]{style="color: rgb(51,51,51);"}\
+build.]\
 [4. In any case, if the number of minutes waiting is bigger than the
 timeout set here, the build will marked as a failed
-build.]{style="color: rgb(51,51,51);"}
+build.]
 
 [**Add support in Junit Plugin and Test
-Charting**]{style="color: rgb(51,51,51);"}
+Charting**]
 
 [The launch Session Plugin is also capable of placing an XML file in the
 format of Junit Test Report.  The XML file name will
-be]{style="color: rgb(51,51,51);"}[** **]{style="color: rgb(51,51,51);"}[**session\_runs**]{style="color: rgb(51,51,51);"}[**.xml
-- **]{style="color: rgb(51,51,51);"}[This format let \'Junit Plugin\"
+be][** **][**session\_runs**][**.xml
+- **][This format let \'Junit Plugin\"
 chart over each build.  In order to activate
-this:]{style="color: rgb(51,51,51);"}
+this:]
 
-[1.]{style="color: rgb(51,51,51);"}[After activating the \"wait for
+[1.][After activating the \"wait for
 session to end\", check the  \"Generate JUnit Result\" checkbox.  You
 can also add custom Runs\' attributes to the report using this
-configuration.]{style="color: rgb(51,51,51);"}
+configuration.]
 
-[2.]{style="color: rgb(51,51,51);"}[Install the plugin \"Junit Plugin\".
+[2.][Install the plugin \"Junit Plugin\".
  Add a final build step to
-pick \*]{style="color: rgb(51,51,51);"}[**/**]{style="color: rgb(51,51,51);"}[.session\_runs.xml
-from the workspace.]{style="color: rgb(51,51,51);"}
+pick \*][**/**][.session\_runs.xml
+from the workspace.]
 
 [This will give you a detail summary of the build, and an aggregated
 charting over your entire builds.  See
-below.]{style="color: rgb(51,51,51);"}
+below.]
 
-![](./docs/images/detail_junit.png "Jenkins > Cadence vManager Plugin > detail_junit.png"){.confluence-embedded-image
-.confluence-content-image-border}
-![](./docs/images/JunitA.png "Jenkins > Cadence vManager Plugin > JunitA.png"){.confluence-embedded-image
-.confluence-content-image-border}
+![](./docs/images/detail_junit.png "Jenkins > Cadence vManager Plugin > detail_junit.png")
+![](./docs/images/JunitA.png "Jenkins > Cadence vManager Plugin > JunitA.png")
 
 **\
 **
@@ -335,17 +327,16 @@ Pipeline syntax:
 .confluence-content-image-border width="794" height="400"}
 
 [**\
-**]{style="color: rgb(0,0,0);"}
+**]
 
 [**Setting Jenkins to delete the build\'s sessions from vManager DB when
-a build is being removed**]{style="color: rgb(0,0,0);"}
+a build is being removed**]
 
-[**![](./docs/images/delete.png "Jenkins > Cadence vManager Plugin > delete.png"){.confluence-embedded-image
-.confluence-content-image-border width="750" height="400"}\
-**]{style="color: rgb(0,0,0);"}
+[**![](./docs/images/delete.png "Jenkins > Cadence vManager Plugin > delete.png")\
+**]
 
 [**\
-**]{style="color: rgb(0,0,0);"}
+**]
 
 <div>
 
@@ -400,16 +391,15 @@ The vManager Plugin also support a new Dashboard portal using the
 Dashboard-view plugin.  The new portal reflects the session\'s states
 launched by the various builds:
 
-![](./docs/images/Dashboard.png "Jenkins > Cadence vManager Plugin > Dashboard.png"){.confluence-embedded-image
-.confluence-content-image-border}\
+![](./docs/images/Dashboard.png "Jenkins > Cadence vManager Plugin > Dashboard.png")\
 To enable the new portal, select \"**vManager Latest Sessions**\" from
 the Dashboard drop-down.
 
 ##### Authentication
 
-##### ![](./docs/images/newlogin.png "Jenkins > Cadence vManager Plugin > newlogin.png"){.confluence-embedded-image .confluence-content-image-border}
+##### ![](./docs/images/newlogin.png "Jenkins > Cadence vManager Plugin > newlogin.png")
 
-[*defining the connection settings*]{style="color: rgb(136,136,136);"}
+[*defining the connection settings*]
 
 In case of a need in dynamically selecting the user name per job, the
 pre-job should place into the workspace directory a file with single
@@ -420,8 +410,7 @@ using this userid and the vAPI secret key.
 
 \
 
-[***vManager Post Build Actions***]{.underline}
-
+[***vManager Post Build Actions***]
 The vManager Plugin also supports a post-build action that brings:
 
 -   High level view at the  session\'s states launched by the various
@@ -441,8 +430,7 @@ The action is also available for pipeline usage using the
 function **vmanagerPostBuildActions()**
 
 [*Pre-requisite and limitation when using the post build
-action:*]{.underline}
-
+action:*]
 1.  The post-build action uses information that is gathered by the
     Launcher Action.  In order for the launcher action to generate the
     relevant information, please make sure \"Wait for launched session
@@ -458,40 +446,35 @@ action:*]{.underline}
     project (since the time of restart).  This is because of a bug in
     the Jenkins Platform.
 
-![](./docs/images/projectlevel.png "Jenkins > Cadence vManager Plugin > projectlevel.png"){.confluence-embedded-image
-.confluence-content-image-border width="759" height="400"}
+![](./docs/images/projectlevel.png "Jenkins > Cadence vManager Plugin > projectlevel.png")
 
-[*Session View at the Project level*]{style="color: rgb(136,136,136);"}
+[*Session View at the Project level*]
 
 \
 
-![](./docs/images/buildlevel.png "Jenkins > Cadence vManager Plugin > buildlevel.png"){.confluence-embedded-image
-.confluence-content-image-border width="894" height="400"}
+![](./docs/images/buildlevel.png "Jenkins > Cadence vManager Plugin > buildlevel.png")
 
 [*Session Triage View at the Build
-level*]{style="color: rgb(136,136,136);"}
+level*]
 
 \
 
-![](./docs/images/buildlevellink.png "Jenkins > Cadence vManager Plugin > buildlevellink.png"){.confluence-embedded-image
-.confluence-content-image-border width="750" height="400"}
+![](./docs/images/buildlevellink.png "Jenkins > Cadence vManager Plugin > buildlevellink.png")
 
 [*Links at the build level for doing analysis on the launched
-session. (vManager Analysis)*]{style="color: rgb(136,136,136);"}
+session. (vManager Analysis)*]
 
 \
 
-![](./docs/images/projectlevellink.png "Jenkins > Cadence vManager Plugin > projectlevellink.png"){.confluence-embedded-image
-height="400"}
-
+![](./docs/images/projectlevellink.png "Jenkins > Cadence vManager Plugin > projectlevellink.png")
 [*Links at the project level for doing analysis on the last completed
-build. (vManager Analysis)*]{style="color: rgb(136,136,136);"}
+build. (vManager Analysis)*]
 
 \
 
 **Summary Report and Email**
 
-[*^**\*\*Security\ issue**\ was\ introduced\ in\ version\ 2.7.0. \ Please\ use\ version\ 2.7.1\ and\ above\ if\ possible. \ If\ you\ are\ already\ using\ the\ below\ capability\ on\ 2.7.0,\ upgrading\ to\ 2.7.1\ will\ add\ a\ new\ checkbox\ to\ get\ your\ consent\ regard\ SSL\ validation. \ Please\ check\ for\ more\ information\ within\ the\ plugin\'s\ configurations.  ^*]{style="color: rgb(122,134,154);"}
+[*^**\*\*Security\ issue**\ was\ introduced\ in\ version\ 2.7.0. \ Please\ use\ version\ 2.7.1\ and\ above\ if\ possible. \ If\ you\ are\ already\ using\ the\ below\ capability\ on\ 2.7.0,\ upgrading\ to\ 2.7.1\ will\ add\ a\ new\ checkbox\ to\ get\ your\ consent\ regard\ SSL\ validation. \ Please\ check\ for\ more\ information\ within\ the\ plugin\'s\ configurations.  ^*]
 
 1.  The vManager 2.7.0 post-build now have the ability to embed into
     Jenkins the vManager Summary Report.  This gives you the ability to
@@ -505,11 +488,9 @@ build. (vManager Analysis)*]{style="color: rgb(136,136,136);"}
 The Summary Report is part of the Plugin Advanced Functions, and is
 supported as part of pipeline dsl or traditional post plugin.
 
-![](./docs/images/report_tests.png "Jenkins > Cadence vManager Plugin > report_tests.png"){.confluence-embedded-image
-.confluence-content-image-border height="400"}
+![](./docs/images/report_tests.png "Jenkins > Cadence vManager Plugin > report_tests.png")
 
-![](./docs/images/report_metrics.png "Jenkins > Cadence vManager Plugin > report_metrics.png"){.confluence-embedded-image
-.confluence-content-image-border width="1336" height="400"}
+![](./docs/images/report_metrics.png "Jenkins > Cadence vManager Plugin > report_metrics.png")
 
 \
 
@@ -574,8 +555,7 @@ the following format within the job working directory: 
 
 \
 
-![](./docs/images/report_conf.png "Jenkins > Cadence vManager Plugin > report_conf.png"){.confluence-embedded-image
-.confluence-content-image-border height="400"}
+![](./docs/images/report_conf.png "Jenkins > Cadence vManager Plugin > report_conf.png")
 
 ### Change Log
 
