@@ -269,16 +269,16 @@ you have multiple sessions on this build step, it is enough for one
 single session to be marked as \'failed\' in order to mark the entire
 build as a failed build. 
 
-**Other Waiting Considerations**\
+**Other Waiting Considerations**
 1. When all sessions on this build step are having the state
 \'completed\' the build will be marked as
-success.\
+success.
 2. When the vManager server goes down, the build step will keep waiting
 till the server will go back up. The build step will only change its
-state based on sessions state changes.\
+state based on sessions state changes.
 3. If the session was manually deleted on the vManager server, before
 reaching into final state, the build will be marked as a failure
-build.\
+build.
 4. In any case, if the number of minutes waiting is bigger than the
 timeout set here, the build will marked as a failed
 build.
@@ -288,52 +288,42 @@ Charting**
 
 The launch Session Plugin is also capable of placing an XML file in the
 format of Junit Test Report.  The XML file name will
-be [**session_runs.xml**] This format let \'Junit Plugin\"
+be **session_runs.xml** This format let \'Junit Plugin\"
 chart over each build.  In order to activate
 this:
 
-[1.][After activating the \"wait for
+1. After activating the \"wait for
 session to end\", check the  \"Generate JUnit Result\" checkbox.  You
 can also add custom Runs\' attributes to the report using this
-configuration.]
+configuration.
 
-[2.][Install the plugin \"Junit Plugin\".
- Add a final build step to
-pick \*][**/**][.session\_runs.xml
-from the workspace.]
+2. Install the plugin \"Junit Plugin\".
+ Add a final build step to pick session_runs.xml
+from the workspace.
 
-[This will give you a detail summary of the build, and an aggregated
-charting over your entire builds.  See
-below.]
+This will give you a detail summary of the build, and an aggregated
+charting over your entire builds.  See below.
 
 ![](./docs/images/detail_junit.png "Jenkins > Cadence vManager Plugin > detail_junit.png")
 ![](./docs/images/JunitA.png "Jenkins > Cadence vManager Plugin > JunitA.png")
 
-**\
-**
+
 
 **Launching session using pipeline syntax**
 
 The vManager Plugin (Launching New Session only) also support the
 Pipeline syntax:
 
-![](./docs/images/pipeline.png "Jenkins > Cadence vManager Plugin > pipeline.png"){.confluence-embedded-image
-.confluence-content-image-border height="250"}
+![](./docs/images/pipeline.png "Jenkins > Cadence vManager Plugin > pipeline.png")
 
-![](./docs/images/stage.png "Jenkins > Cadence vManager Plugin > stage.png"){.confluence-embedded-image
-.confluence-content-image-border width="794" height="400"}
+![](./docs/images/stage.png "Jenkins > Cadence vManager Plugin > stage.png")
 
-[**\
-**]
 
-[**Setting Jenkins to delete the build\'s sessions from vManager DB when
-a build is being removed**]
+**Setting Jenkins to delete the build\'s sessions from vManager DB when
+a build is being removed**
 
-[**![](./docs/images/delete.png "Jenkins > Cadence vManager Plugin > delete.png")\
-**]
+![](./docs/images/delete.png "Jenkins > Cadence vManager Plugin > delete.png")\
 
-[**\
-**]
 
 <div>
 
@@ -358,10 +348,10 @@ were created during that same build.\
 With this option you can also supply a generic user/password to be used
 for the delete operation, otherwise, the same user that was used during
 the build will be picked automatically. \
-Please note that the sync methodology is lacking two main aspects:\
+Please note that the sync methodology is lacking two main aspects:
 1. Since Jenkins ignores any exception thrown within the callback
 functions of RunListener, the build will get deleted even if the session
-failed to get deleted from vManager DB.\
+failed to get deleted from vManager DB.
 2. When the vAPI is down, it can take up to 20 seconds to finish the
 operation (as it needs to wait till vAPI will be available) - the UX at
 that time, might appears as sluggish to the end user.\
@@ -405,9 +395,8 @@ The file name should be: \$BUILD\_NUMBER.\$BUILD\_ID.user.input\
 The job will pick the userid which is in the file, and connect to vAPI
 using this userid and the vAPI secret key.
 
-\
 
-[***vManager Post Build Actions***]
+[***vManager Post Build Actions***]\
 The vManager Plugin also supports a post-build action that brings:
 
 -   High level view at the  session\'s states launched by the various
