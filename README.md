@@ -1,7 +1,11 @@
 # Cadence vManager Jenkins Plugin
 
 This plugin adds an ability to perform REST over HTTP calls to Cadence vManager as a step in your build.
-  
+
+[![Jenkins Plugin](https://img.shields.io/jenkins/plugin/v/vmanager-plugin.svg)](https://plugins.jenkins.io/vmanager-plugin)
+[![Jenkins Plugin Installs](https://img.shields.io/jenkins/plugin/i/vmanager-plugin.svg?color=blue)](https://plugins.jenkins.io/vmanager-plugin)
+[![Contributors](https://img.shields.io/github/contributors/jenkinsci/vmanager-plugin.svg)](https://github.com/jenkinsci/vmanager-plugin/graphs/contributors)
+
 ### Plugin Dependency
 
 Please make sure you have the **dashboard-view** &
