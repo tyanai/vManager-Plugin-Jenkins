@@ -1,5 +1,4 @@
- 
-  ----------------------------------------------------------------------------------------------------------
+  ----------------------------------------------------------------------------------------------------------
   This plugin adds an ability to perform REST over HTTP calls to Cadence vManager as a step in your build.
   ----------------------------------------------------------------------------------------------------------
 
@@ -38,26 +37,25 @@ build process.
     build removal (plugin ver 2.5.2 and above).
 -   Adds a link within the project page for direct access to the
     vManager web [analysis (post-build
-    action).]{style="font-size: 14.0px;"}
+    action).]
 -   [Adds a table of sessions within the project\'s page to track the
     session\'s history and give high level overview about the progress
-    (post-build action).]{style="font-size: 14.0px;"}
+    (post-build action).]
 -   [Adds an ability to embed the vManager Summary Report within Jenkins
-    as part of the build page.]{style="font-size: 14.0px;"}
+    as part of the build page.]
 -   [[Adds an ability to send vManager Summary Report to dynamically
     selective users at the end of the
-    regression.]{style="font-size: 14.0px;"}]{style="font-size: 14.0px;"}
+    regression.]]
 -   [[Support Collect
-    Mode.]{style="font-size: 14.0px;"}]{style="font-size: 14.0px;"}
+    Mode.]]
 
 ### Configuration
 
 After installing the plugin you\'ll get two new steps in the build step
 selection.
 
-![](./docs/images/addstep.png "Jenkins > Cadence vManager Plugin > addstep.png"){.confluence-embedded-image
-.confluence-content-image-border}\
-[*A new step types*]{style="color: rgb(136,136,136);"}
+![](./docs/images/addstep.png "Jenkins > Cadence vManager Plugin > addstep.png")\
+[*A new step types*]
 
 -   Choose \"**vManager API**\" if you need a free-style vAPI call to
     sends dynamic json input and receive a json output.
