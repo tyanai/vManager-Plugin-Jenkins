@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.vmanager.dsl.post;
 
+import hudson.FilePath;
 import hudson.model.Job;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -21,6 +22,7 @@ public class ReportBuildAction extends PostActionBase implements Serializable, R
     private transient Run<?, ?> build;
     private transient TaskListener listener;
     private transient ReportManager reportManager;
+    private transient FilePath filePath;
 
     @Override 
     public String getIconFileName() {
@@ -48,12 +50,13 @@ public class ReportBuildAction extends PostActionBase implements Serializable, R
         return build;
     }
 
-    public ReportBuildAction(final Run<?, ?> build, SummaryReportParams summaryReportParams, VAPIConnectionParam vAPIConnectionParam, TaskListener listener) {
+    public ReportBuildAction(final Run<?, ?> build, SummaryReportParams summaryReportParams, VAPIConnectionParam vAPIConnectionParam, TaskListener listener, FilePath filePath) {
 
         this.build = build;
         this.listener = listener;
+        this.filePath = filePath;
         
-        this.reportManager = new ReportManager(build, summaryReportParams, vAPIConnectionParam, listener);
+        this.reportManager = new ReportManager(build, summaryReportParams, vAPIConnectionParam, listener,filePath);
         try{
             boolean isStreaming = false;
             if ("stream".equals(summaryReportParams.vManagerVersion)){
@@ -78,7 +81,7 @@ public class ReportBuildAction extends PostActionBase implements Serializable, R
     }
     
     public String getReportFromWorkspace() {
-        ReportManager reportManager = new ReportManager(build, null, null, listener);
+        ReportManager reportManager = new ReportManager(build, null, null, listener,filePath);
         return reportManager.getReportFromWorkspace();
     }
     

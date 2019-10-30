@@ -28,6 +28,8 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
         EnvVars envVars = getContext().get(EnvVars.class);
         String buildId = envVars.get("BUILD_ID");
         int buildNumber = new Integer(envVars.get("BUILD_NUMBER"));
+        
+        
 
         String workspace = envVars.get("WORKSPACE");
 
@@ -172,7 +174,7 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
         }
 
         try {
-            Utils utils = new Utils();
+            Utils utils = new Utils(null,false);
             // Get the list of VSIF file to launch
             String[] vsifFileNames = null;
             String[] sessionNames = null;
@@ -249,6 +251,9 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
 
             // Now call the actual launch
             // ----------------------------------------------------------------------------------------------------------------
+           
+           
+            
             String output = utils.executeVSIFLaunch(vsifFileNames, step.getVAPIUrl(), step.isAuthRequired(), tempUser, tempPassword, listener, step.isDynamicUserId(), buildId, buildNumber,
                     "" + workspace, step.getConnTimeout(), step.getReadTimeout(), step.isAdvConfig(), jsonEnvInput, step.isUseUserOnFarm(), step.getUserFarmType(), farmUserPassword, stepHolder, step.getEnvSourceInputFile(), workingJobDir, vMGRBuildArchiver, step.isUserPrivateSSHKey(), jsonAttrValuesInput, step.getExecutionType(), sessionNames);
             if (!"success".equals(output)) {

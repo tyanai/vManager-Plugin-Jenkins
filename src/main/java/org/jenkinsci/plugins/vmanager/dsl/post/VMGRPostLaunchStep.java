@@ -342,7 +342,7 @@ import org.kohsuke.stapler.StaplerRequest;
                 ServletException {
             try {
 
-                Utils utils = new Utils();
+                Utils utils = new Utils(null,false);
                 String output = utils.checkVAPIConnection(vAPIUrl, authRequired, vAPIUser, vAPIPassword);
                 if (!output.startsWith("Failed")) {
                     return FormValidation.ok("Success. " + output);

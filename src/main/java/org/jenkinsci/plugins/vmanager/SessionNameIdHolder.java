@@ -42,9 +42,9 @@ public class SessionNameIdHolder {
        
 	
 	public List<String> getSessionNames(String[] sessionNames, String url, boolean requireAuth, String user, String password, TaskListener listener, boolean dynamicUserId, String buildID, int buildNumber,
-            String workPlacePath, int connConnTimeOut, int connReadTimeout, boolean advConfig) throws Exception{
+            String workPlacePath, int connConnTimeOut, int connReadTimeout, boolean advConfig, Utils utils) throws Exception{
 		HttpURLConnection conn = null;
-		Utils utils = new Utils();
+		//Utils utils = new Utils();
 		listener.getLogger().print("Trying to get session ID for the session names supplied:\n");
 		String apiURL = url + "/rest/sessions/list";
                 List<String> sessionList = new ArrayList<String>();

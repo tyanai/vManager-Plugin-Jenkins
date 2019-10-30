@@ -1,5 +1,8 @@
 package org.jenkinsci.plugins.vmanager;
 
+import hudson.FilePath;
+import hudson.model.AbstractBuild;
+import hudson.model.Run;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -90,9 +93,9 @@ public class SessionStatusHolder {
         
        
 	
-	public void dumpSessionStatus(boolean postSession, Map<String, String> sessionIdName) throws Exception{
+	public void dumpSessionStatus(boolean postSession, Map<String, String> sessionIdName,FilePath filePath, boolean noneSharedNFS) throws Exception{
 		HttpURLConnection conn = null;
-		Utils utils = new Utils();
+		Utils utils = new Utils(filePath,noneSharedNFS);
 		
 		String apiURL = url + "/rest/sessions/list";
 		
@@ -120,7 +123,7 @@ public class SessionStatusHolder {
 				}
 				
 				//Retrive all the session params
-				writeSessionIntoFile(sessionObject,postSession,sessionIdName);
+				writeSessionIntoFile(sessionObject,postSession,sessionIdName,utils);
 				
 				
 				
@@ -142,7 +145,7 @@ public class SessionStatusHolder {
 		}
 	}
 	
-	private void writeSessionIntoFile(JSONObject session,boolean postSession, Map<String, String> sessionIdName) throws IOException, Exception{
+	private void writeSessionIntoFile(JSONObject session,boolean postSession, Map<String, String> sessionIdName, Utils utils) throws IOException, Exception{
 		
 		
 		
@@ -210,7 +213,7 @@ public class SessionStatusHolder {
                     }
                 }
 
-		FileWriter writer = new FileWriter(fileOutput);
+		StringBuffer writer = new StringBuffer();
 		
 		writer.append("status=" + sessionData.getStatus() + "\n");
 		writer.append("name=" + sessionData.getName() + "\n");
@@ -244,17 +247,21 @@ public class SessionStatusHolder {
 		
 		writer.append("url=" + sessionData.getServerUrl() + "\n");
                 writer.append("idNames=" + idNameResult + "\n");
-		
-		
-		writer.flush();
-		writer.close();
+		 
+                utils.standardWriteToDisk(fileOutput, writer.toString());
                 
                 //For sake of backward compatibility, also place a copy into the workspace dir:
-                String copyToWorkspace = this.workPlacePath + File.separator + buildNumber + "." + buildId + ".session_status.properties";
+                try{
+                    String copyToWorkspace = this.workPlacePath + File.separator + buildNumber + "." + buildId + ".session_status.properties";
+                    utils.saveFileOnDisk(copyToWorkspace, writer.toString());
+                }catch (Exception e){
+                    this.listener.getLogger().println("Info - Failed to dump session status for workspace dir for backward compatibility.  This is not a must.");
+                }
+                /*
                 Path copyFrom = FileSystems.getDefault().getPath(fileOutput);
                 Path copyTo = FileSystems.getDefault().getPath(copyToWorkspace);
                 Files.copy(copyFrom, copyTo, StandardCopyOption.REPLACE_EXISTING);
-                
+                */
                
                 if (postSession){
                     //Just before continue to the next Jenkins step, check if the user choose to fail the entire Job in case all runs failed

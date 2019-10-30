@@ -1,7 +1,6 @@
 package org.jenkinsci.plugins.vmanager;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -36,14 +35,14 @@ public class UnitTestFormatter {
 		this.runs = runs;
 	}
 	
-	public void dumpXMLFile(String workPlacePath, int buildNumber, String buildID) throws IOException {
+	public void dumpXMLFile(String workPlacePath, int buildNumber, String buildID, Utils utils) throws IOException {
 		
 		if (runs.size() > 0){
 			// Flush the output into workspace
 			//String fileOutput = workPlacePath + File.separator + buildNumber + "." + buildID + "." + sessionId + ".session_runs.xml";
 			String fileOutput = workPlacePath + File.separator + "session_runs.xml";
 
-			FileWriter writer = new FileWriter(fileOutput);
+			StringBuffer writer = new StringBuffer();
 			writer.append("<testsuite tests=\"vManager\">" + "\n");		
 			Iterator<JSONObject> runsIter = runs.iterator();
 			JSONObject tmpRun = null;
@@ -119,8 +118,9 @@ public class UnitTestFormatter {
 			}
 			
 			writer.append("</testsuite>" + "\n");
-			writer.flush();
-			writer.close();
+                        
+                        utils.saveFileOnDisk(fileOutput, writer.toString());
+			
 		}
 		
 	}

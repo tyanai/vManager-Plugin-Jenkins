@@ -23,6 +23,7 @@
  */
 package org.jenkinsci.plugins.vmanager;
 
+import hudson.FilePath;
 import hudson.model.Job;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -76,12 +77,15 @@ public class ReportManager {
     private VMGRRun vmgrRun;
     private TaskListener listener;
     private boolean testMode = false;
+    private FilePath filePath = null;
 
-    public ReportManager(Run<?, ?> build, SummaryReportParams summaryReportParams, VAPIConnectionParam vAPIConnectionParam, TaskListener listener) {
+    public ReportManager(Run<?, ?> build, SummaryReportParams summaryReportParams, VAPIConnectionParam vAPIConnectionParam, TaskListener listener, FilePath fp) {
         this.build = build;
         this.summaryReportParams = summaryReportParams;
         this.vAPIConnectionParam = vAPIConnectionParam;
         this.listener = listener;
+        this.filePath = filePath;
+        
 
         Job job = build.getParent();
         String workingDir = job.getBuildDir() + File.separator + build.getNumber();
@@ -120,7 +124,7 @@ public class ReportManager {
     }
 
     private String getReportEmailAddresses() {
-        Utils utils = new Utils();
+        Utils utils = new Utils(filePath,summaryReportParams.noneSharedNFS);
         String[] emails;
         String output = null;
 
@@ -306,7 +310,7 @@ public class ReportManager {
                 listener.getLogger().println("ReportManager - Using user freestyle json to bring the report...");
             }
             //Load json from file
-            Utils utils = new Utils();
+            Utils utils = new Utils(filePath,summaryReportParams.noneSharedNFS);
             String freeVAPISyntax;
             if (this.testMode) {
                 freeVAPISyntax = utils.loadUserSyntaxForSummaryReport("20", 20, "" + "c://temp", summaryReportParams.freeVAPISyntax, null, summaryReportParams.deleteReportSyntaxInputFile);
@@ -412,7 +416,8 @@ public class ReportManager {
             if (vAPIConnectionParam.dynamicUserId) {
                 BufferedReader reader = null;
                 try {
-                    Utils utils = new Utils();
+                    
+                    Utils utils = new Utils(filePath,summaryReportParams.noneSharedNFS);
                     reader = utils.loadFileFromWorkSpace(buildId, buildNumber, jobWorkingDir, null, listener, false, "user.input");
                     String line = null;
                     while ((line = reader.readLine()) != null) {
@@ -493,7 +498,7 @@ public class ReportManager {
         }
 
         HttpURLConnection conn = null;
-        Utils utils = new Utils();
+        Utils utils = new Utils(filePath,summaryReportParams.noneSharedNFS);
         String apiURL = vAPIConnectionParam.vAPIUrl + "/rest/reports/generate-summary-report";
         if (isStreamingOn) {
             apiURL = vAPIConnectionParam.vAPIUrl + "/rest/reports/stream-summary-report";
@@ -616,7 +621,7 @@ public class ReportManager {
         }
 
         HttpURLConnection conn = null;
-        Utils utils = new Utils();
+        Utils utils = new Utils(filePath,summaryReportParams.noneSharedNFS);
         String apiURL = vAPIConnectionParam.vAPIUrl + "/rest/reports/generate-summary-report";
 
         int buildNumber = 20;

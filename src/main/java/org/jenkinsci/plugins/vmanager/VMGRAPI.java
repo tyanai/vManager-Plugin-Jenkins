@@ -36,6 +36,7 @@ public class VMGRAPI extends Builder {
 	private final String apiUrl;
 	private final String requestMethod;
 	private final boolean advConfig;
+        private final boolean noneSharedNFS;
 	private int connTimeout = 1;
 	private int readTimeout = 30;
 
@@ -44,7 +45,7 @@ public class VMGRAPI extends Builder {
 	// "DataBoundConstructor"
 	@DataBoundConstructor
 	public VMGRAPI(String vAPIUrl, String vAPIUser, String vAPIPassword, String vAPIInput, String vJsonInputFile, boolean deleteInputFile, boolean authRequired, String apiType,
-			boolean dynamicUserId, String apiUrl, String requestMethod, boolean advConfig, int connTimeout, int readTimeout) {
+			boolean dynamicUserId, String apiUrl, String requestMethod, boolean advConfig, int connTimeout, int readTimeout,boolean noneSharedNFS) {
 		this.vAPIUrl = vAPIUrl;
 		this.vAPIUser = vAPIUser;
 		this.vAPIPassword = vAPIPassword;
@@ -59,6 +60,7 @@ public class VMGRAPI extends Builder {
 		this.advConfig = advConfig;
 		this.connTimeout = connTimeout;
 		this.readTimeout = readTimeout;
+                this.noneSharedNFS = noneSharedNFS;
 	}
 
 	/**
@@ -68,6 +70,10 @@ public class VMGRAPI extends Builder {
 		return vAPIUrl;
 	}
 
+        public boolean isNoneSharedNFS() {
+            return noneSharedNFS;
+        }
+        
 	public String getApiUrl() {
 		return apiUrl;
 	}
@@ -157,7 +163,7 @@ public class VMGRAPI extends Builder {
 
 
 		try {
-			Utils utils = new Utils();
+			Utils utils = new Utils(build.getWorkspace(),noneSharedNFS);
 			// Get the jSON query string
 			String jSonInput = null;
 
@@ -304,7 +310,7 @@ public class VMGRAPI extends Builder {
 				ServletException {
 			try {
 
-				Utils utils = new Utils();
+				Utils utils = new Utils(null,false);
 				String output = utils.checkVAPIConnection(vAPIUrl, authRequired, vAPIUser, vAPIPassword);
 				if (!output.startsWith("Failed")) {
 					return FormValidation.ok("Success. " + output);

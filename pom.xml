@@ -11,7 +11,7 @@
   <version>2.7.2-SNAPSHOT</version>
   <packaging>hpi</packaging>
   <description>Integrates Jenkins to Cadence vManager</description>
-  <url>http://wiki.jenkins-ci.org/display/JENKINS/Cadence+vManager+Plugin</url>
+  <url>https://github.com/jenkinsci/vmanager-plugin</url>
   <licenses>
     <license>
       <name>MIT License</name>

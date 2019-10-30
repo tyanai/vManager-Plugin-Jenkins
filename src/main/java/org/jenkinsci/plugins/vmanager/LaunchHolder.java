@@ -1,5 +1,6 @@
 package org.jenkinsci.plugins.vmanager;
 
+import hudson.FilePath;
 import hudson.model.TaskListener; 
 
 import java.io.BufferedReader;
@@ -27,18 +28,23 @@ public class LaunchHolder {
 	private static final String postData1 = "{\"filter\":{\"attName\":\"id\",\"operand\":\"EQUALS\",\"@c\":\".AttValueFilter\",\"attValue\":\"";
 	private static final String postData2 = "\"},\"projection\": {\"type\":\"SELECTION_ONLY\",\"selection\":[\"session_status\",\"name\"]}}";
 	private static final String runsList = "{\"filter\":{\"condition\":\"AND\",\"@c\":\".ChainedFilter\",\"chain\":[{\"@c\":\".RelationFilter\",\"relationName\":\"session\",\"filter\":{\"condition\":\"AND\",\"@c\":\".ChainedFilter\",\"chain\":[{\"@c\":\".InFilter\",\"attName\":\"id\",\"operand\":\"IN\",\"values\":[\"######\"]}]}}]},\"pageLength\":100000,\"settings\":{\"write-hidden\":true,\"stream-mode\":true},\"projection\": {\"type\": \"SELECTION_ONLY\",\"selection\":[\"test_name\",\"status\",\"duration\",\"test_group\",\"computed_seed\",\"id\",\"first_failure_name\",\"first_failure_description\"###ATTR###]}}";
-	Map<String, String> extraAttrLabels = new HashMap<String, String>();
+	private FilePath filePath = null;
+        private boolean noneSharedNFS = false;
+        Map<String, String> extraAttrLabels = new HashMap<String, String>();
 
-	public LaunchHolder(StepHolder stepHolder, List<String> listOfSessions) {
+	public LaunchHolder(StepHolder stepHolder, List<String> listOfSessions, FilePath filePath, boolean noneSharedNFS) {
 		super();
 		this.stepHolder = stepHolder;
 		this.listOfSessions = listOfSessions;
+                this.filePath = filePath;
+                this.noneSharedNFS = noneSharedNFS;
 
 		this.listOfSessionsForCountDown = new ArrayList<String>();
 		Iterator<String> iter = listOfSessions.iterator();
 		while (iter.hasNext()) {
 			this.listOfSessionsForCountDown.add(iter.next());
 		}
+                
 	}
 
 	public StepHolder getStepHolder() {
@@ -64,7 +70,7 @@ public class LaunchHolder {
 		String apiURL = url + "/rest/sessions/list";
 		boolean keepWaiting = true;
 
-		Utils utils = new Utils();
+		Utils utils = new Utils(filePath,noneSharedNFS);
 		HttpURLConnection conn = null;
 		long startTime = new Date().getTime();
 		long startTimeForDebugInfo = new Date().getTime();
@@ -251,14 +257,14 @@ public class LaunchHolder {
 				debugPrint = false;
 
 				// Write the session state information - can be future use by
-				// the dashboard
-				sessionStatusHolder.dumpSessionStatus(false,sessionIdName);
+				// the dashboard 
+				sessionStatusHolder.dumpSessionStatus(false,sessionIdName,filePath,noneSharedNFS);
 
 			}
 
-		}
+		} 
                 
-                sessionStatusHolder.dumpSessionStatus(true,sessionIdName);
+                sessionStatusHolder.dumpSessionStatus(true,sessionIdName,filePath,noneSharedNFS);
 
 		// Check if to write the Unit Test XML
 		if (stepHolder.getjUnitRequestHolder() != null) {
@@ -355,7 +361,7 @@ public class LaunchHolder {
 				}
                                 if (entireSessionsRuns.size() > 0){
                                     UnitTestFormatter unitTestFormatter = new UnitTestFormatter(entireSessionsRuns, tmpSessionId, stepHolder.getjUnitRequestHolder(), extraAttrLabels);
-                                    unitTestFormatter.dumpXMLFile(workPlacePath, buildNumber, buildID);
+                                    unitTestFormatter.dumpXMLFile(workPlacePath, buildNumber, buildID,utils);
                                 }
 			}
 		}

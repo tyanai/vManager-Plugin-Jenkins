@@ -52,7 +52,7 @@ public class TestPlugin {
 
     public void test() throws Exception {
 
-        Utils utils = new Utils();
+        Utils utils = new Utils(null,false);
 
         //System.out.println(Utils.getRegressionURLFromVAPIURL("https://vlnx488:50500/vmgr/vapi"));
         //Test Summary Report

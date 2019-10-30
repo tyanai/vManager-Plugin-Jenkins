@@ -330,7 +330,8 @@ public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializa
 
         if (advancedFunctions) {
             if (retrieveSummaryReport) {
-                ReportBuildAction reportAction = new ReportBuildAction(run, summaryReportParams, vAPIConnectionParam, tl);
+                summaryReportParams.noneSharedNFS = false;
+                ReportBuildAction reportAction = new ReportBuildAction(run, summaryReportParams, vAPIConnectionParam, tl,fp);
                 run.addAction(reportAction);
             }
         }
@@ -395,7 +396,7 @@ public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializa
                 ServletException {
             try {
 
-                Utils utils = new Utils();
+                Utils utils = new Utils(null,false);
                 String output = utils.checkVAPIConnection(vAPIUrl, authRequired, vAPIUser, vAPIPassword);
                 if (!output.startsWith("Failed")) {
                     return FormValidation.ok("Success. " + output);

@@ -1,6 +1,6 @@
 <div>
   <strong>Supported by vManager 17.1 and above only</strong></br>
-  In case of a need in setting the vsif attribute values, the pre-job should place into the workspace directory a file with a list of relevant attributes and their values (one line per each attribute) in the following format.</br>
+  In case of a need in setting the vsif attribute values, you can use this text area for giving a list of relevant attributes and their values (one line per each attribute) in the following format.</br>
   Line 1: attribute_name,attribute_value,attribute_type</br>
   Line 2: attribute_name,attribute_value,attribute_type</br></br>
   attribute type can be 1 of 3:</br>
@@ -13,8 +13,4 @@
   owner,dan,P_TEST</br>
   </strong>
   (Note the comma separator within the lines. <strong>Do not</strong> place comma at the end of the lines.)
-  </br>
-  The input file should be place into the working directory. 
-  In case this field is empty, The file name need to be: ${BUILD_NUMBER}.${BUILD_ID}.attr.values.input</br>
-  Please fill this field only in case, you want to hard code the input file name, to be consist across all builds.
 </div>

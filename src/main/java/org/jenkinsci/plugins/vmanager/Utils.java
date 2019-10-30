@@ -1,11 +1,14 @@
 package org.jenkinsci.plugins.vmanager;
 
+import hudson.FilePath;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.security.KeyManagementException;
@@ -19,20 +22,32 @@ import java.util.LinkedList;
 import java.util.List;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.StringTokenizer;
+import hudson.FilePath;
+import java.io.FileNotFoundException;
 
 import javax.net.ssl.*;
 
 import org.apache.commons.codec.binary.Base64;
 
 import net.sf.json.JSONObject;
+import org.apache.commons.lang.StringUtils;
 
 public class Utils {
 
     private String UserUsedForLogin = null;
     private String PasswordUsedForLogin = null;
+    private FilePath filePath = null;
+    private boolean noneSharedNFS = false;
     
+    public Utils(FilePath filePath, boolean noneSharedNFS){
+        this.filePath = filePath;
+        this.noneSharedNFS = noneSharedNFS;
+       
+    }
     
+
     public BufferedReader loadFileFromWorkSpace(String buildID, int buildNumber, String workPlacePath, String inputFile, TaskListener listener, boolean deleteInputFile, String fileTypeEndingName)
             throws Exception {
 
@@ -50,14 +65,14 @@ public class Utils {
                 if (notInTestMode) {
                     listener.getLogger().print("Loading input file '" + fileName + "\n");
                 }
-                reader = new BufferedReader(new FileReader(fileName));
+                reader = readFileOnDisk(fileName);
             } else {
                 //fileName = workPlacePath + File.separator + inputFile;
                 fileName = inputFile;
                 if (notInTestMode) {
                     listener.getLogger().print("Loading input file '" + fileName + "\n");
                 }
-                reader = new BufferedReader(new FileReader(fileName));
+                reader = readFileOnDisk(fileName);
             }
         } catch (Exception e) {
 
@@ -74,88 +89,8 @@ public class Utils {
         return reader;
 
     }
-    
-    /*
-    public String[] loadVSIFFileNames(String buildID, int buildNumber, String workPlacePath, String inputFile, TaskListener listener, boolean deleteInputFile) throws Exception {
-        String[] output = null;
-        List<String> listOfNames = new LinkedList<String>();
-        BufferedReader reader = null;
-        String fileName = null;
-        boolean notInTestMode = true;
-        if (listener == null) {
-            notInTestMode = false;
-        }
 
-        // Set the right File name.
-        if ("".equals(inputFile) || inputFile == null) {
-            fileName = workPlacePath + File.separator + buildNumber + "." + buildID + "." + "vsif.input";
-        } else {
-            fileName = inputFile;
-        }
-
-        try {
-
-            reader = this.loadFileFromWorkSpace(buildID, buildNumber, workPlacePath, inputFile, listener, deleteInputFile, "vsif.input");
-            String line = null;
-            while ((line = reader.readLine()) != null) {
-                listOfNames.add(line);
-            }
-
-        } catch (Exception e) {
-
-            if (notInTestMode) {
-                listener.getLogger().print("Failed to read input file for the vsif targets.  Failed to load file '" + fileName + "'\n");
-            } else {
-
-                System.out.println("Failed to open the read file for the vsif targets.  Failed to load file '" + fileName + "'");
-            }
-
-            throw e;
-        } finally {
-            reader.close();
-        }
-
-        Iterator<String> iter = listOfNames.iterator();
-        output = new String[listOfNames.size()];
-        int i = 0;
-        if (notInTestMode) {
-            listener.getLogger().print("Found the following VSIF files for vManager launch:\n");
-        }
-        String theFileName = null;
-        while (iter.hasNext()) {
-            theFileName = new String(iter.next());
-            output[i++] = theFileName;
-            if (notInTestMode) {
-                listener.getLogger().print(i + " '" + theFileName + "'\n");
-            } else {
-
-                System.out.println(i + " '" + theFileName + "'");
-            }
-        }
-
-        if (deleteInputFile) {
-            if (notInTestMode) {
-                listener.getLogger().print("Job set to delete the input file.  Deleting " + fileName + "\n");
-            }
-            try {
-                File fileToDelete = new File(fileName);
-                fileToDelete.renameTo(new File(fileToDelete + ".delete"));
-            } catch (Exception e) {
-                if (notInTestMode) {
-                    listener.getLogger().print("Failed to delete input file from workspace.  Failed to delete file '" + fileName + "'\n");
-
-                } else {
-
-                    System.out.println("Failed to delete the input file from the workspace.  Failed to delete file '" + fileName + "'");
-                }
-                throw e;
-            }
-        }
-
-        return output;
-    }
-    */
-
+  
     public String[] loadDataFromInputFiles(String buildID, int buildNumber, String workPlacePath, String inputFile, TaskListener listener, boolean deleteInputFile, String type, String fileEnding) throws Exception {
         String[] output = null;
         List<String> listOfNames = new LinkedList<String>();
@@ -165,11 +100,10 @@ public class Utils {
         if (listener == null) {
             notInTestMode = false;
         }
-        
+
         if (notInTestMode) {
             listener.getLogger().print("Lookin for " + type + " input:\n");
         }
-
 
         // Set the right File name.
         if ("".equals(inputFile) || inputFile == null) {
@@ -240,88 +174,7 @@ public class Utils {
         return output;
     }
 
-    /*
-    public String[] loadSessionsFileNames(String buildID, int buildNumber, String workPlacePath, String sessionsInputFile, TaskListener listener, boolean deleteSessionInputFile) throws Exception {
-        String[] output = null;
-        List<String> listOfNames = new LinkedList<String>();
-        BufferedReader reader = null;
-        String fileName = null;
-        boolean notInTestMode = true;
-        if (listener == null) {
-            notInTestMode = false;
-        }
-
-        // Set the right File name.
-        if ("".equals(sessionsInputFile) || sessionsInputFile == null) {
-            fileName = workPlacePath + File.separator + buildNumber + "." + buildID + "." + "sessions.input";
-        } else {
-            fileName = sessionsInputFile;
-        }
-
-        try {
-
-            reader = this.loadFileFromWorkSpace(buildID, buildNumber, workPlacePath, sessionsInputFile, listener, deleteSessionInputFile, "sessions.input");
-            String line = null;
-            while ((line = reader.readLine()) != null) {
-                listOfNames.add(line);
-            }
-
-        } catch (Exception e) {
-
-            if (notInTestMode) {
-                listener.getLogger().print("Failed to read input file for the session names.  Failed to load file '" + fileName + "'\n");
-            } else {
-
-                System.out.println("Failed to open the read file for the session names.  Failed to load file '" + fileName + "'");
-            }
-
-            throw e;
-        } finally {
-            reader.close();
-        }
-
-        Iterator<String> iter = listOfNames.iterator();
-        output = new String[listOfNames.size()];
-        int i = 0;
-        if (notInTestMode) {
-            listener.getLogger().print("Found the following session names for vManager to monitor:\n");
-        }
-        String sessionfileName = null;
-        while (iter.hasNext()) {
-            sessionfileName = new String(iter.next());
-            output[i++] = sessionfileName;
-            if (notInTestMode) {
-                listener.getLogger().print(i + " '" + sessionfileName + "'\n");
-            } else {
-
-                System.out.println(i + " '" + sessionfileName + "'");
-            }
-        }
-
-        if (deleteSessionInputFile) {
-            if (notInTestMode) {
-                listener.getLogger().print("Job set to delete the input file.  Deleting " + fileName + "\n");
-            }
-            try {
-                File fileToDelete = new File(fileName);
-                fileToDelete.renameTo(new File(fileToDelete + ".delete"));
-            } catch (Exception e) {
-                if (notInTestMode) {
-                    listener.getLogger().print("Failed to delete input file from workspace.  Failed to delete file '" + fileName + "'\n");
-
-                } else {
-
-                    System.out.println("Failed to delete the input file from the workspace.  Failed to delete file '" + fileName + "'");
-                }
-                throw e;
-            }
-        }
-
-        return output;
-    }
-
-*/
-    
+  
     public String loadUserSyntaxForSummaryReport(String buildID, int buildNumber, String workPlacePath, String inputFile, TaskListener listener, boolean deleteInputFile) throws Exception {
         String output = null;
         StringBuffer jsonInput = new StringBuffer();
@@ -361,8 +214,6 @@ public class Utils {
             reader.close();
         }
 
-        
-
         if (deleteInputFile) {
             if (notInTestMode) {
                 listener.getLogger().print("Job set to delete the input file.  Deleting " + fileName + "\n");
@@ -384,8 +235,6 @@ public class Utils {
         output = jsonInput.toString();
         return output;
     }
-    
-    
 
     public String[] loadFileCredentials(String buildID, int buildNumber, String workPlacePath, String credentialInputFile, TaskListener listener, boolean deleteInputFile) throws Exception {
         String[] output = null;
@@ -581,6 +430,54 @@ public class Utils {
             throw e;
         } finally {
             reader.close();
+        }
+
+        return output;
+    }
+
+    public String loadJSONAttrValuesFromTextArea(String buildID, int buildNumber, String workPlacePath, TaskListener listener, String textarea) throws Exception {
+        String output = null;
+        StringBuffer listOfAttrValues = new StringBuffer();
+
+        boolean notInTestMode = true;
+        if (listener == null) {
+            notInTestMode = false;
+        }
+
+        try {
+
+            String line = null;
+            boolean foundOneAttr = false;
+            String[] lines = StringUtils.split(textarea, System.lineSeparator());
+            for (int i = 0; i < lines.length; i++) {
+
+                String tmpLineResult = "";
+                StringTokenizer tokenizer = new StringTokenizer(lines[i], ",");
+                tmpLineResult = tmpLineResult + "{\"name\":\"" + tokenizer.nextToken().trim() + "\",";
+                tmpLineResult = tmpLineResult + "\"value\":\"" + tokenizer.nextToken().trim() + "\",";
+                tmpLineResult = tmpLineResult + "\"type\":\"" + tokenizer.nextToken().trim() + "\"},";
+                listOfAttrValues.append(tmpLineResult);
+                foundOneAttr = true;
+            }
+
+            output = listOfAttrValues.toString();
+            if (foundOneAttr) {
+                //Remove the last comma
+                output = output.substring(0, output.length() - 1);
+            }
+
+            output = "\"attributes\":[" + output + "]";
+
+        } catch (Exception e) {
+
+            if (notInTestMode) {
+                listener.getLogger().print("Failed to parse attributes for vsif.\n " + e.getMessage());
+            } else {
+
+                System.out.println("Failed to parse attributes for vsif.\n ");
+            }
+
+            throw e;
         }
 
         return output;
@@ -897,13 +794,13 @@ public class Utils {
         if ("batch".equals(executionType)) {
             //Treat sessions that were launched by the user's batch 
             SessionNameIdHolder sessionNameIdHolder = new SessionNameIdHolder();
-            listOfSessions = sessionNameIdHolder.getSessionNames(sessionNames, url, requireAuth, user, password, listener, dynamicUserId, buildID, buildNumber, workPlacePath, connConnTimeOut, connReadTimeout, advConfig);
-            if (listOfSessions.size() == 0){
-               listener.getLogger().print("Couldn't find any data for the given project and the supplied session names.\n"); 
-               return "Please check the input file that lists the session names and make sure you have the full session names as listed in vManager.";
-               
+            listOfSessions = sessionNameIdHolder.getSessionNames(sessionNames, url, requireAuth, user, password, listener, dynamicUserId, buildID, buildNumber, workPlacePath, connConnTimeOut, connReadTimeout, advConfig,this);
+            if (listOfSessions.size() == 0) {
+                listener.getLogger().print("Couldn't find any data for the given project and the supplied session names.\n");
+                return "Please check the input file that lists the session names and make sure you have the full session names as listed in vManager.";
+
             }
-            
+
         } else {
 
             for (int i = 0; i < vsifs.length; i++) {
@@ -1029,15 +926,14 @@ public class Utils {
         // Flush the output into workspace
         String fileOutput = workPlacePath + File.separator + buildNumber + "." + buildID + ".session_launch.output";
 
-        FileWriter writer = new FileWriter(fileOutput);
+        StringBuffer writer = new StringBuffer();
         Iterator<String> iter = listOfSessions.iterator();
         while (iter.hasNext()) {
             writer.append(iter.next() + "\n");
         }
+        this.saveFileOnDisk(fileOutput, writer.toString());
 
-        writer.flush();
-        writer.close();
-
+       
         if (stepHolder != null) {
             waitTillSessionEnds(url, requireAuth, user, password, listener, dynamicUserId, buildID, buildNumber,
                     workPlacePath, connConnTimeOut, connReadTimeout, advConfig, stepHolder, listOfSessions, notInTestMode, workingJobDir);
@@ -1137,7 +1033,7 @@ public class Utils {
     public void waitTillSessionEnds(String url, boolean requireAuth, String user, String password, TaskListener listener, boolean dynamicUserId, String buildID, int buildNumber,
             String workPlacePath, int connConnTimeOut, int connReadTimeout, boolean advConfig, StepHolder stepHolder, List listOfSessions, boolean notInTestMode, String workingJobDir) throws Exception {
 
-        LaunchHolder launchHolder = new LaunchHolder(stepHolder, listOfSessions);
+        LaunchHolder launchHolder = new LaunchHolder(stepHolder, listOfSessions,filePath,noneSharedNFS);  
         launchHolder.performWaiting(url, requireAuth, user, password, listener, dynamicUserId, buildID, buildNumber,
                 workPlacePath, connConnTimeOut, connReadTimeout, advConfig, notInTestMode, workingJobDir);
 
@@ -1201,6 +1097,77 @@ public class Utils {
             }
             return errorMessage;
         }
+    }
+
+    public void saveFileOnDisk(String fileOnDiskPath, String output) throws IOException {
+        if (noneSharedNFS && filePath.isRemote()) {
+            /*
+            hudson.remoting.Channel channel = null;
+            try {
+                channel = (hudson.remoting.Channel) build.getExecutor().getCurrentWorkspace().getChannel();
+                hudson.FilePath newFile = new hudson.FilePath(channel, fileOnDiskPath);
+                newFile.write(output, StandardCharsets.UTF_8.name());
+            } catch (Exception e) {
+                e.printStackTrace();
+                standardWriteToDisk( fileOnDiskPath,  output);
+            } finally {
+                //channel.close();
+            }
+            */
+            try {
+                hudson.FilePath newFile = filePath.child(fileOnDiskPath);
+                newFile.write(output, StandardCharsets.UTF_8.name());
+            }catch (Exception e) {
+                e.printStackTrace();
+                standardWriteToDisk( fileOnDiskPath,  output);
+            }
+
+        } else {
+            standardWriteToDisk( fileOnDiskPath,  output);
+            
+        }
+    }
+    
+  
+    public BufferedReader readFileOnDisk(String fileOnDiskPath) throws FileNotFoundException {
+        if (noneSharedNFS && filePath.isRemote()) {
+            /*
+            hudson.remoting.Channel channel = null;
+            try {
+                channel = (hudson.remoting.Channel) build.getExecutor().getCurrentWorkspace().getChannel();
+                hudson.FilePath newFile = new hudson.FilePath(channel, fileOnDiskPath);
+                newFile.write(output, StandardCharsets.UTF_8.name());
+            } catch (Exception e) {
+                e.printStackTrace();
+                standardWriteToDisk( fileOnDiskPath,  output);
+            } finally {
+                //channel.close();
+            }
+            */
+            try {
+                hudson.FilePath newFile = filePath.child(fileOnDiskPath);
+                return new BufferedReader(new InputStreamReader( newFile.read(), StandardCharsets.UTF_8));
+                
+            }catch (Exception e) {
+                e.printStackTrace();
+                return standardReadFromDisk( fileOnDiskPath);
+            }
+
+        } else {
+            return standardReadFromDisk(fileOnDiskPath);
+            
+        }
+    }
+    
+    public void standardWriteToDisk(String fileOnDiskPath, String output) throws IOException{
+        FileWriter writer = new FileWriter(fileOnDiskPath);
+        writer.append(output);
+        writer.flush();
+        writer.close(); 
+    }
+    
+    public BufferedReader standardReadFromDisk(String fileOnDiskPath) throws FileNotFoundException{
+        return new BufferedReader(new FileReader(fileOnDiskPath));
     }
 
 }

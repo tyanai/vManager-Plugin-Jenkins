@@ -1,14 +1,11 @@
 package org.jenkinsci.plugins.vmanager;
 
 import hudson.Extension;
-import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.BuildListener;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
-import hudson.model.Action;
 import hudson.model.Run;
-import hudson.model.TaskListener;
 import hudson.model.listeners.RunListener;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
@@ -19,11 +16,11 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 
 import net.sf.json.JSONObject;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 
@@ -62,6 +59,7 @@ public class VMGRLaunch extends Builder {
     private final String doneResolver;
     private final String suspendedResolver;
     private final boolean waitTillSessionEnds;
+    private final boolean noneSharedNFS;
     private int stepSessionTimeout = 0;
 
     private final boolean generateJUnitXML;
@@ -88,6 +86,10 @@ public class VMGRLaunch extends Builder {
     private final String executionType;
     private final String sessionsInputFile;
     private final boolean deleteSessionInputFile;
+    private final String envVariableType;
+    private final String envVariableText;
+    private final String attrVariableType;
+    private final String attrVariableText;
 
     //Variable that might contain macros
     private String sessionsInputFileFix;
@@ -98,6 +100,7 @@ public class VMGRLaunch extends Builder {
     private String envVaribleFileFix;
     private String attrValuesFileFix;
     private String famModeLocationFix;
+    
 
     // Fields in config.jelly must match the parameter names in the
     // "DataBoundConstructor"
@@ -106,7 +109,7 @@ public class VMGRLaunch extends Builder {
             boolean dynamicUserId, boolean advConfig, int connTimeout, int readTimeout, boolean envVarible, String envVaribleFile, String inaccessibleResolver, String stoppedResolver, String failedResolver, String doneResolver, String suspendedResolver, boolean waitTillSessionEnds,
             int stepSessionTimeout, boolean generateJUnitXML, boolean extraAttributesForFailures, String staticAttributeList, boolean markBuildAsFailedIfAllRunFailed, boolean failJobIfAllRunFailed, String envSourceInputFile, boolean vMGRBuildArchive, boolean deleteAlsoSessionDirectory,
             boolean genericCredentialForSessionDelete, String archiveUser, String archivePassword, String famMode, String famModeLocation, boolean noAppendSeed, boolean markBuildAsPassedIfAllRunPassed, boolean failJobUnlessAllRunPassed, boolean userPrivateSSHKey, boolean attrValues,
-            String attrValuesFile, String executionType, String sessionsInputFile, boolean deleteSessionInputFile) {
+            String attrValuesFile, String executionType, String sessionsInputFile, boolean deleteSessionInputFile, boolean noneSharedNFS, String envVariableType, String envVariableText, String attrVariableType, String attrVariableText) {
         this.vAPIUrl = vAPIUrl;
         this.vAPIUser = vAPIUser;
         this.vAPIPassword = vAPIPassword;
@@ -160,6 +163,11 @@ public class VMGRLaunch extends Builder {
         this.executionType = executionType;
         this.sessionsInputFile = sessionsInputFile;
         this.deleteSessionInputFile = deleteSessionInputFile;
+        this.noneSharedNFS = noneSharedNFS;
+        this.envVariableType = envVariableType;
+        this.envVariableText = envVariableText;
+        this.attrVariableType = attrVariableType;
+        this.attrVariableText = attrVariableText;
 
     }
 
@@ -168,6 +176,26 @@ public class VMGRLaunch extends Builder {
      */
     public String getSessionsInputFile() {
         return sessionsInputFile;
+    }
+
+    public boolean isNoneSharedNFS() {
+        return noneSharedNFS;
+    }
+    
+    public String getAttrVariableType() {
+        return attrVariableType;
+    }
+
+    public String getAttrVariableText() {
+        return attrVariableText;
+    }
+
+    public String getEnvVariableType() {
+        return envVariableType;
+    }
+
+    public String getEnvVariableText() {
+        return envVariableText;
     }
 
     public boolean isDeleteSessionInputFile() {
@@ -388,7 +416,7 @@ public class VMGRLaunch extends Builder {
             listener.getLogger().println("The deleteSessionInputFile : " + deleteSessionInputFile);
         } else {
             listener.getLogger().println("The vsif to be executed is is " + vsifType);
-            
+
             try {
                 vSIFNameFix = TokenMacro.expandAll(build, listener, vSIFName);
             } catch (Exception e) {
@@ -397,8 +425,7 @@ public class VMGRLaunch extends Builder {
                 vSIFNameFix = vSIFName;
             }
             listener.getLogger().println("The vSIFName is: " + vSIFNameFix);
-            
-            
+
             try {
                 vSIFInputFileFix = TokenMacro.expandAll(build, listener, vSIFInputFile);
             } catch (Exception e) {
@@ -508,7 +535,7 @@ public class VMGRLaunch extends Builder {
         }
 
         try {
-            Utils utils = new Utils();
+            Utils utils = new Utils(build.getWorkspace(),noneSharedNFS);
             // Get the list of VSIF file to launch
             String[] vsifFileNames = null;
             String[] sessionNames = null;
@@ -544,24 +571,86 @@ public class VMGRLaunch extends Builder {
 
                 //check if user set an environment variables in addition:
                 if (envVarible) {
-                    if (envVaribleFile == null || envVaribleFile.trim().equals("")) {
-                        listener.getLogger().println("The environment varible file chosen is dynamic. Env File directory dynamic workspace directory: '" + build.getWorkspace() + "'");
-                    } else {
-                        listener.getLogger().println("The environment varible file chosen is static. Environment file name is: '" + envVaribleFileFix.trim() + "'");
+                    if (envVariableType == null || "".equals(envVariableType) || "file".equals(envVariableType)) {
+                        envVaribleFileFix = envVaribleFile;
+                        if (envVaribleFile == null || envVaribleFile.trim().equals("")) {
+                            listener.getLogger().println("The environment varible file chosen is dynamic. Env File directory dynamic workspace directory: '" + build.getWorkspace() + "'");
+                        } else {
+
+                            try {
+                                envVaribleFileFix = TokenMacro.expandAll(build, listener, envVaribleFile);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                listener.getLogger().println("Failed to extract out macro from the input of envVaribleFile: " + envVaribleFile);
+                                envVaribleFileFix = envVaribleFile;
+                            }
+
+                            listener.getLogger().println("The environment varible file chosen is static. Environment file name is: '" + envVaribleFileFix.trim() + "'");
+                        }
+                        jsonEnvInput = utils.loadJSONEnvInput(build.getId(), build.getNumber(), "" + build.getWorkspace(), envVaribleFileFix, listener);
+                        try {
+                            jsonEnvInput = TokenMacro.expandAll(build, listener, jsonEnvInput);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            listener.getLogger().println("Failed to extract out macro from the input of envVaribleFile: " + envVaribleFileFix);
+                        }
+                        listener.getLogger().println("Found the following environment for the vsif: " + jsonEnvInput);
                     }
-                    jsonEnvInput = utils.loadJSONEnvInput(build.getId(), build.getNumber(), "" + build.getWorkspace(), envVaribleFileFix, listener);
-                    listener.getLogger().println("Found the following environment for the vsif: " + jsonEnvInput);
+                    if ("textarea".equals(envVariableType)) {
+                        String tmpEnvText = null;
+                        try {
+                            tmpEnvText = TokenMacro.expandAll(build, listener, StringUtils.normalizeSpace(envVariableText));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            listener.getLogger().println("Failed to extract out macro from the input of envVariableText: " + StringUtils.normalizeSpace(envVariableText));
+                            tmpEnvText = StringUtils.normalizeSpace(envVariableText);
+                        }
+                        jsonEnvInput = "\"environment\":{  " + tmpEnvText + "}";
+                        listener.getLogger().println("Found the following environment variable textarea for the vsif: " + jsonEnvInput);
+                    }
+
                 }
 
                 //check if user set an attribute values in addition:
                 if (attrValues) {
-                    if (attrValuesFile == null || attrValuesFile.trim().equals("")) {
-                        listener.getLogger().println("The attribute values file chosen is dynamic. Env File directory dynamic workspace directory: '" + build.getWorkspace() + "'");
-                    } else {
-                        listener.getLogger().println("The attribute values file chosen is static. Attribute values file name is: '" + attrValuesFileFix.trim() + "'");
+                    if (attrVariableType == null || "".equals(attrVariableType) || "file".equals(attrVariableType)) {
+                        attrValuesFileFix = attrValuesFile;
+                        if (attrValuesFile == null || attrValuesFile.trim().equals("")) {
+                            listener.getLogger().println("The attribute values file chosen is dynamic. Env File directory dynamic workspace directory: '" + build.getWorkspace() + "'");
+                        } else {
+
+                            try {
+                                attrValuesFileFix = TokenMacro.expandAll(build, listener, attrValuesFile);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                listener.getLogger().println("Failed to extract out macro from the input of attrValuesFile: " + attrValuesFile);
+                                attrValuesFileFix = attrValuesFile;
+                            }
+
+                            listener.getLogger().println("The attribute values file chosen is static. Attribute values file name is: '" + attrValuesFileFix.trim() + "'");
+                        }
+                        jsonAttrValuesInput = utils.loadJSONAttrValuesInput(build.getId(), build.getNumber(), "" + build.getWorkspace(), attrValuesFileFix, listener);
+                        try {
+                            jsonAttrValuesInput = TokenMacro.expandAll(build, listener, jsonAttrValuesInput);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            listener.getLogger().println("Failed to extract out macro from the input of attrValuesFile: " + attrValuesFileFix);
+                        }
+                        listener.getLogger().println("Found the following attribute values for the vsif: " + jsonAttrValuesInput);
                     }
-                    jsonAttrValuesInput = utils.loadJSONAttrValuesInput(build.getId(), build.getNumber(), "" + build.getWorkspace(), attrValuesFileFix, listener);
-                    listener.getLogger().println("Found the following attribute values for the vsif: " + jsonAttrValuesInput);
+                    if ("textarea".equals(attrVariableType)) {
+                        String tmpAttrText = null;
+                        String fetchJsonFromTextArea = utils.loadJSONAttrValuesFromTextArea(build.getId(), build.getNumber(), "" + build.getWorkspace(), listener, attrVariableText);
+                        try {
+                            tmpAttrText = TokenMacro.expandAll(build, listener, StringUtils.normalizeSpace(fetchJsonFromTextArea));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            listener.getLogger().println("Failed to extract out macro from the input of fetchJsonFromTextArea: " + StringUtils.normalizeSpace(fetchJsonFromTextArea));
+                            tmpAttrText = StringUtils.normalizeSpace(fetchJsonFromTextArea);
+                        }
+                        jsonAttrValuesInput = tmpAttrText;
+                        listener.getLogger().println("Found the following attribute values textarea for the vsif: " + jsonAttrValuesInput);
+                    }
                 }
 
                 if ("dynamic".equals(userFarmType)) {
@@ -583,6 +672,15 @@ public class VMGRLaunch extends Builder {
 
             // Now call the actual launch
             // ----------------------------------------------------------------------------------------------------------------
+            if (noneSharedNFS){
+                if(build.getWorkspace().isRemote()){
+                    listener.getLogger().println("The build is remote to master running on slave agent.");
+                } else {
+                    listener.getLogger().println("The build is local and running on master process.");
+                }
+            }
+
+
             String output = utils.executeVSIFLaunch(vsifFileNames, vAPIUrl, authRequired, tempUser, tempPassword, listener, dynamicUserId, build.getId(), build.getNumber(),
                     "" + build.getWorkspace(), connTimeout, readTimeout, advConfig, jsonEnvInput, useUserOnFarm, userFarmType, farmUserPassword, stepHolder, envSourceInputFileFix, workingJobDir, vMGRBuildArchiver, userPrivateSSHKey, jsonAttrValuesInput, executionType, sessionNames);
             if (!"success".equals(output)) {
@@ -600,7 +698,7 @@ public class VMGRLaunch extends Builder {
             }
 
             listener.getLogger().println(ExceptionUtils.getFullStackTrace(e));
-            
+
             return false;
         }
 
@@ -784,7 +882,7 @@ public class VMGRLaunch extends Builder {
                 ServletException {
             try {
 
-                Utils utils = new Utils();
+                Utils utils = new Utils(null,false);
                 String output = utils.checkVAPIConnection(vAPIUrl, authRequired, vAPIUser, vAPIPassword);
                 if (!output.startsWith("Failed")) {
                     return FormValidation.ok("Success. " + output);
@@ -801,7 +899,7 @@ public class VMGRLaunch extends Builder {
                 ServletException {
             try {
 
-                Utils utils = new Utils();
+                Utils utils = new Utils(null,false);
                 String output = utils.checkVAPIConnection(vAPIUrl, true, archiveUser, archivePassword);
                 if (!output.startsWith("Failed")) {
                     return FormValidation.ok("Success. " + output);
@@ -818,7 +916,7 @@ public class VMGRLaunch extends Builder {
                 ServletException {
             try {
 
-                Utils utils = new Utils();
+                Utils utils = new Utils(null,false);
                 String output = utils.checkExtraStaticAttr(vAPIUrl, authRequired, vAPIUser, vAPIPassword, staticAttributeList);
                 if (!output.startsWith("Failed")) {
                     return FormValidation.ok("Success. " + output);

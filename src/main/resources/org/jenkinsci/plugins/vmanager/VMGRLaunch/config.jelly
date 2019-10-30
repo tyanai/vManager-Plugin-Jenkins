@@ -54,11 +54,12 @@
   
   </table>
   </f:block>
-  
+  <f:entry title="Jenkins Master and Slaves are not sharing NFS" field="noneSharedNFS" description="If checked, assumption is that the build is running on a file system that the master do not have access to."><f:checkbox name="noneSharedNFS" checked="${it.noneSharedNFS}"/></f:entry>
   <f:radioBlock name="executionType" value="launcher" title="Use session launcher" checked="${instance.executionType == 'launcher'}" inline="true">
   <f:block>
   <td colspan="4" style="padding-left: 30px;">
   <table style="width: 100% ; border: 1px solid black ;border-collapse: initial;">
+  
   <f:radioBlock name="vsifType" value="static" title="Static VSIF file name" checked="${instance.vsifType == 'static'}" inline="true">
           <f:entry title="VSIF file location" field="vSIFName" description="Default VSIF file location with VSIF file name."><f:textbox /></f:entry>
   </f:radioBlock>
@@ -73,14 +74,32 @@
   
   
    <f:optionalBlock name="envVarible"  title="Include VSIF Environment Variables" description="" checked="${instance.envVarible}" inline="true">
-     	
-        <f:entry title="Name of input file" field="envVaribleFile" description="Name of input file with environment variables in json format (not mandatory) - vManager 15.1 and above only"><f:textbox /></f:entry>
-      
+        <f:radioBlock name="envVariableType" value="file" title="File input" checked="${instance.envVariableType == 'file'}" inline="true">
+            <f:entry title="Name of input file" field="envVaribleFile" description="Name of input file with environment variables in json format (not mandatory) - vManager 15.1 and above only"><f:textbox /></f:entry>
+         </f:radioBlock> 
+        <f:radioBlock name="envVariableType" value="textarea" title="Environment Variables Text Area" checked="${instance.envVariableType == 'textarea'}" inline="true">
+            <f:block>
+                <table  style="border-left: 4px solid #1f80b5; margin: 0 0 0 30px;">   
+                    <f:entry title="Environment Variables" field="envVariableText" description="list of relevant environment variables in json keys format.">
+                        <f:textarea/>
+                    </f:entry>
+                </table>
+            </f:block>
+       </f:radioBlock>  
     </f:optionalBlock>
     <f:optionalBlock name="attrValues"  title="Include VSIF Attribute Values" description="" checked="${instance.attrValues}" inline="true">
-     	
-        <f:entry title="Name of input file" field="attrValuesFile" description="Name of input file with attribute values in json format (not mandatory) - vManager 17.1 and above only"><f:textbox /></f:entry>
-      
+     	<f:radioBlock name="attrVariableType" value="file" title="File input" checked="${instance.attrVariableType == 'file'}" inline="true">
+            <f:entry title="Name of input file" field="attrValuesFile" description="Name of input file with attribute values in json format (not mandatory) - vManager 17.1 and above only"><f:textbox /></f:entry>
+        </f:radioBlock>
+        <f:radioBlock name="attrVariableType" value="textarea" title="Attribute Values Text Area" checked="${instance.attrVariableType == 'textarea'}" inline="true"> 
+           <f:block>
+                <table  style="border-left: 4px solid #1f80b5; margin: 0 0 0 30px;">   
+                    <f:entry title="Attribute Values" field="attrVariableText" description="list of relevant attribute values.">
+                        <f:textarea/>
+                    </f:entry>
+                </table>
+            </f:block>
+        </f:radioBlock>
     </f:optionalBlock>
     
     
