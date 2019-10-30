@@ -18,12 +18,12 @@ Also, in case you want to chart over the runs results, install the
 ![](./docs/images/JunitA.png "Jenkins > Cadence vManager Plugin > JunitA.png")
 ![](./docs/images/Dashboard.png "Jenkins > Cadence vManager Plugin > Dashboard.png")
 
-### Why this plugin ?
+### About
 
 Cadence vManager is exposing a REST API (vAPI) for performing automation
 queries and updates for its regression/test and coverage data.  This
 plugin enables you to add a remote execution for extracting runs
-information, reports data or even launching new sessions as part of your
+information, reports data or even collecting and launching sessions as part of your
 build process.
 
 ## Features
