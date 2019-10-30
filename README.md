@@ -102,7 +102,7 @@ this field is empty, The file name need to be:
 Please fill this field only in case, you want to hard code the input
 file name, to be consist across all builds.
 
-##### *[**vManager Session Launcher**]*
+##### **vManager Session Launcher**
 
 [There are two modes for launching a session using the vManager Session
 Launcher action:]
@@ -116,9 +116,9 @@ Launcher action:]
    
   ![](./docs/images/executiontype.png "Jenkins > Cadence vManager Plugin > executiontype.png")
 
-\
 
-**Launcher mode **
+
+**Launcher mode**
 
 The step takes care for the following:
 
@@ -136,7 +136,7 @@ The below is an example of defining a **dynamic launch call with
 
 ![](./docs/images/dynamicvsif.png "Jenkins > Cadence vManager Plugin > dynamicvsif.png")\
 [*Launching more than one vsif file
-dynamically *]
+dynamically*]
 
 In case of a need in dynamically selecting the vsif files to get
 launched per job, the pre-job should place into the workspace directory
@@ -148,7 +148,6 @@ this field is empty, The file name need to be:
 Please fill this field only in case, you want to hard code the input
 file name, to be consist across all builds.
 
-\
 
 **Batch mode  ([Continue from a pre-launched
 session)]**
