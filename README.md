@@ -104,8 +104,8 @@ file name, to be consist across all builds.
 
 ##### **vManager Session Launcher**
 
-[There are two modes for launching a session using the vManager Session
-Launcher action:]
+There are two modes for launching a session using the vManager Session
+Launcher action:
 
 -   **Launcher mode (default)** - choose this if you want the plugin to
     take over the actual launch operation with all the relevant setting,
@@ -149,15 +149,15 @@ Please fill this field only in case, you want to hard code the input
 file name, to be consist across all builds.
 
 
-**Batch mode  ([Continue from a pre-launched
-session)]**
+**Batch mode  (Continue from a pre-launched
+session)**
 
-[The below is an example of defining a continues action from a previous
-launched session:]
+The below is an example of defining a continues action from a previous
+launched session:
 
 ![](./docs/images/batchmode.png "Jenkins > Cadence vManager Plugin > batchmode.png")
 
-[This option is useful for those who wish to take benefit of their own
+This option is useful for those who wish to take benefit of their own
 environment and scripts for launching sessions using batch, but still
 want the benefit of having the Job waiting for the execution to end,
 generates JUnit report, produce triage link, real time view of the
@@ -166,35 +166,34 @@ run\'s progress, etc\']\
 shell type) is taking over the session launch operation, and as such, in
 order for this plugin to continue monitor those sessions - the session
 names need to be exchange between the shell step and this
-step.]\
+step.\
 \
-[In case of a need to launch the sessions using batch as a pre-step to
+In case of a need to launch the sessions using batch as a pre-step to
 this one, the pre-step should place into the workspace directory a file
 with the session or session names that were launched - new line for each
-session name.]\
-[The input file should be place into the working directory. In case this
+session name.\
+The input file should be place into the working directory. In case this
 field is empty, The file name need to be:
 \${BUILD\_NUMBER}.\${BUILD\_ID}.sessions.input]\
 [Please fill this field only in case, you want to hard code the input
 file name, to be consist across all
-builds.]\
+builds.\
 \
-[The vManager plugin will look for the any of the input files mentioned
+The vManager plugin will look for the any of the input files mentioned
 above, and query the server for their respective id automatically. From
 that point and on, the flow continues as if the sessions were launched
-by this plugin.]
+by this plugin.
 
-\
 
-**Collect mode  ([Continue post
-\'collect\')]**
+**Collect mode  (Continue post
+\'collect\')**
 
-[The below is an example of defining a continues action from a previous
-launched session:]
+The below is an example of defining a continues action from a previous
+launched session:
 
-[![](./docs/images/batchmode.png "Jenkins > Cadence vManager Plugin > batchmode.png")]
+![](./docs/images/batchmode.png "Jenkins > Cadence vManager Plugin > batchmode.png")
 
-[This option is useful for those who wish to take advantage of this
+This option is useful for those who wish to take advantage of this
 plugin, but are not using the vManager Runner, and uses \"**collect**\"
 mode instead. For such flow they can still benefit from generated JUnit
 report, triage link, real time view of the run\'s progress, summary
@@ -218,11 +217,11 @@ file name, to be consist across all builds.\
 the vManager plugin will look for any of the input files mentioned
 above, and query the server for their respective id automatically. From
 that point and on, the flow continues as if the sessions were collected
-by this plugin.]
+by this plugin.
 
-**[Important:]**
+**Important:**
 
-[please make sure \"**Wait for launched session to end**\" is checked
+please make sure \"**Wait for launched session to end**\" is checked
 \'on\' within the plugin configuration.  Basically, your collected
 sessions must be in a \"complete\" state within vManager.  The step will
 only move FW once ALL your collected sessions are in a \"complete\"
@@ -231,9 +230,9 @@ different states for the plugin to continue, if you like.\
 \
 The output of all IDs of the launched/collected sessions can be found
 at:
-\${BUILD\_NUMBER}.\${BUILD\_ID}.session\_launch.output]
+\${BUILD\_NUMBER}.\${BUILD\_ID}.session\_launch.output
 
-\
+
 
 **Setting the build to wait till all session end execution:**
 
@@ -244,55 +243,54 @@ check box.
  
 ![](./docs/images/wait.png "Jenkins > Cadence vManager Plugin > wait.png")
 
-[The above setup allow you to select how the build will behave in each
+The above setup allow you to select how the build will behave in each
 of the state where the session stop from
-running:]
+running:
 
-[**Continue**]\
-[In case you select to continue, the build will assume (on the chosen
+**Continue**\
+In case you select to continue, the build will assume (on the chosen
 state) for a given session that it can continue and finish the wait on
-this specific session.]\
-[Please note that in case there are multiple sessions that are being
+this specific session.\
+Please note that in case there are multiple sessions that are being
 executed by this step, the build will wait till all sessions got into a
-state that allow it to continue. ]
+state that allow it to continue. 
 
-[**Ignore**]\
-[In case you select to continue, the build will assume (on the chosen
+**Ignore**\
+In case you select to continue, the build will assume (on the chosen
 state) for a given session that it can ignore the chosen state and keep
 waiting for other state (until get the \'completed\'
-state). ]
+state). 
 
-[**Fail**]\
-[In case you select to fail, the build will assume (on the chosen state)
+**Fail**\
+In case you select to fail, the build will assume (on the chosen state)
 for a given session that it should mark this build as a failure
-build. ][**Note: **][If
+build. **Note:** If
 you have multiple sessions on this build step, it is enough for one
 single session to be marked as \'failed\' in order to mark the entire
-build as a failed build. ]
+build as a failed build. 
 
-[**Other Waiting Considerations**]\
-[1. When all sessions on this build step are having the state
+**Other Waiting Considerations**\
+1. When all sessions on this build step are having the state
 \'completed\' the build will be marked as
-success.]\
-[2. When the vManager server goes down, the build step will keep waiting
+success.\
+2. When the vManager server goes down, the build step will keep waiting
 till the server will go back up. The build step will only change its
-state based on sessions state changes.]\
-[3. If the session was manually deleted on the vManager server, before
+state based on sessions state changes.\
+3. If the session was manually deleted on the vManager server, before
 reaching into final state, the build will be marked as a failure
-build.]\
-[4. In any case, if the number of minutes waiting is bigger than the
+build.\
+4. In any case, if the number of minutes waiting is bigger than the
 timeout set here, the build will marked as a failed
-build.]
+build.
 
-[**Add support in Junit Plugin and Test
-Charting**]
+**Add support in Junit Plugin and Test
+Charting**
 
-[The launch Session Plugin is also capable of placing an XML file in the
+The launch Session Plugin is also capable of placing an XML file in the
 format of Junit Test Report.  The XML file name will
-be][** **][**session\_runs**][**.xml
-- **][This format let \'Junit Plugin\"
+be [**session_runs.xml**] This format let \'Junit Plugin\"
 chart over each build.  In order to activate
-this:]
+this:
 
 [1.][After activating the \"wait for
 session to end\", check the  \"Generate JUnit Result\" checkbox.  You
