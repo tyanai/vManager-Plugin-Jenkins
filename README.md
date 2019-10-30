@@ -1,8 +1,7 @@
-  
-  ----------------------------------------------------------------------------------------------------------
-  This plugin adds an ability to perform REST over HTTP calls to Cadence vManager as a step in your build.
-  ----------------------------------------------------------------------------------------------------------
+# Cadence vManager Jenkins Plugin
 
+This plugin adds an ability to perform REST over HTTP calls to Cadence vManager as a step in your build.
+  
 ### Plugin Dependency
 
 Please make sure you have the **dashboard-view** &
@@ -23,7 +22,7 @@ plugin enables you to add a remote execution for extracting runs
 information, reports data or even launching new sessions as part of your
 build process.
 
-### Features
+## Features
 
 -   Free-style job plugin (can perform all vManager API call).
 -   Support static/dynamic API calls
@@ -47,7 +46,7 @@ build process.
     selective users at the end of the regression.
 -   Support Collect Mode.
 
-### Configuration
+## Configuration
 
 After installing the plugin you\'ll get two new steps in the build step
 selection.
@@ -70,7 +69,7 @@ type](./docs/images/postbuild.png "Jenkins > Cadence vManager Plugin > postbuild
 -   The Post Build Action **must have** the \'vManager Launcher\' part
     running as part of the build steps as a pre-requisites.
 
-### Usage
+## Usage
 
 ##### **vManager API**
 
@@ -372,7 +371,7 @@ requires the use of forward slash instead of backslash.
 
 </div>
 
-##### Dashboard
+## Dashboard
 
 The vManager Plugin also support a new Dashboard portal using the
 Dashboard-view plugin.  The new portal reflects the session\'s states
@@ -382,7 +381,7 @@ launched by the various builds:
 To enable the new portal, select \"**vManager Latest Sessions**\" from
 the Dashboard drop-down.
 
-##### Authentication
+## Authentication
 
 ##### ![](./docs/images/newlogin.png "Jenkins > Cadence vManager Plugin > newlogin.png")
 
@@ -396,7 +395,8 @@ The job will pick the userid which is in the file, and connect to vAPI
 using this userid and the vAPI secret key.
 
 
-***vManager Post Build Actions***\
+## vManager Post Build Actions
+
 The vManager Plugin also supports a post-build action that brings:
 
 -   High level view at the  session\'s states launched by the various
@@ -536,7 +536,7 @@ the following format within the job working directory: 
 
 ![](./docs/images/report_conf.png "Jenkins > Cadence vManager Plugin > report_conf.png")
 
-### Change Log
+## Change Log
 
 ##### Version 3.0.0 (Nov 1, 2019)
 
