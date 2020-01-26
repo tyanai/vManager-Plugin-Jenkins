@@ -88,6 +88,8 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
             listener.getLogger().println("The connection timeout is: 1 minutes");
             listener.getLogger().println("The read api timeout is: 30 minutes");
         }
+        
+        listener.getLogger().println("In case build is interrupted, sesssion will get paused: " + step.isPauseSessionOnBuildInterruption());
 
         //Check if this is user's batch or launch
         listener.getLogger().println("The execution type set is " + step.getExecutionType());
@@ -153,7 +155,7 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
 
             }
 
-            stepHolder = new StepHolder(step.getInaccessibleResolver(), step.getStoppedResolver(), step.getFailedResolver(), step.getDoneResolver(), step.getSuspendedResolver(), step.isWaitTillSessionEnds(), step.getStepSessionTimeout(), jUnitRequestHolder, step.isMarkBuildAsFailedIfAllRunFailed(), step.isFailJobIfAllRunFailed(), step.isMarkBuildAsPassedIfAllRunPassed(), step.isFailJobUnlessAllRunPassed());
+            stepHolder = new StepHolder(step.getInaccessibleResolver(), step.getStoppedResolver(), step.getFailedResolver(), step.getDoneResolver(), step.getSuspendedResolver(), step.isWaitTillSessionEnds(), step.getStepSessionTimeout(), jUnitRequestHolder, step.isMarkBuildAsFailedIfAllRunFailed(), step.isFailJobIfAllRunFailed(), step.isMarkBuildAsPassedIfAllRunPassed(), step.isFailJobUnlessAllRunPassed(),step.isPauseSessionOnBuildInterruption());
         }
 
         VMGRBuildArchiver vMGRBuildArchiver = null;

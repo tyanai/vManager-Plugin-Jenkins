@@ -88,6 +88,7 @@ public class VMGRLaunchStep extends Step {
     private final String executionType ;
     private final String sessionsInputFile;
     private final boolean deleteSessionInputFile;
+    private final boolean pauseSessionOnBuildInterruption;
     
 
     @DataBoundConstructor
@@ -95,7 +96,7 @@ public class VMGRLaunchStep extends Step {
             boolean dynamicUserId, boolean advConfig, int connTimeout, int readTimeout, boolean envVarible, String envVaribleFile, String inaccessibleResolver, String stoppedResolver, String failedResolver, String doneResolver, String suspendedResolver, boolean waitTillSessionEnds, int stepSessionTimeout, 
             boolean generateJUnitXML, boolean extraAttributesForFailures, String staticAttributeList, boolean markBuildAsFailedIfAllRunFailed, boolean failJobIfAllRunFailed, String envSourceInputFile, boolean vMGRBuildArchive, boolean deleteAlsoSessionDirectory, boolean genericCredentialForSessionDelete, 
             String archiveUser, String archivePassword, String famMode, String famModeLocation, boolean noAppendSeed, boolean pipelineNodes, String masterWorkspaceLocation, boolean markBuildAsPassedIfAllRunPassed, boolean failJobUnlessAllRunPassed, boolean userPrivateSSHKey, boolean attrValues, 
-            String attrValuesFile, String executionType, String sessionsInputFile, boolean deleteSessionInputFile) {
+            String attrValuesFile, String executionType, String sessionsInputFile, boolean deleteSessionInputFile, boolean pauseSessionOnBuildInterruption) {
         this.vAPIUrl = vAPIUrl;
         this.vAPIUser = vAPIUser;
         this.vAPIPassword = vAPIPassword;
@@ -153,6 +154,7 @@ public class VMGRLaunchStep extends Step {
         this.executionType = executionType;
         this.sessionsInputFile = sessionsInputFile;
         this.deleteSessionInputFile = deleteSessionInputFile; 
+        this.pauseSessionOnBuildInterruption = pauseSessionOnBuildInterruption;
     }
 
     /**
@@ -180,6 +182,9 @@ public class VMGRLaunchStep extends Step {
         return noAppendSeed;
     }
     
+    public boolean isPauseSessionOnBuildInterruption(){
+        return pauseSessionOnBuildInterruption;
+    }
     
 
     public boolean isMarkBuildAsFailedIfAllRunFailed() {

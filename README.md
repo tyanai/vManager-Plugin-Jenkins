@@ -542,18 +542,22 @@ the following format within the job working directory: 
 
 ## Change Log
 
+##### Version 3.0.2 (Jan 26, 2020)
+
+-   Added support in vManager session suspension/pause when user abort/cancel/stop Jenkins jobs. 
+
 ##### Version 3.0.0 (Nov 1, 2019)
 
 -	Added support in a none shared NFS between master and slave.
-	Plugin can now consum/dump input/output files from build running
+	Plugin can now consume/dump input/output files from build running
 	on remote slaves.  (Not supported with Pipeline)
 -	Added support in using Jenkins macros as part of the input params.
--	Added two new textarea for supplying session env params and session
+-	Added two new text area for supplying session env params and session
 	attribute values without the need for an input file.
--   Library updates. Plugin now requires jenkins version 2 and above
+-   Library updates. Plugin now requires Jenkins version 2 and above
 	with JDK 1.8 and above. 
 -	New dependency - Token-Macro (version 2.3 and above)
--	Updated dependancy - Dashboard-view (version 2.10 and above).
+-	Updated dependency - Dashboard-view (version 2.10 and above).
 -	Remove apache-httpcomponents direct dependency (plugin size was also
 	reduced).
 

@@ -14,8 +14,9 @@ public class StepHolder {
     private boolean failJobIfAllRunFailed = false;
     private boolean markBuildAsPassedIfAllRunPassed = false;
     private boolean failJobUnlessAllRunPassed = false;
+    private boolean pauseSessionOnBuildInterruption = false;
 
-    public StepHolder(String inaccessibleResolver, String stoppedResolver, String failedResolver, String doneResolver, String suspendedResolver, boolean waitTillSessionEnds, int stepSessionTimeout, JUnitRequestHolder jUnitRequestHolder, boolean markBuildAsFailedIfAllRunFailed, boolean failJobIfAllRunFailed, boolean markBuildAsPassedIfAllRunPassed, boolean failJobUnlessAllRunPassed) {
+    public StepHolder(String inaccessibleResolver, String stoppedResolver, String failedResolver, String doneResolver, String suspendedResolver, boolean waitTillSessionEnds, int stepSessionTimeout, JUnitRequestHolder jUnitRequestHolder, boolean markBuildAsFailedIfAllRunFailed, boolean failJobIfAllRunFailed, boolean markBuildAsPassedIfAllRunPassed, boolean failJobUnlessAllRunPassed, boolean pauseSessionOnBuildInterruption) {
         super();
         this.inaccessibleResolver = inaccessibleResolver;
         this.stoppedResolver = stoppedResolver;
@@ -29,6 +30,7 @@ public class StepHolder {
         this.failJobIfAllRunFailed = failJobIfAllRunFailed;
         this.markBuildAsPassedIfAllRunPassed = markBuildAsPassedIfAllRunPassed;
         this.failJobUnlessAllRunPassed = failJobUnlessAllRunPassed;
+        this.pauseSessionOnBuildInterruption = pauseSessionOnBuildInterruption;
     }
 
     public JUnitRequestHolder getjUnitRequestHolder() {
@@ -41,6 +43,14 @@ public class StepHolder {
 
     public boolean isFailJobUnlessAllRunPassed() {
         return failJobUnlessAllRunPassed;
+    }
+    
+    public boolean isPauseSessionOnBuildInterruption(){
+        return pauseSessionOnBuildInterruption;
+    }
+    
+    public void setPauseSessionOnBuildInterruption(boolean pauseSessionOnBuildInterruption){
+        this.pauseSessionOnBuildInterruption = pauseSessionOnBuildInterruption;
     }
 
     public void setMarkBuildAsPassedIfAllRunPassed(boolean markBuildAsPassedIfAllRunPassed) {

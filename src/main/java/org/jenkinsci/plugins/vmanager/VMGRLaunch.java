@@ -60,6 +60,7 @@ public class VMGRLaunch extends Builder {
     private final String suspendedResolver;
     private final boolean waitTillSessionEnds;
     private final boolean noneSharedNFS;
+    private final boolean pauseSessionOnBuildInterruption;
     private int stepSessionTimeout = 0;
 
     private final boolean generateJUnitXML;
@@ -109,7 +110,7 @@ public class VMGRLaunch extends Builder {
             boolean dynamicUserId, boolean advConfig, int connTimeout, int readTimeout, boolean envVarible, String envVaribleFile, String inaccessibleResolver, String stoppedResolver, String failedResolver, String doneResolver, String suspendedResolver, boolean waitTillSessionEnds,
             int stepSessionTimeout, boolean generateJUnitXML, boolean extraAttributesForFailures, String staticAttributeList, boolean markBuildAsFailedIfAllRunFailed, boolean failJobIfAllRunFailed, String envSourceInputFile, boolean vMGRBuildArchive, boolean deleteAlsoSessionDirectory,
             boolean genericCredentialForSessionDelete, String archiveUser, String archivePassword, String famMode, String famModeLocation, boolean noAppendSeed, boolean markBuildAsPassedIfAllRunPassed, boolean failJobUnlessAllRunPassed, boolean userPrivateSSHKey, boolean attrValues,
-            String attrValuesFile, String executionType, String sessionsInputFile, boolean deleteSessionInputFile, boolean noneSharedNFS, String envVariableType, String envVariableText, String attrVariableType, String attrVariableText) {
+            String attrValuesFile, String executionType, String sessionsInputFile, boolean deleteSessionInputFile, boolean noneSharedNFS, String envVariableType, String envVariableText, String attrVariableType, String attrVariableText, boolean pauseSessionOnBuildInterruption) {
         this.vAPIUrl = vAPIUrl;
         this.vAPIUser = vAPIUser;
         this.vAPIPassword = vAPIPassword;
@@ -168,6 +169,7 @@ public class VMGRLaunch extends Builder {
         this.envVariableText = envVariableText;
         this.attrVariableType = attrVariableType;
         this.attrVariableText = attrVariableText;
+        this.pauseSessionOnBuildInterruption = pauseSessionOnBuildInterruption;
 
     }
 
@@ -180,6 +182,10 @@ public class VMGRLaunch extends Builder {
 
     public boolean isNoneSharedNFS() {
         return noneSharedNFS;
+    }
+    
+    public boolean isPauseSessionOnBuildInterruption(){
+        return pauseSessionOnBuildInterruption;
     }
     
     public String getAttrVariableType() {
@@ -401,6 +407,8 @@ public class VMGRLaunch extends Builder {
             listener.getLogger().println("The connection timeout is: 1 minutes");
             listener.getLogger().println("The read api timeout is: 30 minutes");
         }
+        
+        listener.getLogger().println("In case build is interrupted, sesssion will get paused: " + pauseSessionOnBuildInterruption);
 
         //Check if this is user's batch or launch
         listener.getLogger().println("The execution type set is " + executionType);
@@ -507,7 +515,7 @@ public class VMGRLaunch extends Builder {
 
             }
 
-            stepHolder = new StepHolder(inaccessibleResolver, stoppedResolver, failedResolver, doneResolver, suspendedResolver, waitTillSessionEnds, stepSessionTimeout, jUnitRequestHolder, markBuildAsFailedIfAllRunFailed, failJobIfAllRunFailed, markBuildAsPassedIfAllRunPassed, failJobUnlessAllRunPassed);
+            stepHolder = new StepHolder(inaccessibleResolver, stoppedResolver, failedResolver, doneResolver, suspendedResolver, waitTillSessionEnds, stepSessionTimeout, jUnitRequestHolder, markBuildAsFailedIfAllRunFailed, failJobIfAllRunFailed, markBuildAsPassedIfAllRunPassed, failJobUnlessAllRunPassed, pauseSessionOnBuildInterruption);
         }
 
         VMGRBuildArchiver vMGRBuildArchiver = null;
@@ -679,6 +687,10 @@ public class VMGRLaunch extends Builder {
                     listener.getLogger().println("The build is local and running on master process.");
                 }
             }
+            
+            
+            
+            
 
 
             String output = utils.executeVSIFLaunch(vsifFileNames, vAPIUrl, authRequired, tempUser, tempPassword, listener, dynamicUserId, build.getId(), build.getNumber(),
