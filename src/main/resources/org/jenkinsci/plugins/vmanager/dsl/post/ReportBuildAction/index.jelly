@@ -1,0 +1,18 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:l="/lib/layout" xmlns:t="/lib/hudson">
+	<st:header name="Content-Type" value="text/html;charset=UTF-8" />
+    
+    <st:include page="/css/css.jelly" />
+    <l:layout>
+        <st:include it="${it.build}" page="sidepanel.jelly" optional="true"/>
+        <l:main-panel>
+	    <h2><img src="/plugin/vmanager-plugin/img/report.png" style="width: 32px; height: 32px; margin-right: 10px;"/>${it.DisplayName}</h2>
+            <div id="reportLoading" class="microAgentWaiting"><div class="loaderMicro"><div class="loader-waiting"><div class="loader"></div></div></div><div class="spinnerMicroAgentMessage"><p>Loading the report. Please wait...</p></div></div>
+            <div id="reportContent" class="contentWrapper">${h.rawHtml(it.getReportFromWorkspace())}</div>
+             		
+		<script type="text/javascript" src="${rootURL}/plugin/vmanager-plugin/js/vmanager_report.js"/>	
+	
+        </l:main-panel>
+    </l:layout>
+</j:jelly>
+

@@ -1,0 +1,18 @@
+<div>
+    In case of a need to take advantage of the full summary report flags, you can use a json structure to define the rest of the flags the vAPI supports.</br>
+    The following structure addresses the flags relevant for the vPlan and Metrics parts and gives you more control over refinements  (for more information, check the full vAPI electronic docs on the web):</br>
+    {</br>
+      "depth": 4,</br>
+      "refinementFile": "string",</br>
+      "vplanFile": "string",</br>
+      "vplanRefinementFile": "string",</br>
+      "environment": "string",</br>
+      "multiPerspectives": [array - look for more information within the documentation],</br>
+      "multiPerspectives": [array - look for more information within the documentation],</br>
+      "multiPerspectives": [array - look for more information within the documentation]</br>
+    }</br></br>
+    
+
+    None of the fields are mandatory, however -  please note that adding "vplanFile" here, will overwrite anything you placed within "vPlanx file name".</br>
+    ("vPlanx file name" field is not mandatory in case you choose to use the advanced context input)
+</div>

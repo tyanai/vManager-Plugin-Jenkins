@@ -1,0 +1,26 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler"
+         xmlns:l="/lib/layout" xmlns:t="/lib/hudson">
+    <l:layout>
+        <st:include it="${it.build}" page="sidepanel.jelly" optional="true"/>
+        <l:main-panel>
+            <h2><img src="/plugin/vmanager-plugin/img/weblinks.png" style="width: 32px; height: 32px; margin-right: 10px;"/>${it.DisplayName}</h2>
+            <h4>Build #${it.buildNumber}'s sessions:</h4>
+            <j:set var="sessionId" value="${it.getJobSessions()}"/>
+            <table id="statistics" class="sortable pane bigtable" style="margin-top: 0px;">
+                <tr style="border-top: 0px;">
+                    <th align="left">Session Name</th>
+                    <th align="left">Session ID</th>
+                    <th align="left">vManager Web</th>
+                </tr>
+            <j:forEach var="session" items="${sessionId}">
+                    <tr>    
+                        <td style="border: 1px #bbb solid;" data="${it.getSessionName(session)}">${it.getSessionName(session)}</td>
+                        <td style="border: 1px #bbb solid;" data="${session}">${session}</td>
+                        <td style="border: 1px #bbb solid;" data="${it.getSessionLinkForBuild(session)}"><a target="_blank" href="${it.getSessionLinkForBuild(session)}" tooltip="A Link to vManager Web Regression">Link</a></td>		
+                    </tr>
+            </j:forEach>
+            </table>
+        </l:main-panel>
+    </l:layout>
+</j:jelly>

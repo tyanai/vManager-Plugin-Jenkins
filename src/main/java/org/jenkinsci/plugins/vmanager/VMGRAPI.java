@@ -8,6 +8,8 @@ import hudson.model.AbstractProject;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
+import hudson.util.ListBoxModel;
+import hudson.util.ListBoxModel.Option;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,7 +25,6 @@ import org.kohsuke.stapler.StaplerRequest;
 public class VMGRAPI extends Builder {
 
 	private final String vAPIUrl;
-	private final String vAPIPort;
 	private final boolean authRequired;
 	private final String vAPIUser;
 	private final String vAPIPassword;
@@ -33,15 +34,19 @@ public class VMGRAPI extends Builder {
 	private final boolean dynamicUserId;
 	private final String apiType;
 	private final String apiUrl;
+	private final String requestMethod;
+	private final boolean advConfig;
+        private final boolean noneSharedNFS;
+	private int connTimeout = 1;
+	private int readTimeout = 30;
 
 
 	// Fields in config.jelly must match the parameter names in the
 	// "DataBoundConstructor"
 	@DataBoundConstructor
-	public VMGRAPI(String vAPIUrl, String vAPIPort, String vAPIUser, String vAPIPassword, String vAPIInput, String vJsonInputFile, boolean deleteInputFile, boolean authRequired, String apiType,
-			boolean dynamicUserId, String apiUrl) {
+	public VMGRAPI(String vAPIUrl, String vAPIUser, String vAPIPassword, String vAPIInput, String vJsonInputFile, boolean deleteInputFile, boolean authRequired, String apiType,
+			boolean dynamicUserId, String apiUrl, String requestMethod, boolean advConfig, int connTimeout, int readTimeout,boolean noneSharedNFS) {
 		this.vAPIUrl = vAPIUrl;
-		this.vAPIPort = vAPIPort;
 		this.vAPIUser = vAPIUser;
 		this.vAPIPassword = vAPIPassword;
 		this.vAPIInput = vAPIInput;
@@ -51,6 +56,11 @@ public class VMGRAPI extends Builder {
 		this.apiType = apiType;
 		this.dynamicUserId = dynamicUserId;
 		this.apiUrl = apiUrl;
+		this.requestMethod = requestMethod;
+		this.advConfig = advConfig;
+		this.connTimeout = connTimeout;
+		this.readTimeout = readTimeout;
+                this.noneSharedNFS = noneSharedNFS;
 	}
 
 	/**
@@ -60,10 +70,10 @@ public class VMGRAPI extends Builder {
 		return vAPIUrl;
 	}
 
-	public String getVAPIPort() {
-		return vAPIPort;
-	}
-
+        public boolean isNoneSharedNFS() {
+            return noneSharedNFS;
+        }
+        
 	public String getApiUrl() {
 		return apiUrl;
 	}
@@ -99,12 +109,38 @@ public class VMGRAPI extends Builder {
 	public String getApiType() {
 		return apiType;
 	}
+	
+	public String getRequestMethod(){
+		return requestMethod;
+	}
+	
+	public boolean isAdvConfig() {
+		return advConfig;
+	}
+	
+	public int getConnTimeout() {
+		return connTimeout;
+	}
+
+	public int getReadTimeout() {
+		return readTimeout;
+	}
+	/*
+	public ListBoxModel doFillRequestMethodItems(){
+
+	    return new ListBoxModel(
+	        new Option("POST", "POST", "POST".equals(requestMethod)),
+	        new Option("GET", "GET", "GET".equals(requestMethod)),
+	        new Option("PUT", "PUT", "PUT".equals(requestMethod)),
+	    	new Option("DELETE", "DELETE", "DELETE".equals(requestMethod)));
+	}
+	*/
+	
 
 	@Override
 	public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
 
 		listener.getLogger().println("The HOST for vAPI is: " + vAPIUrl);
-		listener.getLogger().println("The PORT for vAPI is: " + vAPIPort);
 		listener.getLogger().println("The vAPIUser for vAPI is: " + vAPIUser);
 		listener.getLogger().println("The vAPIPassword for vAPI is: *******");
 		listener.getLogger().println("The Static jSON query for vAPI is: " + vAPIInput);
@@ -116,9 +152,18 @@ public class VMGRAPI extends Builder {
 		listener.getLogger().println("The id is: " + build.getId());
 		listener.getLogger().println("The number is: " + build.getNumber());
 		listener.getLogger().println("The workspace dir is: " + build.getWorkspace());
+		listener.getLogger().println("The request method dir is: " + requestMethod);
+		if (advConfig){
+			listener.getLogger().println("The connection timeout is: " + connTimeout + " minutes");
+			listener.getLogger().println("The read api timeout is: " + readTimeout + " minutes");
+		} else {
+			listener.getLogger().println("The connection timeout is: 1 minutes");
+			listener.getLogger().println("The read api timeout is: 30 minutes");
+		}
+
 
 		try {
-			Utils utils = new Utils();
+			Utils utils = new Utils(build.getWorkspace(),noneSharedNFS);
 			// Get the jSON query string
 			String jSonInput = null;
 
@@ -130,7 +175,7 @@ public class VMGRAPI extends Builder {
 					listener.getLogger().println("The vAPI query string chosen is dynamic. jSON input file dynamic workspace directory: '" + build.getWorkspace() + "'");
 				} else {
 					listener.getLogger().println(
-							"The vAPI query string chosen is dynamic. jSON input file dynamic workspace directory: '" + build.getWorkspace() + File.separator + vJsonInputFile.trim() + "'");
+							"The vAPI query string chosen is dynamic. jSON input file static location: '" + vJsonInputFile.trim() + "'");
 				}
 				jSonInput = utils.loadJSONFromFile(build.getId(), build.getNumber(), "" + build.getWorkspace(), vJsonInputFile, listener, deleteInputFile);
 
@@ -138,8 +183,8 @@ public class VMGRAPI extends Builder {
 
 			// Now call the actual launch
 			// ----------------------------------------------------------------------------------------------------------------
-			String output = utils.executeAPI(jSonInput, apiUrl, vAPIUrl, vAPIPort, authRequired, vAPIUser, vAPIPassword, listener, dynamicUserId, build.getId(), build.getNumber(),
-					"" + build.getWorkspace());
+			String output = utils.executeAPI(jSonInput, apiUrl, vAPIUrl, authRequired, vAPIUser, vAPIPassword,requestMethod, listener, dynamicUserId, build.getId(), build.getNumber(),
+					"" + build.getWorkspace(),connTimeout,readTimeout,advConfig);
 			if (!"success".equals(output)) {
 				listener.getLogger().println("Failed to call vAPI for build " + build.getId() + " " + build.getNumber() + "\n");
 				listener.getLogger().println(output + "\n");
@@ -180,10 +225,7 @@ public class VMGRAPI extends Builder {
 		 * To persist global configuration information, simply store it in a
 		 * field and call save().
 		 * 
-		 * <p>
-		 * If you don't want fields to be persisted, use <tt>transient</tt>.
-		 */
-		private boolean useFrench;
+		
 
 		/**
 		 * In order to load the persisted global configuration, you have to call
@@ -220,14 +262,26 @@ public class VMGRAPI extends Builder {
 				return FormValidation.warning("Isn't the name too short?");
 			return FormValidation.ok();
 		}
-
-		public FormValidation doCheckVAPIPort(@QueryParameter String value) throws IOException, ServletException {
-			if (value.length() == 0)
-				return FormValidation.error("Please set the vManager vAPI PORT ");
-			if (value.length() < 4)
-				return FormValidation.warning("Isn't the name too short?");
+		
+		public FormValidation doCheckRequestMethod(@QueryParameter String value) throws IOException, ServletException {
+			if (value == null || "".equals(value))
+				return FormValidation.error("Please choose the REST API request method (POST/GET/DELETE/PUT)");
 			return FormValidation.ok();
 		}
+		
+		public ListBoxModel doFillRequestMethodItems() {
+	        ListBoxModel items = new ListBoxModel();
+	        
+	         items.add("POST", "POST");
+	         items.add("GET", "GET");
+	         items.add("PUT", "PUT");
+	         items.add("DELETE", "DELETE");
+	        
+	        return items;
+	    }
+		
+		
+
 
 		public boolean isApplicable(Class<? extends AbstractProject> aClass) {
 			// Indicates that this builder can be used with all kinds of project
@@ -244,35 +298,20 @@ public class VMGRAPI extends Builder {
 
 		@Override
 		public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
-			// To persist global configuration information,
-			// set that to properties and call save().
-			useFrench = formData.getBoolean("useFrench");
-			// ^Can also use req.bindJSON(this, formData);
-			// (easier when there are many fields; need set* methods for this,
-			// like setUseFrench)
+			
 			save();
 			return super.configure(req, formData);
 		}
 
-		/**
-		 * This method returns true if the global configuration says we should
-		 * speak French.
-		 * 
-		 * The method name is bit awkward because global.jelly calls this method
-		 * to determine the initial state of the checkbox by the naming
-		 * convention.
-		 */
-		public boolean getUseFrench() {
-			return useFrench;
-		}
+		
 
 		public FormValidation doTestConnection(@QueryParameter("vAPIUser") final String vAPIUser, @QueryParameter("vAPIPassword") final String vAPIPassword,
-				@QueryParameter("vAPIUrl") final String vAPIUrl, @QueryParameter("vAPIPort") final String vAPIPort, @QueryParameter("authRequired") final boolean authRequired) throws IOException,
+				@QueryParameter("vAPIUrl") final String vAPIUrl, @QueryParameter("authRequired") final boolean authRequired) throws IOException,
 				ServletException {
 			try {
 
-				Utils utils = new Utils();
-				String output = utils.checkVAPIConnection(vAPIUrl, vAPIPort, authRequired, vAPIUser, vAPIPassword);
+				Utils utils = new Utils(null,false);
+				String output = utils.checkVAPIConnection(vAPIUrl, authRequired, vAPIUser, vAPIPassword);
 				if (!output.startsWith("Failed")) {
 					return FormValidation.ok("Success. " + output);
 				} else {

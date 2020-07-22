@@ -1,0 +1,8 @@
+<div>
+  In case of a need in taking full control over the vAPI parameters of the summary report, the pre-job should place into the workspace directory a file with the json input for the /reports/generate-summary-report vAPI.</br>
+  The input file should be place into the working directory. 
+  In case this field is empty, The file name need to be: ${BUILD_NUMBER}.${BUILD_ID}.summary_report.input</br>
+  Please fill this field only in case, you want to hard code the input file name, to be consist across all builds.
+  </br>
+  Please exclude the "rs" section from this json.  This plugin will automatically fill in the "rs" based on the sessions launched during the build process.</br>
+</div>
