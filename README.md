@@ -2,6 +2,8 @@
 
 This plugin adds an ability to perform REST over HTTP calls to Cadence vManager as a step in your build.
 
+Plugin development and support is made by Cadence Design Systems. 
+
 [![Jenkins Plugin](https://img.shields.io/jenkins/plugin/v/vmanager-plugin.svg)](https://plugins.jenkins.io/vmanager-plugin)
 [![Jenkins Plugin Installs](https://img.shields.io/jenkins/plugin/i/vmanager-plugin.svg?color=blue)](https://plugins.jenkins.io/vmanager-plugin)
 [![Contributors](https://img.shields.io/github/contributors/jenkinsci/vmanager-plugin.svg)](https://github.com/jenkinsci/vmanager-plugin/graphs/contributors)
@@ -561,6 +563,9 @@ the following format within the job working directory: 
 -	Remove apache-httpcomponents direct dependency (plugin size was also
 	reduced).
 
+##### Version 2.7.2 (Aug 3, 2020)
+
+-   Bug fix.  When choosing to use User SSH key, the pre-execution file was mandatory. 
 
 ##### Version 2.7.1 (Oct 11, 2019)
 

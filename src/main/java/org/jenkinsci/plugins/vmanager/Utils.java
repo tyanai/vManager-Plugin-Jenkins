@@ -857,14 +857,14 @@ public class Utils {
                         input = input + ",\"credentials\":{\"connectType\":\"PUBLIC_KEY\"}";
                     }
 
-                    if (!"".equals(envSourceInputFile.trim())) {
+                    if ((envSourceInputFile != null) && (!"".equals(envSourceInputFile.trim()))) {
                         String scriptShell = "BSH";
                         input = input + ",\"preliminaryStage\":{\"sourceFilePath\":\"" + envSourceInputFile + "\",\"shell\":\"" + scriptShell + "\"}";
                     }
 
                 }
                 input = input + "}";
-
+    
                 //listener.getLogger().print("vManager vAPI input: '" + input + "' with user/password: "+ user + "/" + password +"\n");
                 HttpURLConnection conn = getVAPIConnection(apiURL, requireAuth, user, password, "POST", dynamicUserId, buildID, buildNumber, workPlacePath, listener, connConnTimeOut, connReadTimeout, advConfig);
                 OutputStream os = conn.getOutputStream();

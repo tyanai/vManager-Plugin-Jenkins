@@ -117,7 +117,7 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
                     listener.getLogger().println("The credential file is: " + step.getCredentialInputFile());
                     listener.getLogger().println("The credential file was set to be deleted after use: " + step.isDeleteCredentialInputFile());
                 }
-                if (!"".equals(step.getEnvSourceInputFile().trim())) {
+                if (step.getEnvSourceInputFile() != null && !"".equals(step.getEnvSourceInputFile().trim())) {
                     listener.getLogger().println("The User's source file is: " + step.getEnvSourceInputFile());
                 } else {
                     listener.getLogger().println("The User's source file wasn't set");

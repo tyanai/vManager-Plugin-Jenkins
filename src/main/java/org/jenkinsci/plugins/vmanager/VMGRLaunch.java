@@ -469,7 +469,7 @@ public class VMGRLaunch extends Builder {
                     listener.getLogger().println("The credential file is: " + credentialInputFileFix);
                     listener.getLogger().println("The credential file was set to be deleted after use: " + deleteCredentialInputFile);
                 }
-                if (!"".equals(envSourceInputFile.trim())) {
+                if (envSourceInputFile != null && !"".equals(envSourceInputFile.trim())) {
                     try {
                         envSourceInputFileFix = TokenMacro.expandAll(build, listener, envSourceInputFile);
                     } catch (Exception e) {
