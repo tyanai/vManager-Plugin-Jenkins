@@ -544,6 +544,10 @@ the following format within the job working directory: 
 
 ## Change Log
 
+##### Version 3.0.3 (Aug 3, 2020)
+
+-   Bug fix.  When choosing to use User SSH key, the pre-execution file was mandatory. 
+
 ##### Version 3.0.2 (Jan 26, 2020)
 
 -   Added support in vManager session suspension/pause when user abort/cancel/stop Jenkins jobs. 
@@ -562,10 +566,6 @@ the following format within the job working directory: 
 -	Updated dependency - Dashboard-view (version 2.10 and above).
 -	Remove apache-httpcomponents direct dependency (plugin size was also
 	reduced).
-
-##### Version 2.7.2 (Aug 3, 2020)
-
--   Bug fix.  When choosing to use User SSH key, the pre-execution file was mandatory. 
 
 ##### Version 2.7.1 (Oct 11, 2019)
 
