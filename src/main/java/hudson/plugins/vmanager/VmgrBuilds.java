@@ -34,7 +34,7 @@ public class VmgrBuilds extends DashboardPortlet {
     }
 
     public int getNumBuilds() {
-        return numBuilds <= 0 ? 10 : numBuilds;
+        return numBuilds <= 0 ? 10 : numBuilds; 
     }
 
     public String getTimestampSortData(VMGRRun run) {
@@ -106,6 +106,7 @@ public class VmgrBuilds extends DashboardPortlet {
     }
 
     public String getTotalSessions(VMGRRun run) {
+        
         return BuildStatusMap.getValue(run.getRun().getId(), run.getRun().getNumber(), run.getJobWorkingDir() + "", "number_of_entities", false);
     }
 
