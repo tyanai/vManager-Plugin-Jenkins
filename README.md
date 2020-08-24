@@ -544,6 +544,10 @@ the following format within the job working directory: 
 
 ## Change Log
 
+##### Version 3.0.5 (Aug 24, 2020)
+
+-   Remove description from the tables tooltip at the dashboard and vManager Job Overview. 
+
 ##### Version 3.0.3 (Aug 3, 2020)
 
 -   Bug fix.  When choosing to use User SSH key, the pre-execution file was mandatory. 
