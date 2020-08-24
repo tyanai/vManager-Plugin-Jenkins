@@ -29,7 +29,7 @@
                     <tr>
                         
                         <td style="border: 1px #bbb solid;" data="${it.getBuildColumnSortData(build)}">
-                            <a href="${h.getRelativeLinkTo(build.getRun().parent)}/${build.getRun().number}" tooltip="${build.getRun().description}">
+                            <a href="${h.getRelativeLinkTo(build.getRun().parent)}/${build.getRun().number}" >
                                 <img src="${imagesURL}/16x16/${build.getRun().buildStatusUrl}" alt="${build.getRun().iconColor.description}" title="${build.getRun().iconColor.description}" />${build.getRun().displayName}
                             </a>
                         </td>
