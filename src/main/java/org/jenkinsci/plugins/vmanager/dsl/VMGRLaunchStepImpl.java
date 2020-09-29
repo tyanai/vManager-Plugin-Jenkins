@@ -119,6 +119,8 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
                 }
                 if (step.getEnvSourceInputFile() != null && !"".equals(step.getEnvSourceInputFile().trim())) {
                     listener.getLogger().println("The User's source file is: " + step.getEnvSourceInputFile());
+                    listener.getLogger().println("The User's source file type is: " + step.getEnvSourceInputFileType());
+                    
                 } else {
                     listener.getLogger().println("The User's source file wasn't set");
                 }
@@ -257,7 +259,7 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
            
             
             String output = utils.executeVSIFLaunch(vsifFileNames, step.getVAPIUrl(), step.isAuthRequired(), tempUser, tempPassword, listener, step.isDynamicUserId(), buildId, buildNumber,
-                    "" + workspace, step.getConnTimeout(), step.getReadTimeout(), step.isAdvConfig(), jsonEnvInput, step.isUseUserOnFarm(), step.getUserFarmType(), farmUserPassword, stepHolder, step.getEnvSourceInputFile(), workingJobDir, vMGRBuildArchiver, step.isUserPrivateSSHKey(), jsonAttrValuesInput, step.getExecutionType(), sessionNames);
+                    "" + workspace, step.getConnTimeout(), step.getReadTimeout(), step.isAdvConfig(), jsonEnvInput, step.isUseUserOnFarm(), step.getUserFarmType(), farmUserPassword, stepHolder, step.getEnvSourceInputFile(), workingJobDir, vMGRBuildArchiver, step.isUserPrivateSSHKey(), jsonAttrValuesInput, step.getExecutionType(), sessionNames, step.getEnvSourceInputFileType());
             if (!"success".equals(output)) {
                 listener.getLogger().println("Failed to launch vsifs for build " + buildId + " " + buildNumber + "\n");
                 listener.getLogger().println(output + "\n");

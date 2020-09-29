@@ -779,7 +779,7 @@ public class Utils {
     }
 
     public String executeVSIFLaunch(String[] vsifs, String url, boolean requireAuth, String user, String password, TaskListener listener, boolean dynamicUserId, String buildID, int buildNumber,
-            String workPlacePath, int connConnTimeOut, int connReadTimeout, boolean advConfig, String jsonEnvInput, boolean useUserOnFarm, String userFarmType, String[] farmUserPassword, StepHolder stepHolder, String envSourceInputFile, String workingJobDir, VMGRBuildArchiver vMGRBuildArchiver, boolean userPrivateSSHKey, String jsonAttrValuesInput, String executionType, String[] sessionNames) throws Exception {
+            String workPlacePath, int connConnTimeOut, int connReadTimeout, boolean advConfig, String jsonEnvInput, boolean useUserOnFarm, String userFarmType, String[] farmUserPassword, StepHolder stepHolder, String envSourceInputFile, String workingJobDir, VMGRBuildArchiver vMGRBuildArchiver, boolean userPrivateSSHKey, String jsonAttrValuesInput, String executionType, String[] sessionNames, String envSourceInputFileType) throws Exception {
 
         boolean notInTestMode = true;
         if (listener == null) {
@@ -846,7 +846,7 @@ public class Utils {
                                 reader.close();
                             }
                         }
-                    } else {
+                    } else if (!userPrivateSSHKey) {
                         userFarm = farmUserPassword[0];;
                         passwordFarm = farmUserPassword[1];;
                     }
@@ -858,7 +858,7 @@ public class Utils {
                     }
 
                     if ((envSourceInputFile != null) && (!"".equals(envSourceInputFile.trim()))) {
-                        String scriptShell = "BSH";
+                        String scriptShell = envSourceInputFileType;
                         input = input + ",\"preliminaryStage\":{\"sourceFilePath\":\"" + envSourceInputFile + "\",\"shell\":\"" + scriptShell + "\"}";
                     }
 

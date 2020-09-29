@@ -90,6 +90,7 @@
           	<f:entry title="Delete Credential File" field="deleteCredentialInputFile" description="If checked, the job will delete the credential file name after processing it."><f:checkbox name="deleteCredentialInputFile" checked="${it.deleteCredentialInputFile}"/></f:entry>
         </f:radioBlock>
         <f:entry title="User Pre Exceution File" field="envSourceInputFile" description="Path to user env params declaration for sourcing prior to execution (not mandatory) - vManager 17.10 and above only"><f:textbox /></f:entry> 
+        <f:entry title="User Pre Exceution File Type" field="envSourceInputFileType" ><f:select /></f:entry>
      </f:optionalBlock>
  </table>
 

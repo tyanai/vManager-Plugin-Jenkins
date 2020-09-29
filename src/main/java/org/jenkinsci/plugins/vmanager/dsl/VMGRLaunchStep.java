@@ -58,6 +58,7 @@ public class VMGRLaunchStep extends Step {
     private final boolean pipelineNodes;
     private final String masterWorkspaceLocation;
 
+    private final String envSourceInputFileType;
     private final String inaccessibleResolver;
     private final String stoppedResolver;
     private final String failedResolver;
@@ -96,7 +97,7 @@ public class VMGRLaunchStep extends Step {
             boolean dynamicUserId, boolean advConfig, int connTimeout, int readTimeout, boolean envVarible, String envVaribleFile, String inaccessibleResolver, String stoppedResolver, String failedResolver, String doneResolver, String suspendedResolver, boolean waitTillSessionEnds, int stepSessionTimeout, 
             boolean generateJUnitXML, boolean extraAttributesForFailures, String staticAttributeList, boolean markBuildAsFailedIfAllRunFailed, boolean failJobIfAllRunFailed, String envSourceInputFile, boolean vMGRBuildArchive, boolean deleteAlsoSessionDirectory, boolean genericCredentialForSessionDelete, 
             String archiveUser, String archivePassword, String famMode, String famModeLocation, boolean noAppendSeed, boolean pipelineNodes, String masterWorkspaceLocation, boolean markBuildAsPassedIfAllRunPassed, boolean failJobUnlessAllRunPassed, boolean userPrivateSSHKey, boolean attrValues, 
-            String attrValuesFile, String executionType, String sessionsInputFile, boolean deleteSessionInputFile, boolean pauseSessionOnBuildInterruption) {
+            String attrValuesFile, String executionType, String sessionsInputFile, boolean deleteSessionInputFile, boolean pauseSessionOnBuildInterruption, String envSourceInputFileType) {
         this.vAPIUrl = vAPIUrl;
         this.vAPIUser = vAPIUser;
         this.vAPIPassword = vAPIPassword;
@@ -122,6 +123,7 @@ public class VMGRLaunchStep extends Step {
         this.connTimeout = connTimeout;
         this.readTimeout = readTimeout;
 
+        this.envSourceInputFileType = envSourceInputFileType;
         this.inaccessibleResolver = inaccessibleResolver;
         this.stoppedResolver = stoppedResolver;
         this.failedResolver = failedResolver;
@@ -316,6 +318,10 @@ public class VMGRLaunchStep extends Step {
     public String getInaccessibleResolver() {
         return inaccessibleResolver;
     }
+    
+    public String getEnvSourceInputFileType(){
+        return envSourceInputFileType;
+    }
 
     public String getStoppedResolver() {
         return stoppedResolver;
@@ -469,6 +475,15 @@ public class VMGRLaunchStep extends Step {
             items.add("Ignore, and continue to wait", "ignore");
             return items;
         }
+        
+        public ListBoxModel doFillEnvSourceInputFileTypeItems() {
+            ListBoxModel items = new ListBoxModel();
+            items.add("bash", "BSH");
+            items.add("csh", "CSH");
+            return items;
+        }
+        
+        
 
         public ListBoxModel doFillStoppedResolverItems() {
             ListBoxModel items = new ListBoxModel();

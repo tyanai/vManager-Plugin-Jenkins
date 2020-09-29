@@ -544,6 +544,11 @@ the following format within the job working directory: 
 
 ## Change Log
 
+##### Version 3.0.6 (Sep 29, 2020)
+
+-   Added support in CSH scripts for sourcing using Linux Users. 
+-	Fixed a bug to support private SSH without selecting any other login method in addition.
+
 ##### Version 3.0.5 (Aug 24, 2020)
 
 -   Remove description from the tables tooltip at the dashboard and vManager Job Overview. 

@@ -54,6 +54,7 @@ public class VMGRLaunch extends Builder {
     private final String attrValuesFile;
 
     private final String inaccessibleResolver;
+    private final String envSourceInputFileType;
     private final String stoppedResolver;
     private final String failedResolver;
     private final String doneResolver;
@@ -110,7 +111,7 @@ public class VMGRLaunch extends Builder {
             boolean dynamicUserId, boolean advConfig, int connTimeout, int readTimeout, boolean envVarible, String envVaribleFile, String inaccessibleResolver, String stoppedResolver, String failedResolver, String doneResolver, String suspendedResolver, boolean waitTillSessionEnds,
             int stepSessionTimeout, boolean generateJUnitXML, boolean extraAttributesForFailures, String staticAttributeList, boolean markBuildAsFailedIfAllRunFailed, boolean failJobIfAllRunFailed, String envSourceInputFile, boolean vMGRBuildArchive, boolean deleteAlsoSessionDirectory,
             boolean genericCredentialForSessionDelete, String archiveUser, String archivePassword, String famMode, String famModeLocation, boolean noAppendSeed, boolean markBuildAsPassedIfAllRunPassed, boolean failJobUnlessAllRunPassed, boolean userPrivateSSHKey, boolean attrValues,
-            String attrValuesFile, String executionType, String sessionsInputFile, boolean deleteSessionInputFile, boolean noneSharedNFS, String envVariableType, String envVariableText, String attrVariableType, String attrVariableText, boolean pauseSessionOnBuildInterruption) {
+            String attrValuesFile, String executionType, String sessionsInputFile, boolean deleteSessionInputFile, boolean noneSharedNFS, String envVariableType, String envVariableText, String attrVariableType, String attrVariableText, boolean pauseSessionOnBuildInterruption, String envSourceInputFileType) {
         this.vAPIUrl = vAPIUrl;
         this.vAPIUser = vAPIUser;
         this.vAPIPassword = vAPIPassword;
@@ -134,6 +135,7 @@ public class VMGRLaunch extends Builder {
         this.connTimeout = connTimeout;
         this.readTimeout = readTimeout;
 
+        this.envSourceInputFileType = envSourceInputFileType;
         this.inaccessibleResolver = inaccessibleResolver;
         this.stoppedResolver = stoppedResolver;
         this.failedResolver = failedResolver;
@@ -339,6 +341,9 @@ public class VMGRLaunch extends Builder {
     public String getInaccessibleResolver() {
         return inaccessibleResolver;
     }
+    public String getEnvSourceInputFileType(){
+        return envSourceInputFileType;
+    }
 
     public String getStoppedResolver() {
         return stoppedResolver;
@@ -478,6 +483,8 @@ public class VMGRLaunch extends Builder {
                         envSourceInputFileFix = envSourceInputFile;
                     }
                     listener.getLogger().println("The User's source file is: " + envSourceInputFileFix);
+                    listener.getLogger().println("The User's source file type is: " + envSourceInputFileType);
+                    
                 } else {
                     listener.getLogger().println("The User's source file wasn't set");
                 }
@@ -694,7 +701,7 @@ public class VMGRLaunch extends Builder {
 
 
             String output = utils.executeVSIFLaunch(vsifFileNames, vAPIUrl, authRequired, tempUser, tempPassword, listener, dynamicUserId, build.getId(), build.getNumber(),
-                    "" + build.getWorkspace(), connTimeout, readTimeout, advConfig, jsonEnvInput, useUserOnFarm, userFarmType, farmUserPassword, stepHolder, envSourceInputFileFix, workingJobDir, vMGRBuildArchiver, userPrivateSSHKey, jsonAttrValuesInput, executionType, sessionNames);
+                    "" + build.getWorkspace(), connTimeout, readTimeout, advConfig, jsonEnvInput, useUserOnFarm, userFarmType, farmUserPassword, stepHolder, envSourceInputFileFix, workingJobDir, vMGRBuildArchiver, userPrivateSSHKey, jsonAttrValuesInput, executionType, sessionNames,envSourceInputFileType);
             if (!"success".equals(output)) {
                 listener.getLogger().println("Failed to launch vsifs for build " + build.getId() + " " + build.getNumber() + "\n");
                 listener.getLogger().println(output + "\n");
@@ -842,6 +849,15 @@ public class VMGRLaunch extends Builder {
             items.add("Ignore, and continue to wait", "ignore");
             return items;
         }
+        
+         public ListBoxModel doFillEnvSourceInputFileTypeItems() {
+            ListBoxModel items = new ListBoxModel();
+            items.add("bash", "BSH");
+            items.add("csh", "CSH");
+            return items;
+        }
+        
+        
 
         public ListBoxModel doFillStoppedResolverItems() {
             ListBoxModel items = new ListBoxModel();
