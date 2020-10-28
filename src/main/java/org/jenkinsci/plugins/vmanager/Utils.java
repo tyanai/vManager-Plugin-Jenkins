@@ -1007,11 +1007,14 @@ public class Utils {
             // Flush the output into workspace
             String fileOutput = workPlacePath + File.separator + buildNumber + "." + buildID + ".vapi.output";
 
-            FileWriter writer = new FileWriter(fileOutput);
+            //FileWriter writer = new FileWriter(fileOutput);
 
-            writer.append(result.toString());
-            writer.flush();
-            writer.close();
+
+            this.saveFileOnDisk(fileOutput, result.toString());
+
+            //writer.append(result.toString());
+            //writer.flush();
+            //writer.close();
 
             String textOut = "API Call Success: Output was saved into: " + fileOutput + "\n";
 

@@ -544,6 +544,10 @@ the following format within the job working directory: 
 
 ## Change Log
 
+##### Version 3.0.7 (Oct 28, 2020)
+
+-   Fixed the support in Master and Salve running with different NFS access for the vAPI Plugin step. 
+
 ##### Version 3.0.6 (Sep 29, 2020)
 
 -   Added support in CSH scripts for sourcing using Linux Users. 

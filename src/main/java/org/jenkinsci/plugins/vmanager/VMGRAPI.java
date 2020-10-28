@@ -181,6 +181,16 @@ public class VMGRAPI extends Builder {
 
 			}
 
+
+
+                        if (noneSharedNFS){
+                            if(build.getWorkspace().isRemote()){
+                                listener.getLogger().println("The build is remote to master running on slave agent.");
+                            } else {
+                                listener.getLogger().println("The build is local and running on master process.");
+                            }
+                        }
+
 			// Now call the actual launch
 			// ----------------------------------------------------------------------------------------------------------------
 			String output = utils.executeAPI(jSonInput, apiUrl, vAPIUrl, authRequired, vAPIUser, vAPIPassword,requestMethod, listener, dynamicUserId, build.getId(), build.getNumber(),
