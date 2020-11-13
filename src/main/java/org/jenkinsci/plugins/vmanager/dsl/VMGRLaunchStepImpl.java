@@ -1,6 +1,8 @@
 package org.jenkinsci.plugins.vmanager.dsl;
 
 import hudson.EnvVars;
+import hudson.FilePath;
+import hudson.Launcher;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import java.io.File;
@@ -26,10 +28,10 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
 
         TaskListener listener = getContext().get(TaskListener.class);
         EnvVars envVars = getContext().get(EnvVars.class);
+        Launcher launcher = getContext().get(Launcher.class);
+        FilePath filePath = getContext().get(FilePath.class);
         String buildId = envVars.get("BUILD_ID");
         int buildNumber = new Integer(envVars.get("BUILD_NUMBER"));
-        
-        
 
         String workspace = envVars.get("WORKSPACE");
 
@@ -80,6 +82,7 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
         listener.getLogger().println("The id is: " + buildId);
         listener.getLogger().println("The number is: " + buildNumber);
         listener.getLogger().println("The workspace dir is: " + workspace);
+        listener.getLogger().println("The FilePath dir is: " + filePath);
 
         if (step.isAdvConfig()) {
             listener.getLogger().println("The connection timeout is: " + step.getConnTimeout() + " minutes");
@@ -88,7 +91,7 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
             listener.getLogger().println("The connection timeout is: 1 minutes");
             listener.getLogger().println("The read api timeout is: 30 minutes");
         }
-        
+
         listener.getLogger().println("In case build is interrupted, sesssion will get paused: " + step.isPauseSessionOnBuildInterruption());
 
         //Check if this is user's batch or launch
@@ -120,7 +123,7 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
                 if (step.getEnvSourceInputFile() != null && !"".equals(step.getEnvSourceInputFile().trim())) {
                     listener.getLogger().println("The User's source file is: " + step.getEnvSourceInputFile());
                     listener.getLogger().println("The User's source file type is: " + step.getEnvSourceInputFileType());
-                    
+
                 } else {
                     listener.getLogger().println("The User's source file wasn't set");
                 }
@@ -157,7 +160,7 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
 
             }
 
-            stepHolder = new StepHolder(step.getInaccessibleResolver(), step.getStoppedResolver(), step.getFailedResolver(), step.getDoneResolver(), step.getSuspendedResolver(), step.isWaitTillSessionEnds(), step.getStepSessionTimeout(), jUnitRequestHolder, step.isMarkBuildAsFailedIfAllRunFailed(), step.isFailJobIfAllRunFailed(), step.isMarkBuildAsPassedIfAllRunPassed(), step.isFailJobUnlessAllRunPassed(),step.isPauseSessionOnBuildInterruption());
+            stepHolder = new StepHolder(step.getInaccessibleResolver(), step.getStoppedResolver(), step.getFailedResolver(), step.getDoneResolver(), step.getSuspendedResolver(), step.isWaitTillSessionEnds(), step.getStepSessionTimeout(), jUnitRequestHolder, step.isMarkBuildAsFailedIfAllRunFailed(), step.isFailJobIfAllRunFailed(), step.isMarkBuildAsPassedIfAllRunPassed(), step.isFailJobUnlessAllRunPassed(), step.isPauseSessionOnBuildInterruption());
         }
 
         VMGRBuildArchiver vMGRBuildArchiver = null;
@@ -178,7 +181,7 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
         }
 
         try {
-            Utils utils = new Utils(null,false);
+            Utils utils = new Utils(run, listener,filePath);
             // Get the list of VSIF file to launch
             String[] vsifFileNames = null;
             String[] sessionNames = null;
@@ -195,7 +198,11 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
                     listener.getLogger().println("The session input file chosen is static. Sessions input file name is: '" + step.getSessionsInputFile().trim() + "'");
                 }
 
-                sessionNames = utils.loadDataFromInputFiles(buildId, buildNumber, "" + workspace, step.getSessionsInputFile(), listener, step.isDeleteSessionInputFile(),"session names","sessions.input");
+                sessionNames = utils.loadDataFromInputFiles(buildId, buildNumber, "" + workspace, step.getSessionsInputFile(), listener, step.isDeleteSessionInputFile(), "session names", "sessions.input");
+                if (sessionNames.length == 0){
+                    listener.getLogger().println("No session were found within sessions.input file.  Exit Job.\n");
+                    throw new Exception("No session were found within sessions.input file.  Exit Job.\n"); //false;
+                }
             } else {
 
                 if ("static".equals(step.getVsifType())) {
@@ -255,11 +262,8 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
 
             // Now call the actual launch
             // ----------------------------------------------------------------------------------------------------------------
-           
-           
-            
             String output = utils.executeVSIFLaunch(vsifFileNames, step.getVAPIUrl(), step.isAuthRequired(), tempUser, tempPassword, listener, step.isDynamicUserId(), buildId, buildNumber,
-                    "" + workspace, step.getConnTimeout(), step.getReadTimeout(), step.isAdvConfig(), jsonEnvInput, step.isUseUserOnFarm(), step.getUserFarmType(), farmUserPassword, stepHolder, step.getEnvSourceInputFile(), workingJobDir, vMGRBuildArchiver, step.isUserPrivateSSHKey(), jsonAttrValuesInput, step.getExecutionType(), sessionNames, step.getEnvSourceInputFileType());
+                    "" + workspace, step.getConnTimeout(), step.getReadTimeout(), step.isAdvConfig(), jsonEnvInput, step.isUseUserOnFarm(), step.getUserFarmType(), farmUserPassword, stepHolder, step.getEnvSourceInputFile(), workingJobDir, vMGRBuildArchiver, step.isUserPrivateSSHKey(), jsonAttrValuesInput, step.getExecutionType(), sessionNames, step.getEnvSourceInputFileType(), launcher);
             if (!"success".equals(output)) {
                 listener.getLogger().println("Failed to launch vsifs for build " + buildId + " " + buildNumber + "\n");
                 listener.getLogger().println(output + "\n");

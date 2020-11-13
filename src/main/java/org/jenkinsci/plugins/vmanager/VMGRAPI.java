@@ -9,9 +9,6 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
-import hudson.util.ListBoxModel.Option;
-
-import java.io.File;
 import java.io.IOException;
 
 import javax.servlet.ServletException;
@@ -163,7 +160,7 @@ public class VMGRAPI extends Builder {
 
 
 		try {
-			Utils utils = new Utils(build.getWorkspace(),noneSharedNFS);
+			Utils utils = new Utils(build,listener);
 			// Get the jSON query string
 			String jSonInput = null;
 
@@ -320,7 +317,7 @@ public class VMGRAPI extends Builder {
 				ServletException {
 			try {
 
-				Utils utils = new Utils(null,false);
+				Utils utils = new Utils();
 				String output = utils.checkVAPIConnection(vAPIUrl, authRequired, vAPIUser, vAPIPassword);
 				if (!output.startsWith("Failed")) {
 					return FormValidation.ok("Success. " + output);

@@ -1,12 +1,9 @@
 package org.jenkinsci.plugins.vmanager;
 
-import hudson.FilePath;
-import hudson.model.AbstractBuild;
-import hudson.model.Run;
+import hudson.Launcher;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -19,10 +16,6 @@ import java.util.Properties;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import hudson.model.TaskListener;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.Map;
 
 public class SessionStatusHolder {
@@ -93,10 +86,9 @@ public class SessionStatusHolder {
         
        
 	
-	public void dumpSessionStatus(boolean postSession, Map<String, String> sessionIdName,FilePath filePath, boolean noneSharedNFS) throws Exception{
-		HttpURLConnection conn = null;
-		Utils utils = new Utils(filePath,noneSharedNFS);
+	public void dumpSessionStatus(boolean postSession, Map<String, String> sessionIdName,Utils utils, Launcher launcher) throws Exception{
 		
+                HttpURLConnection conn = null;		
 		String apiURL = url + "/rest/sessions/list";
 		
 		try {
@@ -123,7 +115,7 @@ public class SessionStatusHolder {
 				}
 				
 				//Retrive all the session params
-				writeSessionIntoFile(sessionObject,postSession,sessionIdName,utils);
+				writeSessionIntoFile(sessionObject,postSession,sessionIdName,utils,launcher);
 				
 				
 				
@@ -145,7 +137,7 @@ public class SessionStatusHolder {
 		}
 	}
 	
-	private void writeSessionIntoFile(JSONObject session,boolean postSession, Map<String, String> sessionIdName, Utils utils) throws IOException, Exception{
+	private void writeSessionIntoFile(JSONObject session,boolean postSession, Map<String, String> sessionIdName, Utils utils, Launcher launcher) throws IOException, Exception{
 		
 		
 		
@@ -192,7 +184,7 @@ public class SessionStatusHolder {
 		sessionData.setServerUrl(this.url);
 		
 		
-		String fileOutput = this.workingJobDir + File.separator + buildNumber + "." + buildId + ".session_status.properties";
+		//String fileOutput = this.workingJobDir + File.separator + buildNumber + "." + buildId + ".session_status.properties";
 		
                 
                 if (postSession){
@@ -248,12 +240,18 @@ public class SessionStatusHolder {
 		writer.append("url=" + sessionData.getServerUrl() + "\n");
                 writer.append("idNames=" + idNameResult + "\n");
 		 
-                utils.standardWriteToDisk(fileOutput, writer.toString());
+                //utils.standardWriteToDisk(fileOutput, writer.toString());
                 
-                //For sake of backward compatibility, also place a copy into the workspace dir:
+                
+                
                 try{
-                    String copyToWorkspace = this.workPlacePath + File.separator + buildNumber + "." + buildId + ".session_status.properties";
-                    utils.saveFileOnDisk(copyToWorkspace, writer.toString());
+                    String fileOutput = buildNumber + "." + buildId + ".session_status.properties";
+                    if (utils.getFilePath() == null){
+                        //Pipeline always run on master
+                        fileOutput = this.workPlacePath + File.separator + fileOutput;            
+                    }
+                    utils.saveFileOnDisk(fileOutput, writer.toString());
+                    utils.moveFromNodeToMaster(buildNumber + "." + buildId + ".session_status.properties", launcher,writer.toString());
                 }catch (Exception e){
                     this.listener.getLogger().println("Info - Failed to dump session status for workspace dir for backward compatibility.  This is not a must.");
                 }

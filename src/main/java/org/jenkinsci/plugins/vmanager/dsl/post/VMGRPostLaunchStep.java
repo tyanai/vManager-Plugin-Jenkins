@@ -37,9 +37,7 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.servlet.ServletException;
 import net.sf.json.JSONObject;
-import org.jenkinsci.plugins.vmanager.SummaryReportParams;
 import org.jenkinsci.plugins.vmanager.Utils;
-import org.jenkinsci.plugins.vmanager.VAPIConnectionParam;
 //import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 //import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.Step;
@@ -54,9 +52,8 @@ import org.kohsuke.stapler.StaplerRequest;
  *
  * @author tyanai
  */
- public class VMGRPostLaunchStep extends Step {
-     
-     
+public class VMGRPostLaunchStep extends Step {
+
     private String vAPIUrl;
     private boolean authRequired;
     private boolean advConfig;
@@ -99,16 +96,13 @@ import org.kohsuke.stapler.StaplerRequest;
     private boolean deleteEmailInputFile;
     private String summaryMode;
     private boolean ignoreSSLError;
-  
-     
-     
-     
+
     // Fields in config.jelly must match the parameter names in the "DataBoundConstructor"
     @DataBoundConstructor
     public VMGRPostLaunchStep(String vAPIUrl, String vAPIUser, String vAPIPassword, boolean authRequired, boolean advConfig, boolean dynamicUserId, int connTimeout, int readTimeout, boolean advancedFunctions,
             boolean retrieveSummaryReport, boolean runReport, boolean metricsReport, boolean vPlanReport, String testsViewName, String metricsViewName, String vplanViewName, int testsDepth, int metricsDepth,
             int vPlanDepth, String metricsInputType, String metricsAdvanceInput, String vPlanInputType, String vPlanAdvanceInput, String vPlanxFileName, String summaryType, boolean ctxInput,
-            String ctxAdvanceInput, String freeVAPISyntax, boolean deleteReportSyntaxInputFile,String vManagerVersion,boolean sendEmail,String emailList,String emailType, String emailInputFile,boolean deleteEmailInputFile,String summaryMode, boolean ignoreSSLError) {
+            String ctxAdvanceInput, String freeVAPISyntax, boolean deleteReportSyntaxInputFile, String vManagerVersion, boolean sendEmail, String emailList, String emailType, String emailInputFile, boolean deleteEmailInputFile, String summaryMode, boolean ignoreSSLError) {
 
         this.vAPIUrl = vAPIUrl;
         this.authRequired = authRequired;
@@ -140,23 +134,22 @@ import org.kohsuke.stapler.StaplerRequest;
         this.ctxAdvanceInput = ctxAdvanceInput;
         this.freeVAPISyntax = freeVAPISyntax;
         this.deleteReportSyntaxInputFile = deleteReportSyntaxInputFile;
-        
+
         this.vManagerVersion = vManagerVersion;
         this.sendEmail = sendEmail;
         this.emailList = emailList;
         this.emailType = emailType;
-        this.emailInputFile = emailInputFile; 
-        this.deleteEmailInputFile = deleteEmailInputFile; 
+        this.emailInputFile = emailInputFile;
+        this.deleteEmailInputFile = deleteEmailInputFile;
         this.summaryMode = summaryMode;
         this.ignoreSSLError = ignoreSSLError;
-        
-        
+
     }
 
     public String getSummaryMode() {
         return summaryMode;
     }
-    
+
     public String getEmailType() {
         return emailType;
     }
@@ -168,11 +161,11 @@ import org.kohsuke.stapler.StaplerRequest;
     public boolean isDeleteEmailInputFile() {
         return deleteEmailInputFile;
     }
-    
+
     public boolean isIgnoreSSLError() {
         return ignoreSSLError;
     }
-    
+
     public String getVManagerVersion() {
         return vManagerVersion;
     }
@@ -185,7 +178,6 @@ import org.kohsuke.stapler.StaplerRequest;
         return emailList;
     }
 
-      
     public boolean isDeleteReportSyntaxInputFile() {
         return deleteReportSyntaxInputFile;
     }
@@ -301,7 +293,7 @@ import org.kohsuke.stapler.StaplerRequest;
     public int getReadTimeout() {
         return readTimeout;
     }
-    
+
     @Override
     public StepExecution start(StepContext context) throws Exception {
         return new VMGRPostLaunchStepImpl(this, context);
@@ -309,7 +301,7 @@ import org.kohsuke.stapler.StaplerRequest;
 
     @Extension
     public static class DescriptorImpl extends StepDescriptor {
-        
+
         public DescriptorImpl() {
             load();
         }
@@ -324,25 +316,25 @@ import org.kohsuke.stapler.StaplerRequest;
         public String getDisplayName() {
             return "vManager Post Build Actions";
         }
-        
-         @Override
+
+        @Override
         public boolean configure(StaplerRequest req, JSONObject formData) throws FormException {
 
             save();
             return super.configure(req, formData);
         }
 
-       @Override
+        @Override
         public Set<Class<?>> getRequiredContext() {
-            return ImmutableSet.of(FilePath.class, Run.class, Launcher.class, TaskListener.class,EnvVars.class);
+            return ImmutableSet.of(FilePath.class, Run.class, Launcher.class, TaskListener.class, EnvVars.class);
         }
-        
+
         public FormValidation doTestConnection(@QueryParameter("vAPIUser") final String vAPIUser, @QueryParameter("vAPIPassword") final String vAPIPassword,
                 @QueryParameter("vAPIUrl") final String vAPIUrl, @QueryParameter("authRequired") final boolean authRequired) throws IOException,
                 ServletException {
             try {
 
-                Utils utils = new Utils(null,false);
+                Utils utils = new Utils();
                 String output = utils.checkVAPIConnection(vAPIUrl, authRequired, vAPIUser, vAPIPassword);
                 if (!output.startsWith("Failed")) {
                     return FormValidation.ok("Success. " + output);
@@ -353,7 +345,7 @@ import org.kohsuke.stapler.StaplerRequest;
                 return FormValidation.error("Client error : " + e.getMessage());
             }
         }
-        
+
         public ListBoxModel doFillVManagerVersionItems() {
             ListBoxModel items = new ListBoxModel();
             items.add("19.09 and above", "stream");
@@ -371,5 +363,4 @@ import org.kohsuke.stapler.StaplerRequest;
             return FormValidation.ok();
         }
     }
-}   
-
+}

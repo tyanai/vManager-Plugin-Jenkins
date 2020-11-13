@@ -40,7 +40,11 @@ public class UnitTestFormatter {
 		if (runs.size() > 0){
 			// Flush the output into workspace
 			//String fileOutput = workPlacePath + File.separator + buildNumber + "." + buildID + "." + sessionId + ".session_runs.xml";
-			String fileOutput = workPlacePath + File.separator + "session_runs.xml";
+			String fileOutput = "session_runs.xml";
+                        if (utils.getFilePath() == null){
+                            //Pipeline always run on master
+                            fileOutput = workPlacePath + File.separator + fileOutput;            
+                        }
 
 			StringBuffer writer = new StringBuffer();
 			writer.append("<testsuite tests=\"vManager\">" + "\n");		

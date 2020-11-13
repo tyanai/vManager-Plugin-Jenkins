@@ -165,6 +165,8 @@ public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializa
         summaryReportParams.deleteEmailInputFile = deleteEmailInputFile;
         summaryReportParams.summaryMode = summaryMode;
         summaryReportParams.ignoreSSLError = ignoreSSLError;
+        
+        
     }
     
     
@@ -322,7 +324,7 @@ public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializa
     }
 
     @Override
-    public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath fp, @Nonnull Launcher lnchr, @Nonnull TaskListener tl) throws InterruptedException, IOException {
+    public void perform(@Nonnull Run<?, ?> run, @Nonnull FilePath fp, @Nonnull Launcher launcher, @Nonnull TaskListener tl) throws InterruptedException, IOException {
 
         this.build = run;
         DSLBuildAction buildAction = new DSLBuildAction("NA", run);
@@ -331,7 +333,7 @@ public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializa
         if (advancedFunctions) {
             if (retrieveSummaryReport) {
                 summaryReportParams.noneSharedNFS = false;
-                ReportBuildAction reportAction = new ReportBuildAction(run, summaryReportParams, vAPIConnectionParam, tl,fp);
+                ReportBuildAction reportAction = new ReportBuildAction(run, summaryReportParams, vAPIConnectionParam, tl,fp,launcher);
                 run.addAction(reportAction);
             }
         }
@@ -396,7 +398,7 @@ public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializa
                 ServletException {
             try {
 
-                Utils utils = new Utils(null,false);
+                Utils utils = new Utils();
                 String output = utils.checkVAPIConnection(vAPIUrl, authRequired, vAPIUser, vAPIPassword);
                 if (!output.startsWith("Failed")) {
                     return FormValidation.ok("Success. " + output);

@@ -24,6 +24,7 @@
 package org.jenkinsci.plugins.vmanager;
 
 import hudson.FilePath;
+import hudson.Launcher;
 import hudson.model.Job;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -31,7 +32,6 @@ import hudson.plugins.vmanager.BuildStatusMap;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -41,6 +41,7 @@ import java.nio.file.Paths;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
@@ -77,19 +78,20 @@ public class ReportManager {
     private VMGRRun vmgrRun;
     private TaskListener listener;
     private boolean testMode = false;
-    private FilePath filePath = null;
+    private Utils utils;
+    private FilePath fp;
 
-    public ReportManager(Run<?, ?> build, SummaryReportParams summaryReportParams, VAPIConnectionParam vAPIConnectionParam, TaskListener listener, FilePath fp) {
+    public ReportManager(Run<?, ?> build, SummaryReportParams summaryReportParams, VAPIConnectionParam vAPIConnectionParam, TaskListener listener,FilePath filePath) {
         this.build = build;
         this.summaryReportParams = summaryReportParams;
         this.vAPIConnectionParam = vAPIConnectionParam;
         this.listener = listener;
-        this.filePath = filePath;
-        
 
         Job job = build.getParent();
         String workingDir = job.getBuildDir() + File.separator + build.getNumber();
         vmgrRun = new VMGRRun(build, workingDir, job.getBuildDir().getAbsolutePath());
+        this.utils = new Utils(build,listener,filePath);
+        //this.fp = fp;
 
     }
 
@@ -124,7 +126,7 @@ public class ReportManager {
     }
 
     private String getReportEmailAddresses() {
-        Utils utils = new Utils(filePath,summaryReportParams.noneSharedNFS);
+
         String[] emails;
         String output = null;
 
@@ -310,7 +312,7 @@ public class ReportManager {
                 listener.getLogger().println("ReportManager - Using user freestyle json to bring the report...");
             }
             //Load json from file
-            Utils utils = new Utils(filePath,summaryReportParams.noneSharedNFS);
+
             String freeVAPISyntax;
             if (this.testMode) {
                 freeVAPISyntax = utils.loadUserSyntaxForSummaryReport("20", 20, "" + "c://temp", summaryReportParams.freeVAPISyntax, null, summaryReportParams.deleteReportSyntaxInputFile);
@@ -416,8 +418,7 @@ public class ReportManager {
             if (vAPIConnectionParam.dynamicUserId) {
                 BufferedReader reader = null;
                 try {
-                    
-                    Utils utils = new Utils(filePath,summaryReportParams.noneSharedNFS);
+
                     reader = utils.loadFileFromWorkSpace(buildId, buildNumber, jobWorkingDir, null, listener, false, "user.input");
                     String line = null;
                     while ((line = reader.readLine()) != null) {
@@ -439,7 +440,7 @@ public class ReportManager {
             }
 
             String userpass = username + ":" + vAPIConnectionParam.vAPIPassword;
-            String basicAuth = "Basic " + javax.xml.bind.DatatypeConverter.printBase64Binary(userpass.getBytes());
+            String basicAuth = "Basic " + java.util.Base64.getUrlEncoder().encodeToString(userpass.getBytes());
             httpGet.setHeader("Authorization", basicAuth);
         }
 
@@ -474,11 +475,17 @@ public class ReportManager {
                 output = output.replace("<body>", "");
                 output = output.replace("</body>", "");
 
-                String fileOutput = jobWorkingDir + File.separator + buildNumber + "." + buildId + ".summary.report";
-                FileWriter writer = new FileWriter(fileOutput);
+                String fileOutput = /*jobWorkingDir + File.separator +*/ buildNumber + "." + buildId + ".summary.report";
+                if (utils.getFilePath() == null){
+                    //Pipeline always run on master
+                    fileOutput = jobWorkingDir + File.separator + fileOutput;            
+                }
+                StringBuffer writer = new StringBuffer();
                 writer.append(output);
-                writer.flush();
-                writer.close();
+                //writer.flush();
+
+                utils.saveFileOnDisk(fileOutput, writer.toString());
+                //writer.close();
 
                 if (!this.testMode) {
                     listener.getLogger().println("Report Summary was created succesfully.");
@@ -490,7 +497,7 @@ public class ReportManager {
 
     }
 
-    public void retrievReportFromServer(boolean isStreamingOn) throws Exception {
+    public void retrievReportFromServer(boolean isStreamingOn,Launcher launcher) throws Exception {
 
         //In case user choose to bring the report manualy skip and return
         if (summaryReportParams.summaryMode.equals("selfmade")) {
@@ -498,7 +505,7 @@ public class ReportManager {
         }
 
         HttpURLConnection conn = null;
-        Utils utils = new Utils(filePath,summaryReportParams.noneSharedNFS);
+
         String apiURL = vAPIConnectionParam.vAPIUrl + "/rest/reports/generate-summary-report";
         if (isStreamingOn) {
             apiURL = vAPIConnectionParam.vAPIUrl + "/rest/reports/stream-summary-report";
@@ -518,7 +525,6 @@ public class ReportManager {
 
         try {
             conn = utils.getVAPIConnection(apiURL, vAPIConnectionParam.authRequired, vAPIConnectionParam.vAPIUser, vAPIConnectionParam.vAPIPassword, "POST", vAPIConnectionParam.dynamicUserId, buildId, buildNumber, jobRootDir, listener, vAPIConnectionParam.connTimeout, vAPIConnectionParam.readTimeout, vAPIConnectionParam.advConfig);
-
             OutputStream os = conn.getOutputStream();
             String postData = buildPostParamForSummaryReport(false);
             if (!this.testMode) {
@@ -538,13 +544,19 @@ public class ReportManager {
                 StringBuffer sb;
                 String output;
                 if (isStreamingOn) {
-                    fileOutput = jobWorkingDir + File.separator + buildNumber + "." + buildId + ".summary.report";
-                    FileWriter writer = new FileWriter(fileOutput);
+                    fileOutput = buildNumber + "." + buildId + ".summary.report";
+                    StringBuffer writer = new StringBuffer();
                     while ((output = br.readLine()) != null) {
                         writer.append(output);
                     }
-                    writer.flush();
-                    writer.close();
+                    if (utils.getFilePath() == null){
+                        //Pipeline always run on master
+                        fileOutput = jobWorkingDir + File.separator + fileOutput;            
+                    }
+                    utils.saveFileOnDisk(fileOutput, writer.toString());
+                    utils.moveFromNodeToMaster(buildNumber + "." + buildId + ".summary.report", launcher,writer.toString());
+
+                    
                     if (!this.testMode) {
                         listener.getLogger().println("Report Summary was created succesfully.");
                     }
@@ -561,8 +573,12 @@ public class ReportManager {
                 BufferedReader br = new BufferedReader(new InputStreamReader((conn.getErrorStream())));
 
                 String output;
-                String fileOutput = jobWorkingDir + File.separator + buildNumber + "." + buildId + ".summary.report";
-                FileWriter writer = new FileWriter(fileOutput);
+                String fileOutput = buildNumber + "." + buildId + ".summary.report";
+                if (utils.getFilePath() == null){
+                    //Pipeline always run on master
+                    fileOutput = jobWorkingDir + File.separator + fileOutput;            
+                }
+                StringBuffer writer = new StringBuffer();
                 writer.append("<div class=\"microAgentWaiting\"><div class=\"spinnerMicroAgentMessage\"><p><img src=\"/plugin/vmanager-plugin/img/support-icon.png\"></img></p><p>");
                 writer.append("Failure to retrieve the report from the vManager server for this build.  Check your parameters.<br>Below you can find the exception that was thrown during the retrieval process:<br><br><strong>");
                 while ((output = br.readLine()) != null) {
@@ -579,8 +595,8 @@ public class ReportManager {
                 }
 
                 writer.append("</strong></p></div></div>");
-                writer.flush();
-                writer.close();
+                utils.saveFileOnDisk(fileOutput, writer.toString());
+                utils.moveFromNodeToMaster(buildNumber + "." + buildId + ".summary.report", launcher,writer.toString());
 
             }
         } catch (Exception e) {
@@ -589,25 +605,35 @@ public class ReportManager {
             } else {
                 if (!this.testMode) {
                     listener.getLogger().println("Failed to retrieve report from the vManager server.");
-                    
-                    String fileOutput = jobWorkingDir + File.separator + buildNumber + "." + buildId + ".summary.report";
-                    FileWriter writer = new FileWriter(fileOutput);
+
+                    String fileOutput = buildNumber + "." + buildId + ".summary.report";
+                    if (utils.getFilePath() == null){
+                        //Pipeline always run on master
+                        fileOutput = jobWorkingDir + File.separator + fileOutput;            
+                    }
+                    StringBuffer writer = new StringBuffer();
                     writer.append("<div class=\"microAgentWaiting\"><div class=\"spinnerMicroAgentMessage\"><p><img src=\"/plugin/vmanager-plugin/img/support-icon.png\"></img></p><p>");
                     writer.append("Failure to retrieve the report from the vManager server for this build.  Check your parameters.<br>Below you can find the exception that was thrown during the retrieval process:<br><br><strong>");
                     writer.append(e.getMessage());
                     writer.append("</strong></p></div></div>");
-                    writer.flush();
-                    writer.close();
+                    utils.saveFileOnDisk(fileOutput, writer.toString());
+                    utils.moveFromNodeToMaster(buildNumber + "." + buildId + ".summary.report", launcher,writer.toString());
                 }
             }
             throw e;
 
         } finally {
+            
             conn.disconnect();
 
         }
+        
+        
+        
 
     }
+    
+    
 
     public void emailSummaryReport() throws Exception {
 
@@ -621,7 +647,7 @@ public class ReportManager {
         }
 
         HttpURLConnection conn = null;
-        Utils utils = new Utils(filePath,summaryReportParams.noneSharedNFS);
+
         String apiURL = vAPIConnectionParam.vAPIUrl + "/rest/reports/generate-summary-report";
 
         int buildNumber = 20;
@@ -690,13 +716,17 @@ public class ReportManager {
         String fileInput = vmgrRun.getJobWorkingDir() + File.separator + vmgrRun.getRun().getNumber() + "." + vmgrRun.getRun().getId() + ".summary.report";
         String output = "<div class=\"microAgentWaiting\"><div class=\"spinnerMicroAgentMessage\"><p><img src=\"/plugin/vmanager-plugin/img/weblinks.png\"></img></p><p>Failed to find a report file for this build.<br>Please check that the following file exist:<br>" + fileInput + "</p></div></div>";
         try {
+            //Utils utils = new Utils(filePath,summaryReportParams.noneSharedNFS);                                                                                     
             output = new String(Files.readAllBytes(Paths.get(fileInput)));
+            //output = (utils.readFileOnDisk(fileInput)).lines().collect(Collectors.joining());
+
         } catch (IOException ex) {
             System.out.println("vManager Action - Can't find file for loading report: " + fileInput);
             return output;
         }
 
         return output;
+
     }
 
     private boolean checkResponseCode(HttpURLConnection conn) {
@@ -735,3 +765,6 @@ public class ReportManager {
     }
 
 }
+
+
+

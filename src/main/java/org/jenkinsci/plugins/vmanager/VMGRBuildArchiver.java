@@ -23,20 +23,18 @@
  */
 package org.jenkinsci.plugins.vmanager;
 
+import hudson.Launcher;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.util.Iterator;
 import java.util.List;
@@ -113,7 +111,7 @@ public class VMGRBuildArchiver {
         this.genericCredentialForSessionDelete = genericCredentialForSessionDelete;
     }
 
-    public void markBuildForArchive(List<String> listOfSessions, String apiURL, boolean requireAuth, String userUsedForLogin, String passwordUsedForLogin, String workingJobDir, TaskListener listener) {
+    public void markBuildForArchive(List<String> listOfSessions, String apiURL, boolean requireAuth, String userUsedForLogin, String passwordUsedForLogin, String workingJobDir, TaskListener listener, Launcher launcher, Utils utils) throws InterruptedException {
 
         //Build a string from listOfSessions
         String sessions = null;
@@ -127,10 +125,14 @@ public class VMGRBuildArchiver {
         }
 
         //Save the data into sdi.properties
-        String fileOutput = workingJobDir + File.separator + "sdi.properties";
-        FileWriter writer;
+        String fileOutput = "sdi.properties";
+        if (utils.getFilePath() == null){
+             //Pipeline always run on master
+             fileOutput = workingJobDir + File.separator + fileOutput;            
+        }
+        StringBuffer writer;
         try {
-            writer = new FileWriter(fileOutput);
+            writer = new StringBuffer();
             String url = apiURL.trim();
             url = url.substring(0, url.length() - 6);
 
@@ -150,8 +152,9 @@ public class VMGRBuildArchiver {
                 writer.append("archivePassword=" + passwordUsedForLogin + "\n");
             }
             writer.append("sessions=" + sessions + "\n");
-            writer.flush();
-            writer.close();
+            utils.saveFileOnDisk(fileOutput, writer.toString());
+            utils.moveFromNodeToMaster(fileOutput, launcher,writer.toString());
+            
 
         } catch (IOException ex) {
             ex.printStackTrace();

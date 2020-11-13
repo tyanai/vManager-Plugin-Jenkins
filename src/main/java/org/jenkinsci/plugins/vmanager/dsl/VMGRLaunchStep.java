@@ -529,7 +529,7 @@ public class VMGRLaunchStep extends Step {
                 ServletException {
             try {
 
-                Utils utils = new Utils(null,false);
+                Utils utils = new Utils();
                 String output = utils.checkVAPIConnection(vAPIUrl, authRequired, vAPIUser, vAPIPassword);
                 if (!output.startsWith("Failed")) {
                     return FormValidation.ok("Success. " + output);
@@ -546,7 +546,7 @@ public class VMGRLaunchStep extends Step {
                 ServletException {
             try {
 
-                Utils utils = new Utils(null,false);
+                Utils utils = new Utils();
                 String output = utils.checkVAPIConnection(vAPIUrl, true, archiveUser, archivePassword);
                 if (!output.startsWith("Failed")) {
                     return FormValidation.ok("Success. " + output);
@@ -563,7 +563,7 @@ public class VMGRLaunchStep extends Step {
                 ServletException {
             try {
 
-                Utils utils = new Utils(null,false);
+                Utils utils = new Utils();
                 String output = utils.checkExtraStaticAttr(vAPIUrl, authRequired, vAPIUser, vAPIPassword, staticAttributeList);
                 if (!output.startsWith("Failed")) {
                     return FormValidation.ok("Success. " + output);

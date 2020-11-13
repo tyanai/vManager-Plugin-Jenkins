@@ -1,6 +1,5 @@
 package org.jenkinsci.plugins.vmanager;
 
-import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 
@@ -25,6 +24,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.StringTokenizer;
 import hudson.FilePath;
+import hudson.Launcher;
 import java.io.FileNotFoundException;
 
 import javax.net.ssl.*;
@@ -39,14 +39,40 @@ public class Utils {
     private String UserUsedForLogin = null;
     private String PasswordUsedForLogin = null;
     private FilePath filePath = null;
-    private boolean noneSharedNFS = false;
-    
+    private TaskListener jobListener = null;
+    private Run build = null;
+    //private boolean noneSharedNFS = false;
+
+    /*
     public Utils(FilePath filePath, boolean noneSharedNFS){
         this.filePath = filePath;
         this.noneSharedNFS = noneSharedNFS;
        
     }
+     */
+    public Utils(Run run, TaskListener listener) {
+        if (run.getExecutor() != null) {
+            filePath = run.getExecutor().getCurrentWorkspace();
+        }
+
+        jobListener = listener;
+        this.build = run;
+    }
     
+    public Utils(Run run, TaskListener listener, FilePath filePath) {
+        this.filePath = filePath;
+        jobListener = listener;
+        this.build = run;
+    }
+
+    public Utils() {
+
+    }
+    
+    public FilePath getFilePath(){
+        return filePath;
+    }
+            
 
     public BufferedReader loadFileFromWorkSpace(String buildID, int buildNumber, String workPlacePath, String inputFile, TaskListener listener, boolean deleteInputFile, String fileTypeEndingName)
             throws Exception {
@@ -61,7 +87,7 @@ public class Utils {
         try {
 
             if ("".equals(inputFile) || inputFile == null) {
-                fileName = workPlacePath + File.separator + buildNumber + "." + buildID + "." + fileTypeEndingName;
+                fileName = /*workPlacePath + File.separator + */ buildNumber + "." + buildID + "." + fileTypeEndingName;
                 if (notInTestMode) {
                     listener.getLogger().print("Loading input file '" + fileName + "\n");
                 }
@@ -90,7 +116,6 @@ public class Utils {
 
     }
 
-  
     public String[] loadDataFromInputFiles(String buildID, int buildNumber, String workPlacePath, String inputFile, TaskListener listener, boolean deleteInputFile, String type, String fileEnding) throws Exception {
         String[] output = null;
         List<String> listOfNames = new LinkedList<String>();
@@ -107,7 +132,7 @@ public class Utils {
 
         // Set the right File name.
         if ("".equals(inputFile) || inputFile == null) {
-            fileName = workPlacePath + File.separator + buildNumber + "." + buildID + "." + fileEnding;
+            fileName = /*workPlacePath + File.separator + */ buildNumber + "." + buildID + "." + fileEnding;
         } else {
             fileName = inputFile;
         }
@@ -174,7 +199,6 @@ public class Utils {
         return output;
     }
 
-  
     public String loadUserSyntaxForSummaryReport(String buildID, int buildNumber, String workPlacePath, String inputFile, TaskListener listener, boolean deleteInputFile) throws Exception {
         String output = null;
         StringBuffer jsonInput = new StringBuffer();
@@ -187,7 +211,7 @@ public class Utils {
 
         // Set the right File name.
         if ("".equals(inputFile) || inputFile == null) {
-            fileName = workPlacePath + File.separator + buildNumber + "." + buildID + "." + "summary_report.input";
+            fileName = /*workPlacePath + File.separator +*/ buildNumber + "." + buildID + "." + "summary_report.input";
         } else {
             fileName = inputFile;
         }
@@ -248,7 +272,7 @@ public class Utils {
 
         // Set the right File name.
         if ("".equals(credentialInputFile) || credentialInputFile == null) {
-            fileName = workPlacePath + File.separator + buildNumber + "." + buildID + "." + "credential.input";
+            fileName = /*workPlacePath + File.separator + */ buildNumber + "." + buildID + "." + "credential.input";
         } else {
             fileName = credentialInputFile;
         }
@@ -319,7 +343,7 @@ public class Utils {
 
         // Set the right File name.
         if ("".equals(envInputFile) || envInputFile == null) {
-            fileName = workPlacePath + File.separator + buildNumber + "." + buildID + "." + "environment.input";
+            fileName = /*workPlacePath + File.separator +*/ buildNumber + "." + buildID + "." + "environment.input";
         } else {
             fileName = envInputFile;
         }
@@ -390,7 +414,7 @@ public class Utils {
 
         // Set the right File name.
         if ("".equals(attrValuesFile) || attrValuesFile == null) {
-            fileName = workPlacePath + File.separator + buildNumber + "." + buildID + "." + "attr.values.input";
+            fileName = /* workPlacePath + File.separator +*/ buildNumber + "." + buildID + "." + "attr.values.input";
         } else {
             fileName = attrValuesFile;
         }
@@ -495,7 +519,7 @@ public class Utils {
 
         // Set the right File name.
         if ("".equals(vInputFile) || vInputFile == null) {
-            fileName = workPlacePath + File.separator + buildNumber + "." + buildID + "." + "vapi.input";
+            fileName = /* workPlacePath + File.separator + */ buildNumber + "." + buildID + "." + "vapi.input";
         } else {
             fileName = vInputFile;
         }
@@ -779,7 +803,7 @@ public class Utils {
     }
 
     public String executeVSIFLaunch(String[] vsifs, String url, boolean requireAuth, String user, String password, TaskListener listener, boolean dynamicUserId, String buildID, int buildNumber,
-            String workPlacePath, int connConnTimeOut, int connReadTimeout, boolean advConfig, String jsonEnvInput, boolean useUserOnFarm, String userFarmType, String[] farmUserPassword, StepHolder stepHolder, String envSourceInputFile, String workingJobDir, VMGRBuildArchiver vMGRBuildArchiver, boolean userPrivateSSHKey, String jsonAttrValuesInput, String executionType, String[] sessionNames, String envSourceInputFileType) throws Exception {
+            String workPlacePath, int connConnTimeOut, int connReadTimeout, boolean advConfig, String jsonEnvInput, boolean useUserOnFarm, String userFarmType, String[] farmUserPassword, StepHolder stepHolder, String envSourceInputFile, String workingJobDir, VMGRBuildArchiver vMGRBuildArchiver, boolean userPrivateSSHKey, String jsonAttrValuesInput, String executionType, String[] sessionNames, String envSourceInputFileType, Launcher launcher) throws Exception {
 
         boolean notInTestMode = true;
         if (listener == null) {
@@ -794,7 +818,7 @@ public class Utils {
         if ("batch".equals(executionType)) {
             //Treat sessions that were launched by the user's batch 
             SessionNameIdHolder sessionNameIdHolder = new SessionNameIdHolder();
-            listOfSessions = sessionNameIdHolder.getSessionNames(sessionNames, url, requireAuth, user, password, listener, dynamicUserId, buildID, buildNumber, workPlacePath, connConnTimeOut, connReadTimeout, advConfig,this);
+            listOfSessions = sessionNameIdHolder.getSessionNames(sessionNames, url, requireAuth, user, password, listener, dynamicUserId, buildID, buildNumber, workPlacePath, connConnTimeOut, connReadTimeout, advConfig, this);
             if (listOfSessions.size() == 0) {
                 listener.getLogger().print("Couldn't find any data for the given project and the supplied session names.\n");
                 return "Please check the input file that lists the session names and make sure you have the full session names as listed in vManager.";
@@ -864,7 +888,7 @@ public class Utils {
 
                 }
                 input = input + "}";
-    
+
                 //listener.getLogger().print("vManager vAPI input: '" + input + "' with user/password: "+ user + "/" + password +"\n");
                 HttpURLConnection conn = getVAPIConnection(apiURL, requireAuth, user, password, "POST", dynamicUserId, buildID, buildNumber, workPlacePath, listener, connConnTimeOut, connReadTimeout, advConfig);
                 OutputStream os = conn.getOutputStream();
@@ -918,25 +942,33 @@ public class Utils {
 
         if (vMGRBuildArchiver != null) {
             if (vMGRBuildArchiver.isVMGRBuildArchive()) {
-                vMGRBuildArchiver.markBuildForArchive(listOfSessions, apiURL, requireAuth, UserUsedForLogin, PasswordUsedForLogin, workingJobDir, listener);
+                vMGRBuildArchiver.markBuildForArchive(listOfSessions, apiURL, requireAuth, UserUsedForLogin, PasswordUsedForLogin, workingJobDir, listener, launcher, this);
             }
         }
 
         //Write the sessions id into the workspace for further use
         // Flush the output into workspace
-        String fileOutput = workPlacePath + File.separator + buildNumber + "." + buildID + ".session_launch.output";
+        String fileOutput = buildNumber + "." + buildID + ".session_launch.output";
 
+         if (filePath == null){
+             //Pipeline always run on master
+             fileOutput = workPlacePath + File.separator + fileOutput;            
+         }
+        
+        
         StringBuffer writer = new StringBuffer();
         Iterator<String> iter = listOfSessions.iterator();
         while (iter.hasNext()) {
             writer.append(iter.next() + "\n");
         }
+        
         this.saveFileOnDisk(fileOutput, writer.toString());
-
        
+        
+
         if (stepHolder != null) {
             waitTillSessionEnds(url, requireAuth, user, password, listener, dynamicUserId, buildID, buildNumber,
-                    workPlacePath, connConnTimeOut, connReadTimeout, advConfig, stepHolder, listOfSessions, notInTestMode, workingJobDir);
+                    workPlacePath, connConnTimeOut, connReadTimeout, advConfig, stepHolder, listOfSessions, notInTestMode, workingJobDir, launcher);
         }
 
         return "success";
@@ -1005,17 +1037,14 @@ public class Utils {
             conn.disconnect();
 
             // Flush the output into workspace
-            String fileOutput = workPlacePath + File.separator + buildNumber + "." + buildID + ".vapi.output";
-
-            //FileWriter writer = new FileWriter(fileOutput);
-
-
+            String fileOutput = buildNumber + "." + buildID + ".vapi.output";
+            if (filePath == null){
+                 //Pipeline always run on master
+                 fileOutput = workPlacePath + File.separator + fileOutput;            
+            }
             this.saveFileOnDisk(fileOutput, result.toString());
 
-            //writer.append(result.toString());
-            //writer.flush();
-            //writer.close();
-
+           
             String textOut = "API Call Success: Output was saved into: " + fileOutput + "\n";
 
             if (notInTestMode) {
@@ -1034,11 +1063,11 @@ public class Utils {
     }
 
     public void waitTillSessionEnds(String url, boolean requireAuth, String user, String password, TaskListener listener, boolean dynamicUserId, String buildID, int buildNumber,
-            String workPlacePath, int connConnTimeOut, int connReadTimeout, boolean advConfig, StepHolder stepHolder, List listOfSessions, boolean notInTestMode, String workingJobDir) throws Exception {
+            String workPlacePath, int connConnTimeOut, int connReadTimeout, boolean advConfig, StepHolder stepHolder, List listOfSessions, boolean notInTestMode, String workingJobDir, Launcher launcher) throws Exception {
 
-        LaunchHolder launchHolder = new LaunchHolder(stepHolder, listOfSessions,filePath,noneSharedNFS);  
+        LaunchHolder launchHolder = new LaunchHolder(stepHolder, listOfSessions, this);
         launchHolder.performWaiting(url, requireAuth, user, password, listener, dynamicUserId, buildID, buildNumber,
-                workPlacePath, connConnTimeOut, connReadTimeout, advConfig, notInTestMode, workingJobDir);
+                workPlacePath, connConnTimeOut, connReadTimeout, advConfig, notInTestMode, workingJobDir, launcher);
 
     }
 
@@ -1103,74 +1132,64 @@ public class Utils {
     }
 
     public void saveFileOnDisk(String fileOnDiskPath, String output) throws IOException {
-        if (noneSharedNFS && filePath.isRemote()) {
-            /*
-            hudson.remoting.Channel channel = null;
-            try {
-                channel = (hudson.remoting.Channel) build.getExecutor().getCurrentWorkspace().getChannel();
-                hudson.FilePath newFile = new hudson.FilePath(channel, fileOnDiskPath);
-                newFile.write(output, StandardCharsets.UTF_8.name());
-            } catch (Exception e) {
-                e.printStackTrace();
-                standardWriteToDisk( fileOnDiskPath,  output);
-            } finally {
-                //channel.close();
-            }
-            */
+        if (filePath != null) {
             try {
                 hudson.FilePath newFile = filePath.child(fileOnDiskPath);
                 newFile.write(output, StandardCharsets.UTF_8.name());
-            }catch (Exception e) {
+                //dir.createTextTempFile("hudson", ".sh", command);
+            } catch (Exception e) {
                 e.printStackTrace();
-                standardWriteToDisk( fileOnDiskPath,  output);
+                standardWriteToDisk(fileOnDiskPath, output);
             }
-
         } else {
-            standardWriteToDisk( fileOnDiskPath,  output);
-            
+            standardWriteToDisk(fileOnDiskPath, output);
         }
+
     }
-    
-  
+
     public BufferedReader readFileOnDisk(String fileOnDiskPath) throws FileNotFoundException {
-        if (noneSharedNFS && filePath.isRemote()) {
-            /*
-            hudson.remoting.Channel channel = null;
-            try {
-                channel = (hudson.remoting.Channel) build.getExecutor().getCurrentWorkspace().getChannel();
-                hudson.FilePath newFile = new hudson.FilePath(channel, fileOnDiskPath);
-                newFile.write(output, StandardCharsets.UTF_8.name());
-            } catch (Exception e) {
-                e.printStackTrace();
-                standardWriteToDisk( fileOnDiskPath,  output);
-            } finally {
-                //channel.close();
-            }
-            */
+
+        if (filePath != null) {
             try {
                 hudson.FilePath newFile = filePath.child(fileOnDiskPath);
-                return new BufferedReader(new InputStreamReader( newFile.read(), StandardCharsets.UTF_8));
-                
-            }catch (Exception e) {
-                e.printStackTrace();
-                return standardReadFromDisk( fileOnDiskPath);
-            }
+                return new BufferedReader(new InputStreamReader(newFile.read(), StandardCharsets.UTF_8));
 
+            } catch (Exception e) {
+                e.printStackTrace();
+                return standardReadFromDisk(fileOnDiskPath);
+            }
         } else {
             return standardReadFromDisk(fileOnDiskPath);
-            
         }
+
     }
-    
-    public void standardWriteToDisk(String fileOnDiskPath, String output) throws IOException{
+
+    public void standardWriteToDisk(String fileOnDiskPath, String output) throws IOException {
         FileWriter writer = new FileWriter(fileOnDiskPath);
         writer.append(output);
         writer.flush();
-        writer.close(); 
+        writer.close();
     }
-    
-    public BufferedReader standardReadFromDisk(String fileOnDiskPath) throws FileNotFoundException{
+
+    public BufferedReader standardReadFromDisk(String fileOnDiskPath) throws FileNotFoundException {
         return new BufferedReader(new FileReader(fileOnDiskPath));
+    }
+
+    public void moveFromNodeToMaster(String fileName, Launcher launcher, String content) throws IOException, InterruptedException {
+        //Get master FilePath
+
+        String buildDir = build.getRootDir().getAbsolutePath();
+        //FilePath masterDirectory = new FilePath(new File(buildDir));
+        //FilePath masterDirectory = new FilePath(new File(buildDir + File.separator + fileName));
+        FilePath masterDirectory = new FilePath(build.getRootDir()).child(fileName);
+        this.jobListener.getLogger().print("About to copy " + fileName + " from Slave location to Master location: \n");
+        this.jobListener.getLogger().print("From Slave location: "  + this.filePath.getRemote() + "\n");
+        this.jobListener.getLogger().print("To Master location: "  + buildDir + "\n\n");
+       
+        this.filePath.list(fileName)[0].copyTo(masterDirectory);
+        //launcher.getChannel().call(new vManagerWriteToSlave(content, new FilePath(masterDirectory, fileName)));
+        //launcher.getChannel().call(new vManagerWriteToSlave(content, new FilePath(this.filePath, fileName)));
+
     }
 
 }

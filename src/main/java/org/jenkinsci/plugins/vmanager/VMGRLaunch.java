@@ -550,7 +550,7 @@ public class VMGRLaunch extends Builder {
         }
 
         try {
-            Utils utils = new Utils(build.getWorkspace(),noneSharedNFS);
+            Utils utils = new Utils(build,listener);
             // Get the list of VSIF file to launch
             String[] vsifFileNames = null;
             String[] sessionNames = null;
@@ -568,6 +568,11 @@ public class VMGRLaunch extends Builder {
                 }
 
                 sessionNames = utils.loadDataFromInputFiles(build.getId(), build.getNumber(), "" + build.getWorkspace(), sessionsInputFileFix, listener, deleteSessionInputFile, "session names", "sessions.input");
+                if (sessionNames.length == 0){
+                    listener.getLogger().println("No session were found within sessions.input file.  Exit Job.\n");
+                    return false;
+                }
+                
             } else {
                 if ("static".equals(vsifType)) {
                     listener.getLogger().println("The VSIF file chosen is static. VSIF file static location is: '" + vSIFNameFix + "'");
@@ -698,10 +703,10 @@ public class VMGRLaunch extends Builder {
             
             
             
-
+            
 
             String output = utils.executeVSIFLaunch(vsifFileNames, vAPIUrl, authRequired, tempUser, tempPassword, listener, dynamicUserId, build.getId(), build.getNumber(),
-                    "" + build.getWorkspace(), connTimeout, readTimeout, advConfig, jsonEnvInput, useUserOnFarm, userFarmType, farmUserPassword, stepHolder, envSourceInputFileFix, workingJobDir, vMGRBuildArchiver, userPrivateSSHKey, jsonAttrValuesInput, executionType, sessionNames,envSourceInputFileType);
+                    "" + build.getWorkspace(), connTimeout, readTimeout, advConfig, jsonEnvInput, useUserOnFarm, userFarmType, farmUserPassword, stepHolder, envSourceInputFileFix, workingJobDir, vMGRBuildArchiver, userPrivateSSHKey, jsonAttrValuesInput, executionType, sessionNames,envSourceInputFileType, launcher);
             if (!"success".equals(output)) {
                 listener.getLogger().println("Failed to launch vsifs for build " + build.getId() + " " + build.getNumber() + "\n");
                 listener.getLogger().println(output + "\n");
@@ -910,7 +915,7 @@ public class VMGRLaunch extends Builder {
                 ServletException {
             try {
 
-                Utils utils = new Utils(null,false);
+                Utils utils = new Utils();
                 String output = utils.checkVAPIConnection(vAPIUrl, authRequired, vAPIUser, vAPIPassword);
                 if (!output.startsWith("Failed")) {
                     return FormValidation.ok("Success. " + output);
@@ -927,7 +932,7 @@ public class VMGRLaunch extends Builder {
                 ServletException {
             try {
 
-                Utils utils = new Utils(null,false);
+                Utils utils = new Utils();
                 String output = utils.checkVAPIConnection(vAPIUrl, true, archiveUser, archivePassword);
                 if (!output.startsWith("Failed")) {
                     return FormValidation.ok("Success. " + output);
@@ -944,7 +949,7 @@ public class VMGRLaunch extends Builder {
                 ServletException {
             try {
 
-                Utils utils = new Utils(null,false);
+                Utils utils = new Utils();
                 String output = utils.checkExtraStaticAttr(vAPIUrl, authRequired, vAPIUser, vAPIPassword, staticAttributeList);
                 if (!output.startsWith("Failed")) {
                     return FormValidation.ok("Success. " + output);
