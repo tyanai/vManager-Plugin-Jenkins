@@ -33,7 +33,7 @@ public class VMGRAPI extends Builder {
 	private final String apiUrl;
 	private final String requestMethod;
 	private final boolean advConfig;
-        private final boolean noneSharedNFS;
+       
 	private int connTimeout = 1;
 	private int readTimeout = 30;
 
@@ -42,7 +42,7 @@ public class VMGRAPI extends Builder {
 	// "DataBoundConstructor"
 	@DataBoundConstructor
 	public VMGRAPI(String vAPIUrl, String vAPIUser, String vAPIPassword, String vAPIInput, String vJsonInputFile, boolean deleteInputFile, boolean authRequired, String apiType,
-			boolean dynamicUserId, String apiUrl, String requestMethod, boolean advConfig, int connTimeout, int readTimeout,boolean noneSharedNFS) {
+			boolean dynamicUserId, String apiUrl, String requestMethod, boolean advConfig, int connTimeout, int readTimeout) {
 		this.vAPIUrl = vAPIUrl;
 		this.vAPIUser = vAPIUser;
 		this.vAPIPassword = vAPIPassword;
@@ -57,7 +57,7 @@ public class VMGRAPI extends Builder {
 		this.advConfig = advConfig;
 		this.connTimeout = connTimeout;
 		this.readTimeout = readTimeout;
-                this.noneSharedNFS = noneSharedNFS;
+                
 	}
 
 	/**
@@ -67,10 +67,7 @@ public class VMGRAPI extends Builder {
 		return vAPIUrl;
 	}
 
-        public boolean isNoneSharedNFS() {
-            return noneSharedNFS;
-        }
-        
+                
 	public String getApiUrl() {
 		return apiUrl;
 	}
@@ -180,13 +177,6 @@ public class VMGRAPI extends Builder {
 
 
 
-                        if (noneSharedNFS){
-                            if(build.getWorkspace().isRemote()){
-                                listener.getLogger().println("The build is remote to master running on slave agent.");
-                            } else {
-                                listener.getLogger().println("The build is local and running on master process.");
-                            }
-                        }
 
 			// Now call the actual launch
 			// ----------------------------------------------------------------------------------------------------------------

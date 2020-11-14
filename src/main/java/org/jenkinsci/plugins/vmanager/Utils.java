@@ -41,15 +41,9 @@ public class Utils {
     private FilePath filePath = null;
     private TaskListener jobListener = null;
     private Run build = null;
-    //private boolean noneSharedNFS = false;
+    
 
-    /*
-    public Utils(FilePath filePath, boolean noneSharedNFS){
-        this.filePath = filePath;
-        this.noneSharedNFS = noneSharedNFS;
-       
-    }
-     */
+    
     public Utils(Run run, TaskListener listener) {
         if (run.getExecutor() != null) {
             filePath = run.getExecutor().getCurrentWorkspace();
@@ -1176,17 +1170,15 @@ public class Utils {
     }
 
     public void moveFromNodeToMaster(String fileName, Launcher launcher, String content) throws IOException, InterruptedException {
+        
         //Get master FilePath
-
         String buildDir = build.getRootDir().getAbsolutePath();
-        //FilePath masterDirectory = new FilePath(new File(buildDir));
-        //FilePath masterDirectory = new FilePath(new File(buildDir + File.separator + fileName));
         FilePath masterDirectory = new FilePath(build.getRootDir()).child(fileName);
         this.jobListener.getLogger().print("About to copy " + fileName + " from Slave location to Master location: \n");
         this.jobListener.getLogger().print("From Slave location: "  + this.filePath.getRemote() + "\n");
         this.jobListener.getLogger().print("To Master location: "  + buildDir + "\n\n");
        
-        this.filePath.list(fileName)[0].copyTo(masterDirectory);
+        this.filePath.child(fileName).copyTo(masterDirectory);
         //launcher.getChannel().call(new vManagerWriteToSlave(content, new FilePath(masterDirectory, fileName)));
         //launcher.getChannel().call(new vManagerWriteToSlave(content, new FilePath(this.filePath, fileName)));
 

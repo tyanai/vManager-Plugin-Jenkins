@@ -544,9 +544,15 @@ the following format within the job working directory: 
 
 ## Change Log
 
+##### Version 3.1 (Nov 13, 2020)
+
+-   Refactor the plugin to support Jenkins distributed execution across all OS types.
+-	Removed the flag for none shared NFS, now the plugin assumes distributed topology as a default.
+-	Fixed a bug in which an empty sessions.input file caused the plugin to monitor all sessions when using batch mode.
+
 ##### Version 3.0.7 (Oct 28, 2020)
 
--   Fixed the support in Master and Salve running with different NFS access for the vAPI Plugin step. 
+-   Fixed the support in Controller and Agent running with different NFS access for the vAPI Plugin step. 
 
 ##### Version 3.0.6 (Sep 29, 2020)
 
@@ -567,7 +573,7 @@ the following format within the job working directory: 
 
 ##### Version 3.0.0 (Nov 1, 2019)
 
--	Added support in a none shared NFS between master and slave.
+-	Added support in a none shared NFS between controller and agent.
 	Plugin can now consume/dump input/output files from build running
 	on remote slaves.  (Not supported with Pipeline)
 -	Added support in using Jenkins macros as part of the input params.
@@ -630,8 +636,8 @@ the following format within the job working directory: 
 
 ##### Version 2.5.4 (Sep 27, 2018)
 
--   Added a support in master/node setup.  An ability to specify the
-    master workspace.
+-   Added a support in controller/agent setup.  An ability to specify the
+    controller workspace.
 
 ##### Version 2.5.3 (Feb 7, 2018)
 

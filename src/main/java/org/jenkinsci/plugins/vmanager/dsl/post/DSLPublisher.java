@@ -332,7 +332,7 @@ public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializa
 
         if (advancedFunctions) {
             if (retrieveSummaryReport) {
-                summaryReportParams.noneSharedNFS = false;
+                
                 ReportBuildAction reportAction = new ReportBuildAction(run, summaryReportParams, vAPIConnectionParam, tl,fp,launcher);
                 run.addAction(reportAction);
             }

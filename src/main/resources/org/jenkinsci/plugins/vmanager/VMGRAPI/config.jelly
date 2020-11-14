@@ -57,7 +57,7 @@
   
   <f:block>
   <table style="width: 95% ; border: 1px solid black">
-  <f:entry title="Jenkins Master and Slaves do not share same NFS" field="noneSharedNFS" description="If checked, assumption is that the build is running on a file system that the master do not have an access to."><f:checkbox name="noneSharedNFS" checked="${it.noneSharedNFS}"/></f:entry>
+  
   <f:entry title="vAPI URL" field="apiUrl" description="The actual API REST path"><f:textbox /></f:entry>
   <f:entry title="Choose Request Method" field="requestMethod" >
   	<f:select />

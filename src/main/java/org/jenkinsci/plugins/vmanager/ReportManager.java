@@ -716,9 +716,9 @@ public class ReportManager {
         String fileInput = vmgrRun.getJobWorkingDir() + File.separator + vmgrRun.getRun().getNumber() + "." + vmgrRun.getRun().getId() + ".summary.report";
         String output = "<div class=\"microAgentWaiting\"><div class=\"spinnerMicroAgentMessage\"><p><img src=\"/plugin/vmanager-plugin/img/weblinks.png\"></img></p><p>Failed to find a report file for this build.<br>Please check that the following file exist:<br>" + fileInput + "</p></div></div>";
         try {
-            //Utils utils = new Utils(filePath,summaryReportParams.noneSharedNFS);                                                                                     
+                                                                                             
             output = new String(Files.readAllBytes(Paths.get(fileInput)));
-            //output = (utils.readFileOnDisk(fileInput)).lines().collect(Collectors.joining());
+            
 
         } catch (IOException ex) {
             System.out.println("vManager Action - Can't find file for loading report: " + fileInput);

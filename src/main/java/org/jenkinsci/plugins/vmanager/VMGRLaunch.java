@@ -60,7 +60,7 @@ public class VMGRLaunch extends Builder {
     private final String doneResolver;
     private final String suspendedResolver;
     private final boolean waitTillSessionEnds;
-    private final boolean noneSharedNFS;
+    
     private final boolean pauseSessionOnBuildInterruption;
     private int stepSessionTimeout = 0;
 
@@ -111,7 +111,7 @@ public class VMGRLaunch extends Builder {
             boolean dynamicUserId, boolean advConfig, int connTimeout, int readTimeout, boolean envVarible, String envVaribleFile, String inaccessibleResolver, String stoppedResolver, String failedResolver, String doneResolver, String suspendedResolver, boolean waitTillSessionEnds,
             int stepSessionTimeout, boolean generateJUnitXML, boolean extraAttributesForFailures, String staticAttributeList, boolean markBuildAsFailedIfAllRunFailed, boolean failJobIfAllRunFailed, String envSourceInputFile, boolean vMGRBuildArchive, boolean deleteAlsoSessionDirectory,
             boolean genericCredentialForSessionDelete, String archiveUser, String archivePassword, String famMode, String famModeLocation, boolean noAppendSeed, boolean markBuildAsPassedIfAllRunPassed, boolean failJobUnlessAllRunPassed, boolean userPrivateSSHKey, boolean attrValues,
-            String attrValuesFile, String executionType, String sessionsInputFile, boolean deleteSessionInputFile, boolean noneSharedNFS, String envVariableType, String envVariableText, String attrVariableType, String attrVariableText, boolean pauseSessionOnBuildInterruption, String envSourceInputFileType) {
+            String attrValuesFile, String executionType, String sessionsInputFile, boolean deleteSessionInputFile, String envVariableType, String envVariableText, String attrVariableType, String attrVariableText, boolean pauseSessionOnBuildInterruption, String envSourceInputFileType) {
         this.vAPIUrl = vAPIUrl;
         this.vAPIUser = vAPIUser;
         this.vAPIPassword = vAPIPassword;
@@ -166,7 +166,7 @@ public class VMGRLaunch extends Builder {
         this.executionType = executionType;
         this.sessionsInputFile = sessionsInputFile;
         this.deleteSessionInputFile = deleteSessionInputFile;
-        this.noneSharedNFS = noneSharedNFS;
+        
         this.envVariableType = envVariableType;
         this.envVariableText = envVariableText;
         this.attrVariableType = attrVariableType;
@@ -182,10 +182,7 @@ public class VMGRLaunch extends Builder {
         return sessionsInputFile;
     }
 
-    public boolean isNoneSharedNFS() {
-        return noneSharedNFS;
-    }
-    
+        
     public boolean isPauseSessionOnBuildInterruption(){
         return pauseSessionOnBuildInterruption;
     }
@@ -692,18 +689,7 @@ public class VMGRLaunch extends Builder {
 
             // Now call the actual launch
             // ----------------------------------------------------------------------------------------------------------------
-            if (noneSharedNFS){
-                if(build.getWorkspace().isRemote()){
-                    listener.getLogger().println("The build is remote to master running on slave agent.");
-                } else {
-                    listener.getLogger().println("The build is local and running on master process.");
-                }
-            }
-            
-            
-            
-            
-            
+           
 
             String output = utils.executeVSIFLaunch(vsifFileNames, vAPIUrl, authRequired, tempUser, tempPassword, listener, dynamicUserId, build.getId(), build.getNumber(),
                     "" + build.getWorkspace(), connTimeout, readTimeout, advConfig, jsonEnvInput, useUserOnFarm, userFarmType, farmUserPassword, stepHolder, envSourceInputFileFix, workingJobDir, vMGRBuildArchiver, userPrivateSSHKey, jsonAttrValuesInput, executionType, sessionNames,envSourceInputFileType, launcher);

@@ -54,7 +54,7 @@
   
   </table>
   </f:block>
-  <f:entry title="Jenkins Master and Slaves are not sharing NFS" field="noneSharedNFS" description="If checked, assumption is that the build is running on a file system that the master do not have access to."><f:checkbox name="noneSharedNFS" checked="${it.noneSharedNFS}"/></f:entry>
+  
   <f:entry title="Pause the vManager session's execution if build is interrupted." field="pauseSessionOnBuildInterruption" description="If checked, in case build is interrupted (aborted), the job will also try to pause the session on vManager."><f:checkbox name="pauseSessionOnBuildInterruption" checked="${it.pauseSessionOnBuildInterruption}"/></f:entry>
   <f:radioBlock name="executionType" value="launcher" title="Use session launcher" checked="${instance.executionType == 'launcher'}" inline="true">
   <f:block>

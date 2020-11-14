@@ -12718,7 +12718,7 @@ $.ui.ddmanager = {
  
  
 function resizeReport() {
-    document.getElementById("reportContent").style.height= window.innerHeight - 198;
+    document.getElementById("reportContent").style.height= window.innerHeight - 250;
 }
 
 function runTheReportScript(){ 
