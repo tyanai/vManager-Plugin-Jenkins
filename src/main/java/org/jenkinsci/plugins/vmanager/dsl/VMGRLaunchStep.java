@@ -91,13 +91,17 @@ public class VMGRLaunchStep extends Step {
     private final boolean deleteSessionInputFile;
     private final boolean pauseSessionOnBuildInterruption;
     
+    private final String executionScript;
+    private final String executionShellLocation;
+    private final String executionVsifFile;
+    
 
     @DataBoundConstructor
     public VMGRLaunchStep(String vAPIUrl, String vAPIUser, String vAPIPassword, String vSIFName, String vSIFInputFile, String credentialInputFile, boolean deleteInputFile, boolean deleteCredentialInputFile, boolean useUserOnFarm, boolean authRequired, String vsifType, String userFarmType,
             boolean dynamicUserId, boolean advConfig, int connTimeout, int readTimeout, boolean envVarible, String envVaribleFile, String inaccessibleResolver, String stoppedResolver, String failedResolver, String doneResolver, String suspendedResolver, boolean waitTillSessionEnds, int stepSessionTimeout, 
             boolean generateJUnitXML, boolean extraAttributesForFailures, String staticAttributeList, boolean markBuildAsFailedIfAllRunFailed, boolean failJobIfAllRunFailed, String envSourceInputFile, boolean vMGRBuildArchive, boolean deleteAlsoSessionDirectory, boolean genericCredentialForSessionDelete, 
             String archiveUser, String archivePassword, String famMode, String famModeLocation, boolean noAppendSeed, boolean pipelineNodes, String masterWorkspaceLocation, boolean markBuildAsPassedIfAllRunPassed, boolean failJobUnlessAllRunPassed, boolean userPrivateSSHKey, boolean attrValues, 
-            String attrValuesFile, String executionType, String sessionsInputFile, boolean deleteSessionInputFile, boolean pauseSessionOnBuildInterruption, String envSourceInputFileType) {
+            String attrValuesFile, String executionType, String sessionsInputFile, boolean deleteSessionInputFile, boolean pauseSessionOnBuildInterruption, String envSourceInputFileType, String executionScript, String executionShellLocation, String executionVsifFile) {
         this.vAPIUrl = vAPIUrl;
         this.vAPIUser = vAPIUser;
         this.vAPIPassword = vAPIPassword;
@@ -157,12 +161,30 @@ public class VMGRLaunchStep extends Step {
         this.sessionsInputFile = sessionsInputFile;
         this.deleteSessionInputFile = deleteSessionInputFile; 
         this.pauseSessionOnBuildInterruption = pauseSessionOnBuildInterruption;
+        
+        this.executionScript = executionScript;
+        this.executionShellLocation = executionShellLocation;
+        this.executionVsifFile = executionVsifFile;
     }
 
+    
     /**
      * We'll use this from the <tt>config.jelly</tt>.
      */
     
+    public String getExecutionScript() {
+        return executionScript;
+    }
+
+    public String getExecutionShellLocation() {
+        return executionShellLocation;
+    }
+
+    
+    public String getExecutionVsifFile() {
+        return executionVsifFile;
+    }
+
     public String getSessionsInputFile() {
         return sessionsInputFile;
     }
@@ -378,25 +400,7 @@ public class VMGRLaunchStep extends Step {
         return new VMGRLaunchStepImpl(this, context);
     }
     
-    /*
-    @Extension
-    public static final class VMGRStepDeletedJobListener extends RunListener<Run> {
-
-        @Override
-        public void onDeleted(Run run) {
-           
-            VMGRBuildArchiver vMGRBuildArchiver = new VMGRBuildArchiver();
-            try {
-                vMGRBuildArchiver.deleteSessions(run, logger);
-            } catch (Exception ex) {
-                logger.log(Level.SEVERE, "Failed to delete session during build removal.", ex);
-            }
-            
-        }
-        
-        private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(VMGRStepDeletedJobListener.class.getName());
-    }
-*/
+    
 
     @Extension
     public static class DescriptorImpl extends StepDescriptor  {

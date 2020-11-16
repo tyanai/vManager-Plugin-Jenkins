@@ -60,7 +60,7 @@ public class VMGRLaunch extends Builder {
     private final String doneResolver;
     private final String suspendedResolver;
     private final boolean waitTillSessionEnds;
-    
+
     private final boolean pauseSessionOnBuildInterruption;
     private int stepSessionTimeout = 0;
 
@@ -102,7 +102,9 @@ public class VMGRLaunch extends Builder {
     private String envVaribleFileFix;
     private String attrValuesFileFix;
     private String famModeLocationFix;
-    
+    private final String executionScript;
+    private final String executionShellLocation;
+    private final String executionVsifFile;
 
     // Fields in config.jelly must match the parameter names in the
     // "DataBoundConstructor"
@@ -111,7 +113,8 @@ public class VMGRLaunch extends Builder {
             boolean dynamicUserId, boolean advConfig, int connTimeout, int readTimeout, boolean envVarible, String envVaribleFile, String inaccessibleResolver, String stoppedResolver, String failedResolver, String doneResolver, String suspendedResolver, boolean waitTillSessionEnds,
             int stepSessionTimeout, boolean generateJUnitXML, boolean extraAttributesForFailures, String staticAttributeList, boolean markBuildAsFailedIfAllRunFailed, boolean failJobIfAllRunFailed, String envSourceInputFile, boolean vMGRBuildArchive, boolean deleteAlsoSessionDirectory,
             boolean genericCredentialForSessionDelete, String archiveUser, String archivePassword, String famMode, String famModeLocation, boolean noAppendSeed, boolean markBuildAsPassedIfAllRunPassed, boolean failJobUnlessAllRunPassed, boolean userPrivateSSHKey, boolean attrValues,
-            String attrValuesFile, String executionType, String sessionsInputFile, boolean deleteSessionInputFile, String envVariableType, String envVariableText, String attrVariableType, String attrVariableText, boolean pauseSessionOnBuildInterruption, String envSourceInputFileType) {
+            String attrValuesFile, String executionType, String sessionsInputFile, boolean deleteSessionInputFile, String envVariableType, String envVariableText, String attrVariableType, String attrVariableText, boolean pauseSessionOnBuildInterruption, String envSourceInputFileType,
+            String executionScript, String executionShellLocation, String executionVsifFile) {
         this.vAPIUrl = vAPIUrl;
         this.vAPIUser = vAPIUser;
         this.vAPIPassword = vAPIPassword;
@@ -166,27 +169,42 @@ public class VMGRLaunch extends Builder {
         this.executionType = executionType;
         this.sessionsInputFile = sessionsInputFile;
         this.deleteSessionInputFile = deleteSessionInputFile;
-        
+
         this.envVariableType = envVariableType;
         this.envVariableText = envVariableText;
         this.attrVariableType = attrVariableType;
         this.attrVariableText = attrVariableText;
         this.pauseSessionOnBuildInterruption = pauseSessionOnBuildInterruption;
 
+        this.executionScript = executionScript;
+        this.executionShellLocation = executionShellLocation;
+        this.executionVsifFile = executionVsifFile;
+
     }
 
     /**
      * We'll use this from the <tt>config.jelly</tt>.
      */
+    public String getExecutionVsifFile() {
+        return executionVsifFile;
+    }
+
+    public String getExecutionShellLocation() {
+        return executionShellLocation;
+    }
+
+    public String getExecutionScript() {
+        return executionScript;
+    }
+    
     public String getSessionsInputFile() {
         return sessionsInputFile;
     }
 
-        
-    public boolean isPauseSessionOnBuildInterruption(){
+    public boolean isPauseSessionOnBuildInterruption() {
         return pauseSessionOnBuildInterruption;
     }
-    
+
     public String getAttrVariableType() {
         return attrVariableType;
     }
@@ -338,7 +356,8 @@ public class VMGRLaunch extends Builder {
     public String getInaccessibleResolver() {
         return inaccessibleResolver;
     }
-    public String getEnvSourceInputFileType(){
+
+    public String getEnvSourceInputFileType() {
         return envSourceInputFileType;
     }
 
@@ -409,7 +428,7 @@ public class VMGRLaunch extends Builder {
             listener.getLogger().println("The connection timeout is: 1 minutes");
             listener.getLogger().println("The read api timeout is: 30 minutes");
         }
-        
+
         listener.getLogger().println("In case build is interrupted, sesssion will get paused: " + pauseSessionOnBuildInterruption);
 
         //Check if this is user's batch or launch
@@ -424,8 +443,14 @@ public class VMGRLaunch extends Builder {
             }
             listener.getLogger().println("The session input file name is: " + sessionsInputFileFix);
             listener.getLogger().println("The deleteSessionInputFile : " + deleteSessionInputFile);
+        }
+        if ("hybrid".equals(executionType)) {
+            listener.getLogger().println("Hybrid batch model with script: " + executionScript);
+            listener.getLogger().println("Hybrid batch model with shell: " + executionShellLocation);
+            listener.getLogger().println("Hybrid batch model with vsif: " + executionVsifFile);
+
         } else {
-            listener.getLogger().println("The vsif to be executed is is " + vsifType);
+            listener.getLogger().println("The vsif to be executed is " + vsifType);
 
             try {
                 vSIFNameFix = TokenMacro.expandAll(build, listener, vSIFName);
@@ -481,7 +506,7 @@ public class VMGRLaunch extends Builder {
                     }
                     listener.getLogger().println("The User's source file is: " + envSourceInputFileFix);
                     listener.getLogger().println("The User's source file type is: " + envSourceInputFileType);
-                    
+
                 } else {
                     listener.getLogger().println("The User's source file wasn't set");
                 }
@@ -547,7 +572,7 @@ public class VMGRLaunch extends Builder {
         }
 
         try {
-            Utils utils = new Utils(build,listener);
+            Utils utils = new Utils(build, listener);
             // Get the list of VSIF file to launch
             String[] vsifFileNames = null;
             String[] sessionNames = null;
@@ -556,6 +581,7 @@ public class VMGRLaunch extends Builder {
             String[] farmUserPassword = null;
             String tempUser = vAPIUser;
             String tempPassword = vAPIPassword;
+            String tmpExecutionType = executionType;
 
             if ("batch".equals(executionType)) {
                 if (sessionsInputFile == null || sessionsInputFile.trim().equals("")) {
@@ -565,10 +591,22 @@ public class VMGRLaunch extends Builder {
                 }
 
                 sessionNames = utils.loadDataFromInputFiles(build.getId(), build.getNumber(), "" + build.getWorkspace(), sessionsInputFileFix, listener, deleteSessionInputFile, "session names", "sessions.input");
-                if (sessionNames.length == 0){
+                if (sessionNames.length == 0) {
                     listener.getLogger().println("No session were found within sessions.input file.  Exit Job.\n");
                     return false;
                 }
+
+            } else if ("hybrid".equals(executionType)) {
+                //Launch the session and create the sessions.input
+                tmpExecutionType = "batch"; // once we found the sessin name, the execution continues as if user did the batch first
+                BatchExecManager batchExecManager = new BatchExecManager(listener,executionScript,executionShellLocation,executionVsifFile,build.getId(), build.getNumber());
+                batchExecManager.execBatchCommand(build.getExecutor().getCurrentWorkspace());
+                sessionNames = utils.loadDataFromInputFiles(build.getId(), build.getNumber(), "" + build.getWorkspace(), "", listener, false, "session names", "sessions.input");
+                if (sessionNames.length == 0) {
+                    listener.getLogger().println("No session were found within sessions.input file.  Exit Job.\n");
+                    return false;
+                }
+                
                 
             } else {
                 if ("static".equals(vsifType)) {
@@ -689,17 +727,18 @@ public class VMGRLaunch extends Builder {
 
             // Now call the actual launch
             // ----------------------------------------------------------------------------------------------------------------
+            
            
-
+            
             String output = utils.executeVSIFLaunch(vsifFileNames, vAPIUrl, authRequired, tempUser, tempPassword, listener, dynamicUserId, build.getId(), build.getNumber(),
-                    "" + build.getWorkspace(), connTimeout, readTimeout, advConfig, jsonEnvInput, useUserOnFarm, userFarmType, farmUserPassword, stepHolder, envSourceInputFileFix, workingJobDir, vMGRBuildArchiver, userPrivateSSHKey, jsonAttrValuesInput, executionType, sessionNames,envSourceInputFileType, launcher);
+                    "" + build.getWorkspace(), connTimeout, readTimeout, advConfig, jsonEnvInput, useUserOnFarm, userFarmType, farmUserPassword, stepHolder, envSourceInputFileFix, workingJobDir, vMGRBuildArchiver, userPrivateSSHKey, jsonAttrValuesInput, tmpExecutionType, sessionNames,envSourceInputFileType, launcher);
             if (!"success".equals(output)) {
                 listener.getLogger().println("Failed to launch vsifs for build " + build.getId() + " " + build.getNumber() + "\n");
                 listener.getLogger().println(output + "\n");
                 return false;
             }
             // ----------------------------------------------------------------------------------------------------------------
-
+             
         } catch (Exception e) {
             listener.getLogger().println("Failed to build " + build.getId() + " " + build.getNumber());
             listener.getLogger().println(e.getMessage());
@@ -840,15 +879,13 @@ public class VMGRLaunch extends Builder {
             items.add("Ignore, and continue to wait", "ignore");
             return items;
         }
-        
-         public ListBoxModel doFillEnvSourceInputFileTypeItems() {
+
+        public ListBoxModel doFillEnvSourceInputFileTypeItems() {
             ListBoxModel items = new ListBoxModel();
             items.add("bash", "BSH");
             items.add("csh", "CSH");
             return items;
         }
-        
-        
 
         public ListBoxModel doFillStoppedResolverItems() {
             ListBoxModel items = new ListBoxModel();

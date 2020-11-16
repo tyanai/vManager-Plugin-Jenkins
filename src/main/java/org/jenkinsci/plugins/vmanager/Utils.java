@@ -25,7 +25,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.StringTokenizer;
 import hudson.FilePath;
 import hudson.Launcher;
+import hudson.Launcher.ProcStarter;
+import hudson.Proc;
 import java.io.FileNotFoundException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.net.ssl.*;
 
@@ -33,6 +39,7 @@ import org.apache.commons.codec.binary.Base64;
 
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 
 public class Utils {
 
@@ -41,9 +48,7 @@ public class Utils {
     private FilePath filePath = null;
     private TaskListener jobListener = null;
     private Run build = null;
-    
 
-    
     public Utils(Run run, TaskListener listener) {
         if (run.getExecutor() != null) {
             filePath = run.getExecutor().getCurrentWorkspace();
@@ -52,7 +57,7 @@ public class Utils {
         jobListener = listener;
         this.build = run;
     }
-    
+
     public Utils(Run run, TaskListener listener, FilePath filePath) {
         this.filePath = filePath;
         jobListener = listener;
@@ -62,11 +67,10 @@ public class Utils {
     public Utils() {
 
     }
-    
-    public FilePath getFilePath(){
+
+    public FilePath getFilePath() {
         return filePath;
     }
-            
 
     public BufferedReader loadFileFromWorkSpace(String buildID, int buildNumber, String workPlacePath, String inputFile, TaskListener listener, boolean deleteInputFile, String fileTypeEndingName)
             throws Exception {
@@ -944,21 +948,18 @@ public class Utils {
         // Flush the output into workspace
         String fileOutput = buildNumber + "." + buildID + ".session_launch.output";
 
-         if (filePath == null){
-             //Pipeline always run on master
-             fileOutput = workPlacePath + File.separator + fileOutput;            
-         }
-        
-        
+        if (filePath == null) {
+            //Pipeline always run on master
+            fileOutput = workPlacePath + File.separator + fileOutput;
+        }
+
         StringBuffer writer = new StringBuffer();
         Iterator<String> iter = listOfSessions.iterator();
         while (iter.hasNext()) {
             writer.append(iter.next() + "\n");
         }
-        
+
         this.saveFileOnDisk(fileOutput, writer.toString());
-       
-        
 
         if (stepHolder != null) {
             waitTillSessionEnds(url, requireAuth, user, password, listener, dynamicUserId, buildID, buildNumber,
@@ -1032,13 +1033,12 @@ public class Utils {
 
             // Flush the output into workspace
             String fileOutput = buildNumber + "." + buildID + ".vapi.output";
-            if (filePath == null){
-                 //Pipeline always run on master
-                 fileOutput = workPlacePath + File.separator + fileOutput;            
+            if (filePath == null) {
+                //Pipeline always run on master
+                fileOutput = workPlacePath + File.separator + fileOutput;
             }
             this.saveFileOnDisk(fileOutput, result.toString());
 
-           
             String textOut = "API Call Success: Output was saved into: " + fileOutput + "\n";
 
             if (notInTestMode) {
@@ -1170,18 +1170,20 @@ public class Utils {
     }
 
     public void moveFromNodeToMaster(String fileName, Launcher launcher, String content) throws IOException, InterruptedException {
-        
+
         //Get master FilePath
         String buildDir = build.getRootDir().getAbsolutePath();
         FilePath masterDirectory = new FilePath(build.getRootDir()).child(fileName);
         this.jobListener.getLogger().print("About to copy " + fileName + " from Slave location to Master location: \n");
-        this.jobListener.getLogger().print("From Slave location: "  + this.filePath.getRemote() + "\n");
-        this.jobListener.getLogger().print("To Master location: "  + buildDir + "\n\n");
-       
+        this.jobListener.getLogger().print("From Slave location: " + this.filePath.getRemote() + "\n");
+        this.jobListener.getLogger().print("To Master location: " + buildDir + "\n\n");
+
         this.filePath.child(fileName).copyTo(masterDirectory);
         //launcher.getChannel().call(new vManagerWriteToSlave(content, new FilePath(masterDirectory, fileName)));
         //launcher.getChannel().call(new vManagerWriteToSlave(content, new FilePath(this.filePath, fileName)));
 
     }
+
+   
 
 }

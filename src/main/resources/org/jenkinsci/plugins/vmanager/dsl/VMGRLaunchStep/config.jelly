@@ -107,6 +107,17 @@
   
   </f:block>  
  </f:radioBlock>  
+<f:radioBlock name="executionType" value="hybrid" title="Launch using Batch and vAPI" checked="${instance.executionType == 'hybrid'}" inline="true">
+  <f:block>
+  <td colspan="4" style="padding-left: 30px;">
+  <table style="width: 100% ; border: 1px solid black ;border-collapse: initial;">
+          <f:entry title="Full path for the batch script location" field="executionScript" description="Name of script file that gets vsif name as an input. Example: /home/tyanai/run.sh (mandatory)"><f:textbox /></f:entry>
+          <f:entry title="Full path for the shell type" field="executionShellLocation" description="Location of the script shell type. Example: /bin/sch (mandatory)"><f:textbox /></f:entry>
+          <f:entry title="Full path for vsif location" field="executionVsifFile" description="Full path for the vsif input file: /home/tyanai/vsif/test.vsif (mandatory)"><f:textbox /></f:entry>   
+  </table>
+  </td>
+  </f:block>  
+ </f:radioBlock>  
  
  <f:block> 
  <f:optionalBlock name="waitTillSessionEnds"  title="Wait for launched sessions to end" description="If selected, the build step will not finish until all sessions launched by this build ended" checked="${instance.waitTillSessionEnds}" inline="true">

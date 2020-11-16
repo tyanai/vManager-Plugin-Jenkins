@@ -54,7 +54,6 @@
   
   </table>
   </f:block>
-  
   <f:entry title="Pause the vManager session's execution if build is interrupted." field="pauseSessionOnBuildInterruption" description="If checked, in case build is interrupted (aborted), the job will also try to pause the session on vManager."><f:checkbox name="pauseSessionOnBuildInterruption" checked="${it.pauseSessionOnBuildInterruption}"/></f:entry>
   <f:radioBlock name="executionType" value="launcher" title="Use session launcher" checked="${instance.executionType == 'launcher'}" inline="true">
   <f:block>
@@ -126,6 +125,18 @@
   <table style="width: 100% ; border: 1px solid black ;border-collapse: initial;">
           <f:entry title="Name of input file" field="sessionsInputFile" description="Name of input file with one or more session names (mandatory)"><f:textbox /></f:entry>
           <f:entry title="Delete Input File" field="deleteSessionInputFile" description="If checked, the job will delete the input file after processing it."><f:checkbox name="deleteSessionInputFile" checked="${it.deleteSessionInputFile}"/></f:entry>
+  </table>
+  </td>
+  </f:block>  
+ </f:radioBlock>  
+
+<f:radioBlock name="executionType" value="hybrid" title="Launch using Batch and vAPI" checked="${instance.executionType == 'hybrid'}" inline="true">
+  <f:block>
+  <td colspan="4" style="padding-left: 30px;">
+  <table style="width: 100% ; border: 1px solid black ;border-collapse: initial;">
+          <f:entry title="Full path for the batch script location" field="executionScript" description="Name of script file that gets vsif name as an input. Example: /home/tyanai/run.sh (mandatory)"><f:textbox /></f:entry>
+          <f:entry title="Full path for the shell type" field="executionShellLocation" description="Location of the script shell type. Example: /bin/sch (mandatory)"><f:textbox /></f:entry>
+          <f:entry title="Full path for vsif location" field="executionVsifFile" description="Full path for the vsif input file: /home/tyanai/vsif/test.vsif (mandatory)"><f:textbox /></f:entry>   
   </table>
   </td>
   </f:block>  

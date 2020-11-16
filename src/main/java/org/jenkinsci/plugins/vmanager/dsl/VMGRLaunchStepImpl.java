@@ -6,6 +6,7 @@ import hudson.Launcher;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import java.io.File;
+import org.jenkinsci.plugins.vmanager.BatchExecManager;
 import org.jenkinsci.plugins.vmanager.JUnitRequestHolder;
 import org.jenkinsci.plugins.vmanager.StepHolder;
 import org.jenkinsci.plugins.vmanager.Utils;
@@ -99,6 +100,10 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
         if ("batch".equals(step.getExecutionType())) {
             listener.getLogger().println("The session input file name is: " + step.getSessionsInputFile());
             listener.getLogger().println("The deleteSessionInputFile : " + step.isDeleteSessionInputFile());
+        } if ("hybrid".equals(step.getExecutionType())) {
+            listener.getLogger().println("Hybrid batch model with script: " + step.getExecutionScript());
+            listener.getLogger().println("Hybrid batch model with shell: " + step.getExecutionShellLocation());
+            listener.getLogger().println("Hybrid batch model with vsif: " + step.getExecutionVsifFile());
         } else {
             listener.getLogger().println("The vsif to be executed is for vAPI is " + step.getVsifType());
             listener.getLogger().println("The vSIFName for vAPI is: " + step.getVSIFName());
@@ -190,6 +195,7 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
             String[] farmUserPassword = null;
             String tempUser = step.getVAPIUser();
             String tempPassword = step.getVAPIPassword();
+            String tmpExecutionType = step.getExecutionType();
 
             if ("batch".equals(step.getExecutionType())) {
                 if (step.getSessionsInputFile() == null || step.getSessionsInputFile().trim().equals("")) {
@@ -203,6 +209,18 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
                     listener.getLogger().println("No session were found within sessions.input file.  Exit Job.\n");
                     throw new Exception("No session were found within sessions.input file.  Exit Job.\n"); //false;
                 }
+            } else if ("hybrid".equals(step.getExecutionType())) {
+                //Launch the session and create the sessions.input
+                tmpExecutionType = "batch"; // once we found the sessin name, the execution continues as if user did the batch first
+                BatchExecManager batchExecManager = new BatchExecManager(listener, step.getExecutionScript(), step.getExecutionShellLocation(), step.getExecutionVsifFile(),buildId, buildNumber);
+                batchExecManager.execBatchCommand(filePath);
+                sessionNames = utils.loadDataFromInputFiles(buildId, buildNumber, "" + workspace, "", listener, false, "session names", "sessions.input");
+                if (sessionNames.length == 0) {
+                    listener.getLogger().println("No session were found within sessions.input file.  Exit Job.\n");
+                    throw new Exception("Failed to launch sessions for build " + buildId + " " + buildNumber + "\n"); //false;
+                }
+                
+                
             } else {
 
                 if ("static".equals(step.getVsifType())) {
@@ -263,7 +281,7 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
             // Now call the actual launch
             // ----------------------------------------------------------------------------------------------------------------
             String output = utils.executeVSIFLaunch(vsifFileNames, step.getVAPIUrl(), step.isAuthRequired(), tempUser, tempPassword, listener, step.isDynamicUserId(), buildId, buildNumber,
-                    "" + workspace, step.getConnTimeout(), step.getReadTimeout(), step.isAdvConfig(), jsonEnvInput, step.isUseUserOnFarm(), step.getUserFarmType(), farmUserPassword, stepHolder, step.getEnvSourceInputFile(), workingJobDir, vMGRBuildArchiver, step.isUserPrivateSSHKey(), jsonAttrValuesInput, step.getExecutionType(), sessionNames, step.getEnvSourceInputFileType(), launcher);
+                    "" + workspace, step.getConnTimeout(), step.getReadTimeout(), step.isAdvConfig(), jsonEnvInput, step.isUseUserOnFarm(), step.getUserFarmType(), farmUserPassword, stepHolder, step.getEnvSourceInputFile(), workingJobDir, vMGRBuildArchiver, step.isUserPrivateSSHKey(), jsonAttrValuesInput, tmpExecutionType, sessionNames, step.getEnvSourceInputFileType(), launcher);
             if (!"success".equals(output)) {
                 listener.getLogger().println("Failed to launch vsifs for build " + buildId + " " + buildNumber + "\n");
                 listener.getLogger().println(output + "\n");

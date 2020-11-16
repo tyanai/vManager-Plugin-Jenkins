@@ -28,6 +28,10 @@ plugin enables you to add a remote execution for extracting runs
 information, reports data or even collecting and launching sessions as part of your
 build process.
 
+This plugin can also work in a hybrid model - aka, keep your current way of
+launching sessions using batch, while letting this plugin take over monitoring 
+the session progress, creation of JUnit and summary report.
+
 ## Features
 
 -   Free-style job plugin (can perform all vManager API call).
@@ -109,7 +113,7 @@ file name, to be consist across all builds.
 
 ##### **vManager Session Launcher**
 
-There are two modes for launching a session using the vManager Session
+There are three modes for launching a session using the vManager Session
 Launcher action:
 
 -   **Launcher mode (default)** - choose this if you want the plugin to
@@ -117,6 +121,8 @@ Launcher action:
     environment and parameters.
 -   **Batch mode** - choose this mode if you want to launch the sessions
     yourself using shell/batch as part of a pre-step for this action.
+-   **Hybrid mode** - This is the same as batch mode, but instead of having 
+    you to write your own shell step, the plugin takes care for that automatically.
 
    
   ![](./docs/images/executiontype.png "Jenkins > Cadence vManager Plugin > executiontype.png")
@@ -548,6 +554,7 @@ the following format within the job working directory: 
 
 -   Refactor the plugin to support Jenkins distributed execution across all OS types.
 -	Removed the flag for none shared NFS, now the plugin assumes distributed topology as a default.
+-	Added new option to launch session using batch (shell) if Jenkins Agent is running on Linux.
 -	Fixed a bug in which an empty sessions.input file caused the plugin to monitor all sessions when using batch mode.
 
 ##### Version 3.0.7 (Oct 28, 2020)
