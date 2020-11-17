@@ -40,6 +40,7 @@ import org.apache.commons.codec.binary.Base64;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
+import sun.launcher.resources.launcher;
 
 public class Utils {
 
@@ -125,7 +126,7 @@ public class Utils {
         }
 
         if (notInTestMode) {
-            listener.getLogger().print("Lookin for " + type + " input:\n");
+            listener.getLogger().print("Looking for " + type + " input:\n");
         }
 
         // Set the right File name.
@@ -1179,11 +1180,79 @@ public class Utils {
         this.jobListener.getLogger().print("To Master location: " + buildDir + "\n\n");
 
         this.filePath.child(fileName).copyTo(masterDirectory);
-        //launcher.getChannel().call(new vManagerWriteToSlave(content, new FilePath(masterDirectory, fileName)));
-        //launcher.getChannel().call(new vManagerWriteToSlave(content, new FilePath(this.filePath, fileName)));
 
     }
 
-   
+    public void batchExecManager(TaskListener listener, String executionScript, String executionShellLocation, String executionVsifFile, String buildId, int buildNumber, Launcher launcher) throws IOException {
+        String sessionNameToMonitor = null;
+        String[] command = {executionShellLocation, executionScript, executionVsifFile};
+        jobListener.getLogger().print("\nTrying to launch a session using batch on this agent workspace:\n");
+        jobListener.getLogger().print("Select script for this execution is " + executionScript + "\n");
+        jobListener.getLogger().print("Select shell type for this execution is " + executionShellLocation + "\n");
+        jobListener.getLogger().print("Select vsif for this execution is " + executionVsifFile + "\n");
+        boolean foundGoodVSIF = false;
+
+        try {
+            Launcher.ProcStarter ps = launcher.new ProcStarter();
+        
+            ps.cmds(command);//.readStdout();
+
+            ps.readStdout();
+            ps.readStderr();
+            Proc proc = launcher.launch(ps);
+            
+            
+            BufferedReader in = new BufferedReader(new InputStreamReader(proc.getStdout()));
+            BufferedReader inError = new BufferedReader(new InputStreamReader(proc.getStdout()));
+            String s = null;
+
+            while ((s = in.readLine()) != null) {
+
+                jobListener.getLogger().print(s + "\n");
+                if (s.indexOf("*I,runner.sessionStarted: Session") > -1) {
+                    foundGoodVSIF = true;
+                    sessionNameToMonitor = s.substring(34, s.indexOf(" started."));
+
+                    //Now creates the file of sessions.input
+                    String fileOutput = buildNumber + "." + buildId + ".sessions.input";
+                    StringBuffer writer = new StringBuffer();
+                    writer.append(sessionNameToMonitor);
+                    hudson.FilePath newFile = filePath.child(fileOutput);
+                    newFile.write(writer.toString(), StandardCharsets.UTF_8.name());
+
+                }
+
+            }
+
+            String sError = null;
+
+            while ((sError = inError.readLine()) != null) {
+
+                jobListener.getLogger().print(sError + "\n");
+
+            }
+
+        } catch (IOException e) {
+            jobListener.getLogger().println(e.getMessage());
+            for (StackTraceElement ste : e.getStackTrace()) {
+                jobListener.getLogger().println(" " + ste);
+            }
+
+            jobListener.getLogger().println(ExceptionUtils.getFullStackTrace(e));
+        } catch (InterruptedException ex) {
+            jobListener.getLogger().println(ex.getMessage());
+            for (StackTraceElement ste : ex.getStackTrace()) {
+                jobListener.getLogger().println(" " + ste);
+            }
+
+            jobListener.getLogger().println(ExceptionUtils.getFullStackTrace(ex));
+        }
+
+        if (foundGoodVSIF) {
+            jobListener.getLogger().print("Found session name to monitor: " + sessionNameToMonitor + "\n");
+        } else {
+            throw new IOException("Failed to launch vsif using batch.  Job stopped.");
+        }
+    }
 
 }

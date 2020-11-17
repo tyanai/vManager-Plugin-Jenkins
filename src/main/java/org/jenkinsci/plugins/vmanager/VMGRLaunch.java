@@ -599,8 +599,9 @@ public class VMGRLaunch extends Builder {
             } else if ("hybrid".equals(executionType)) {
                 //Launch the session and create the sessions.input
                 tmpExecutionType = "batch"; // once we found the sessin name, the execution continues as if user did the batch first
-                BatchExecManager batchExecManager = new BatchExecManager(listener,executionScript,executionShellLocation,executionVsifFile,build.getId(), build.getNumber());
-                batchExecManager.execBatchCommand(build.getExecutor().getCurrentWorkspace());
+                //BatchExecManager batchExecManager = new BatchExecManager(listener,TokenMacro.expandAll(build, listener, executionScript),executionShellLocation,executionVsifFile,build.getId(), build.getNumber());
+                utils.batchExecManager(listener,TokenMacro.expandAll(build, listener, executionScript),executionShellLocation,TokenMacro.expandAll(build, listener, executionVsifFile),build.getId(), build.getNumber(),launcher);
+                //batchExecManager.execBatchCommand(build.getExecutor().getCurrentWorkspace());
                 sessionNames = utils.loadDataFromInputFiles(build.getId(), build.getNumber(), "" + build.getWorkspace(), "", listener, false, "session names", "sessions.input");
                 if (sessionNames.length == 0) {
                     listener.getLogger().println("No session were found within sessions.input file.  Exit Job.\n");

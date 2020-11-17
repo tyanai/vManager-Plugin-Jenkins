@@ -212,8 +212,9 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
             } else if ("hybrid".equals(step.getExecutionType())) {
                 //Launch the session and create the sessions.input
                 tmpExecutionType = "batch"; // once we found the sessin name, the execution continues as if user did the batch first
-                BatchExecManager batchExecManager = new BatchExecManager(listener, step.getExecutionScript(), step.getExecutionShellLocation(), step.getExecutionVsifFile(),buildId, buildNumber);
-                batchExecManager.execBatchCommand(filePath);
+                //BatchExecManager batchExecManager = new BatchExecManager(listener, step.getExecutionScript(), step.getExecutionShellLocation(), step.getExecutionVsifFile(),buildId, buildNumber);
+                //batchExecManager.execBatchCommand(filePath);
+                utils.batchExecManager(listener, step.getExecutionScript(), step.getExecutionShellLocation(), step.getExecutionVsifFile(),buildId, buildNumber, launcher);
                 sessionNames = utils.loadDataFromInputFiles(buildId, buildNumber, "" + workspace, "", listener, false, "session names", "sessions.input");
                 if (sessionNames.length == 0) {
                     listener.getLogger().println("No session were found within sessions.input file.  Exit Job.\n");

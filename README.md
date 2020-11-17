@@ -550,6 +550,11 @@ the following format within the job working directory: 
 
 ## Change Log
 
+##### Version 3.1.1 (Nov 17, 2020)
+
+-	Changed implementation from ProcessBuilder to ProcStarter in batch execution.
+-	Added parsing of batch vsif and script paths to match Jenkins env variables.
+
 ##### Version 3.1 (Nov 13, 2020)
 
 -   Refactor the plugin to support Jenkins distributed execution across all OS types.
