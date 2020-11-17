@@ -6,7 +6,6 @@ import hudson.Launcher;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import java.io.File;
-import org.jenkinsci.plugins.vmanager.BatchExecManager;
 import org.jenkinsci.plugins.vmanager.JUnitRequestHolder;
 import org.jenkinsci.plugins.vmanager.StepHolder;
 import org.jenkinsci.plugins.vmanager.Utils;
