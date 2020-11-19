@@ -1170,9 +1170,9 @@ public class Utils {
         //Get master FilePath
         String buildDir = build.getRootDir().getAbsolutePath();
         FilePath masterDirectory = new FilePath(build.getRootDir()).child(fileName);
-        this.jobListener.getLogger().print("About to copy " + fileName + " from Slave location to Master location: \n");
-        this.jobListener.getLogger().print("From Slave location: " + this.filePath.getRemote() + "\n");
-        this.jobListener.getLogger().print("To Master location: " + buildDir + "\n\n");
+        //this.jobListener.getLogger().print("About to copy " + fileName + " from Slave location to Master location: \n");
+        //this.jobListener.getLogger().print("From Slave location: " + this.filePath.getRemote() + "\n");
+        //this.jobListener.getLogger().print("To Master location: " + buildDir + "\n\n");
 
         this.filePath.child(fileName).copyTo(masterDirectory);
 

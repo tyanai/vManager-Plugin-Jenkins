@@ -550,6 +550,10 @@ the following format within the job working directory: 
 
 ## Change Log
 
+##### Version 3.1.2 (Nov 19, 2020)
+
+-	Removed the logging to the console log each time a copy is made from Agent to Controller.
+
 ##### Version 3.1.1 (Nov 17, 2020)
 
 -	Changed implementation from ProcessBuilder to ProcStarter in batch execution.
