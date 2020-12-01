@@ -550,6 +550,10 @@ the following format within the job working directory: 
 
 ## Change Log
 
+##### Version 3.1.3 (Dec 1, 2020)
+
+-	Fix configuration indent.
+
 ##### Version 3.1.2 (Nov 19, 2020)
 
 -	Removed the logging to the console log each time a copy is made from Agent to Controller.
