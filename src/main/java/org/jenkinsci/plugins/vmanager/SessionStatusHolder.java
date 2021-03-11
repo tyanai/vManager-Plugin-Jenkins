@@ -263,7 +263,9 @@ public class SessionStatusHolder {
                
                 if (postSession){
                     //Just before continue to the next Jenkins step, check if the user choose to fail the entire Job in case all runs failed
+                    //this.listener.getLogger().println("Info - In Post session.");
                     if (failJobIfAllRunFailed){
+                        //this.listener.getLogger().println("Info - total runs: " + sessionData.getTotalRuns().trim());
 			if (sessionData.getTotalRuns().trim().equals(sessionData.getFailed().trim())){
 				//Fail the entire Job:
                                 throw new Exception("ALL_RUNS_FAILED");
@@ -273,6 +275,7 @@ public class SessionStatusHolder {
                 
                     //Just before continue to the next Jenkins step, check if the user choose to fail the entire Job unless not all runs passed
                     if (failJobUnlessAllRunPassed){
+                        //this.listener.getLogger().println("Info - total runs: " + sessionData.getTotalRuns().trim());
 			if (!sessionData.getTotalRuns().trim().equals(sessionData.getPassed().trim())){
 				//Fail the entire Job:
                                 throw new Exception("NOT_ALL_RUNS_PASSED");

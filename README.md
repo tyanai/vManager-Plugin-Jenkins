@@ -550,6 +550,14 @@ the following format within the job working directory: 
 
 ## Change Log
 
+##### Version 3.1.4 (March 11, 2021)
+
+-	Added an exit condition for cases when user choose to ignore specific session states and continue to wait. (mostly
+	common when session is changin state to Stop while not all runs finish thier execution). So far it was waiting 
+	forever, and now the job will continue to the next step once there are no more runs on waiting or running state.
+-	Added support in an auto-rerun post session comletion.  This adds one more minute to the overall Job time, 
+	as the plugin checks for session completion two times in a row (to make sure a rerun did not start).
+
 ##### Version 3.1.3 (Dec 1, 2020)
 
 -	Fix configuration indent.

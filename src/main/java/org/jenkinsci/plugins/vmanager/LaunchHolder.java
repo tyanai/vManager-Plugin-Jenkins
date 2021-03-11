@@ -30,11 +30,12 @@ public class LaunchHolder {
     private List<String> listOfSessionsForCountDown = null;
     private static long TIME_TO_SLEEP = 60000;
     private static final String postData1 = "{\"filter\":{\"attName\":\"id\",\"operand\":\"EQUALS\",\"@c\":\".AttValueFilter\",\"attValue\":\"";
-    private static final String postData2 = "\"},\"projection\": {\"type\":\"SELECTION_ONLY\",\"selection\":[\"session_status\",\"name\"]}}";
+    private static final String postData2 = "\"},\"projection\": {\"type\":\"SELECTION_ONLY\",\"selection\":[\"session_status\",\"name\",\"running\",\"waiting\"]}}";
     private static final String runsList = "{\"filter\":{\"condition\":\"AND\",\"@c\":\".ChainedFilter\",\"chain\":[{\"@c\":\".RelationFilter\",\"relationName\":\"session\",\"filter\":{\"condition\":\"AND\",\"@c\":\".ChainedFilter\",\"chain\":[{\"@c\":\".InFilter\",\"attName\":\"id\",\"operand\":\"IN\",\"values\":[\"######\"]}]}}]},\"pageLength\":100000,\"settings\":{\"write-hidden\":true,\"stream-mode\":true},\"projection\": {\"type\": \"SELECTION_ONLY\",\"selection\":[\"test_name\",\"status\",\"duration\",\"test_group\",\"computed_seed\",\"id\",\"first_failure_name\",\"first_failure_description\"###ATTR###]}}";
     private FilePath filePath = null;
     private Utils utils = null;
     Map<String, String> extraAttrLabels = new HashMap<String, String>();
+    Map<String, String> sessionFinalState = new HashMap<String, String>();
 
     public LaunchHolder(StepHolder stepHolder, List<String> listOfSessions, Utils utilsInstance) {
         super();
@@ -98,6 +99,11 @@ public class LaunchHolder {
 
         //While we iterate over session status, we can use it to grab the real session name for later usages
         Map<String, String> sessionIdName = new HashMap<String, String>();
+        
+        //Since session can finish its execution and start an automatic rerun right after, we need to make sure we wait.
+        //We check that by checkig that two times in a row, there are no runs in waiting or running state
+        Map<String, String> sessionCompletedLastState = new HashMap<String, String>();
+       
 
         while (keepWaiting) {
 
@@ -147,7 +153,10 @@ public class LaunchHolder {
                 String tmpSessionId = null;
                 String tmpPostData = null;
                 String sessionState = null;
-                String sessionName = null;
+                int numOfRunningRuns = 0;
+                int numOfWaitingRuns = 0;
+                
+                
                 while (sessionIter.hasNext()) {
                     tmpSessionId = sessionIter.next();
                     tmpPostData = postData1 + tmpSessionId + postData2;
@@ -185,6 +194,25 @@ public class LaunchHolder {
 
                             JSONObject tmp = tmpArray.getJSONObject(0);
                             sessionState = tmp.getString("session_status");
+                            numOfRunningRuns = tmp.getInt("running");
+                            numOfWaitingRuns = tmp.getInt("waiting");
+                            
+                            //Treat real session state when ALL runs completed
+                            if (numOfRunningRuns == 0 && numOfWaitingRuns == 0){
+                                String lastKnownSessionCompletedState = sessionCompletedLastState.get(tmpSessionId);
+                                if ("true".equals(lastKnownSessionCompletedState)){
+                                    //This is already the second time. that means no auto re-run and the session don't have any run in running or waiting state - mark as done.
+                                    sessionFinalState.put(tmpSessionId, "true");
+                                } else {
+                                    //Mark for first try.  If re-run is started, the second try will invalidate it.
+                                    sessionCompletedLastState.put(tmpSessionId, "true");
+                                    sessionFinalState.put(tmpSessionId, "false");
+                                }
+                            } else {
+                                sessionCompletedLastState.put(tmpSessionId, "false");
+                                sessionFinalState.put(tmpSessionId, "false");
+                            }
+                
                             sessionIdName.put(tmpSessionId, tmp.getString("name"));
                             if (notInTestMode) {
                                 if (debugPrint) {
@@ -198,7 +226,7 @@ public class LaunchHolder {
                                 }
                             }
 
-                            if (toContinue(sessionState, tmpSessionId)) {
+                            if (toContinue(sessionState, tmpSessionId,listener)) {
                                 // MARK THAT ALL SESSION ENDED
                                 buildResult = "(" + new Date().toString() + ") - All sessions got into a state in which the build step can continue.\n";
                                 if (notInTestMode) {
@@ -211,7 +239,7 @@ public class LaunchHolder {
                                 break;
                             }
 
-                            if (toFail(sessionState, tmpSessionId)) {
+                            if (toFail(sessionState, tmpSessionId,listener)) {
                                 // MARK_BUILD_FAIL
                                 buildResult = "(" + new Date().toString() + ") - State of Session '" + tmp.getString("name") + "' (" + tmpSessionId + ") = " + tmp.getString("session_status")
                                         + " - Marking build failed.\n";
@@ -224,7 +252,7 @@ public class LaunchHolder {
                                 break;
                             }
 
-                            if (toIgnore(sessionState, tmpSessionId)) {
+                            if (toIgnore(sessionState, tmpSessionId,listener)) {
                                 // Don't do anything, just continue.
                             }
                         }
@@ -385,54 +413,54 @@ public class LaunchHolder {
 
     }
 
-    private boolean toContinue(String state, String sessionId) {
-        return checkWhatNext(state, sessionId, "continue");
+    private boolean toContinue(String state, String sessionId, TaskListener listener) {
+        return checkWhatNext(state, sessionId, "continue",listener);
     }
 
-    private boolean toFail(String state, String sessionId) {
-        return checkWhatNext(state, sessionId, "fail");
+    private boolean toFail(String state, String sessionId, TaskListener listener) {
+        return checkWhatNext(state, sessionId, "fail",listener);
     }
 
-    private boolean toIgnore(String state, String sessionId) {
-        return checkWhatNext(state, sessionId, "ignore");
+    private boolean toIgnore(String state, String sessionId, TaskListener listener) {
+        return checkWhatNext(state, sessionId, "ignore",listener);
     }
 
-    private boolean checkWhatNext(String state, String sessionId, String checkFor) {
+    private boolean checkWhatNext(String state, String sessionId, String checkFor, TaskListener listener) {
 
         if (("inaccessible").equals(state)) {
 
             if (stepHolder.getInaccessibleResolver().equals(checkFor)) {
-                return stepResolver(checkFor, sessionId);
+                return stepResolver(checkFor, sessionId,  listener);
             }
 
         } else if (("stopped").equals(state)) {
 
             if (stepHolder.getStoppedResolver().equals(checkFor)) {
-                return stepResolver(checkFor, sessionId);
+                return stepResolver(checkFor, sessionId,  listener);
             }
 
         } else if (("failed").equals(state)) {
 
             if (stepHolder.getFailedResolver().equals(checkFor)) {
-                return stepResolver(checkFor, sessionId);
+                return stepResolver(checkFor, sessionId,  listener);
             }
 
         } else if (("done").equals(state)) {
 
             if (stepHolder.getDoneResolver().equals(checkFor)) {
-                return stepResolver(checkFor, sessionId);
+                return stepResolver(checkFor, sessionId,  listener);
             }
 
         } else if (("suspended").equals(state)) {
 
             if (stepHolder.getSuspendedResolver().equals(checkFor)) {
-                return stepResolver(checkFor, sessionId);
+                return stepResolver(checkFor, sessionId,  listener);
             }
 
         } else if (("completed").equals(state)) {
 
             if (checkFor.equals("continue")) {
-                return checkIfAllSessionsEnded(sessionId);
+                return checkIfAllSessionsEnded(sessionId,  listener);
             }
         }
 
@@ -440,29 +468,50 @@ public class LaunchHolder {
 
     }
 
-    private boolean checkIfAllSessionsEnded(String sessionId) {
+    private boolean checkIfAllSessionsEnded(String sessionId, TaskListener listener) {
 
-        listOfSessionsForCountDown.remove(sessionId);
+        //Only if there's no rerun planned
+        //listener.getLogger().print("Checking Session State for real completion - session id ("+ sessionId +"). Checking for completion (2nd check in a row): " + sessionFinalState.get(sessionId) + " \n");
+        if ("true".equals(sessionFinalState.get(sessionId))){
+            listOfSessionsForCountDown.remove(sessionId);
+        }
 
         if (listOfSessionsForCountDown.size() == 0) {
             return true;
         } else {
             return false;
         }
+        
 
     }
 
-    private boolean stepResolver(String checkFor, String sessionId) {
+    private boolean stepResolver(String checkFor, String sessionId, TaskListener listener) {
         if (checkFor.equals("continue")) {
-            return checkIfAllSessionsEnded(sessionId);
+            return checkIfAllSessionsEnded(sessionId,  listener);
         } else if (checkFor.equals("fail")) {
             return true;
         } else if (checkFor.equals("ignore")) {
-            return true;
+            //return true;
+            return checkIfAllSessionsEnded(sessionId,  listener);
         }
 
         return false;
     }
+    
+    /*
+    private boolean checkIfAllRunsFinished(String sessionId, TaskListener listener){
+        //The ignore feature signals the build to keep waiting.  So far there was no stop condition.  The below also check to 
+        //see that all runs from that build are not in running or waiting state, and once that stage is being accomplished, we will
+        //exit this waiting state.
+        if ("true".equals(sessionFinalState.get(sessionId))){
+            return checkIfAllSessionsEnded(sessionId,  listener);
+        } else {
+            return false;
+        }
+        //listener.getLogger().print("Ignroing Session State for session id ("+ sessionId +"). Waiting until all session's runs will end...\n");
+                
+    }
+*/
 
     private boolean checkResponseCode(HttpURLConnection conn) {
         try {
