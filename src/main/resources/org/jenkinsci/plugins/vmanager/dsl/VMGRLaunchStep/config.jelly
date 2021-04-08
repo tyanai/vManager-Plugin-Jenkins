@@ -14,11 +14,11 @@
   
   
   <f:block>
-  <table style="width: 100% ; border: 1px solid black ;border-collapse: initial;">
+  
   <f:entry title="vManager Server API Url" field="vAPIUrl" description="vManager Server API Url"><f:textbox /></f:entry>
   
     <f:block>
-      <table>
+      
  
     <f:optionalBlock name="authRequired"  title="Authentication Required" description="If checked, User/Password are required." checked="${instance.authRequired}" inline="true">
      
@@ -29,11 +29,11 @@
      	
       
     </f:optionalBlock>
-     </table>
+   
       </f:block>
       
       <f:block>
-      <table>
+     
  
     <f:optionalBlock name="advConfig"  title="Override Default Configuration" description="" checked="${instance.advConfig}" inline="true">
      
@@ -43,19 +43,19 @@
      	
       
     </f:optionalBlock>
-     </table>
+     
       </f:block>
   
    <f:validateButton
    title="${%Test Connection}" progress="${%Testing...}"
    method="testConnection" with="vAPIUser,vAPIPassword,vAPIUrl,authRequired" />
   
-  </table>
+  
   </f:block>
   <f:entry title="Pause the vManager session's execution if build is interrupted." field="pauseSessionOnBuildInterruption" description="If checked, in case build is interrupted (aborted), the job will also try to pause the session on vManager."><f:checkbox name="pauseSessionOnBuildInterruption" checked="${it.pauseSessionOnBuildInterruption}"/></f:entry>
   <f:radioBlock name="executionType" value="launcher" title="Use session launcher" checked="${instance.executionType == 'launcher'}" inline="true">
   <f:block>
-  <table style="width: 100% ; border: 1px solid black ;border-collapse: initial;margin-left: 18px;">
+  
   <f:radioBlock name="vsifType" value="static" title="Static VSIF file name" checked="${instance.vsifType == 'static'}" inline="true">
           <f:entry title="VSIF file location" field="vSIFName" description="Default VSIF file location with VSIF file name."><f:textbox /></f:entry>
   </f:radioBlock>
@@ -92,7 +92,7 @@
         <f:entry title="User Pre Exceution File" field="envSourceInputFile" description="Path to user env params declaration for sourcing prior to execution (not mandatory) - vManager 17.10 and above only"><f:textbox /></f:entry> 
         <f:entry title="User Pre Exceution File Type" field="envSourceInputFileType" ><f:select /></f:entry>
      </f:optionalBlock>
- </table>
+ 
 
  </f:block>  
  </f:radioBlock>  
@@ -100,29 +100,28 @@
  <f:radioBlock name="executionType" value="batch" title="Continue from a pre-launched session / Collect mode" checked="${instance.executionType == 'batch'}" inline="true">
   <f:block>
   
-  <table style="width: 100% ; border: 1px solid black ;border-collapse: initial;margin-left: 18px;">
+  
           <f:entry title="Name of input file" field="sessionsInputFile" description="Name of input file with one or more session names (mandatory)"><f:textbox /></f:entry>
           <f:entry title="Delete Input File" field="deleteSessionInputFile" description="If checked, the job will delete the input file after processing it."><f:checkbox name="deleteSessionInputFile" checked="${it.deleteSessionInputFile}"/></f:entry>
-  </table>
+  
   
   </f:block>  
  </f:radioBlock>  
 <f:radioBlock name="executionType" value="hybrid" title="Launch using Batch and vAPI" checked="${instance.executionType == 'hybrid'}" inline="true">
   <f:block>
   
-   <table style="width: 100% ; border: 1px solid black ;border-collapse: initial;margin-left: 18px;">
+   
           <f:entry title="Full path for the batch script location" field="executionScript" description="Name of script file that gets vsif name as an input. Example: /home/tyanai/run.sh (mandatory)"><f:textbox /></f:entry>
           <f:entry title="Full path for the shell type" field="executionShellLocation" description="Location of the script shell type. Example: /bin/sch (mandatory)"><f:textbox /></f:entry>
           <f:entry title="Full path for vsif location" field="executionVsifFile" description="Full path for the vsif input file: /home/tyanai/vsif/test.vsif (mandatory)"><f:textbox /></f:entry>   
-  </table>
+  
   
   </f:block>  
  </f:radioBlock>  
  
  <f:block> 
  <f:optionalBlock name="waitTillSessionEnds"  title="Wait for launched sessions to end" description="If selected, the build step will not finish until all sessions launched by this build ended" checked="${instance.waitTillSessionEnds}" inline="true">
- <td colspan="4" style="padding-left: 30px;">
-     <table style="width: 100% ; border: 1px solid black ;border-collapse: initial;">
+ 
      
     	<f:entry title="Sessions Timeout" field="stepSessionTimeout" description="Timeout in minutes (0 for unlimited), after which the build step will mark this build as a failure"><f:number default="30"/></f:entry>
   		<f:entry title="In case session status was changed to 'inaccessible'" field="inaccessibleResolver" ><f:select /></f:entry>
@@ -146,14 +145,13 @@
   		 
  		 </f:optionalBlock>
 		</f:optionalBlock>
-</table>
- </td>
+
 </f:optionalBlock>
 </f:block> 
  <f:block>    
      <f:optionalBlock name="vMGRBuildArchive"  title="Delete vManager Session when build is removed" description="If selected, the plugin will call vManager to delete the session when a manual/automatically build deletion is triggered" checked="${instance.vMGRBuildArchive}" inline="true">
-    	<td colspan="4" style="padding-left: 30px;">
-         <table style="width: 100% ; border: 1px solid black ;border-collapse: initial;">
+    	
+         
          <f:radioBlock name="famMode" value="false" title="Sync Delete Methodology (built-in)" checked="${instance.famMode == 'false'}" inline="true">
            <f:entry title="Delete also session directory" field="deleteAlsoSessionDirectory" description="If checked, delete also the session directory on disk."><f:checkbox name="deleteAlsoSessionDirectory" checked="${it.deleteAlsoSessionDirectory}"/></f:entry>
            <f:optionalBlock name="genericCredentialForSessionDelete"  title="Dedicated user credentials for session delete operation" description="If supplied, the plugin will use these credentials for deleting the session.  Unless, it will use the same user/password that were used duting the build runtime." checked="${instance.genericCredentialForSessionDelete}" inline="true">
@@ -167,8 +165,7 @@
         <f:radioBlock name="famMode" value="true" title="Async Delete Methodology (externally)" checked="${instance.famMode == 'true'}" inline="true">
             <f:entry title="External path location" field="famModeLocation" description="location where sdi files will get copied to "><f:textbox /></f:entry>
         </f:radioBlock>
-     	</table>
-    </td>
+     	
      </f:optionalBlock>
  </f:block>   
     

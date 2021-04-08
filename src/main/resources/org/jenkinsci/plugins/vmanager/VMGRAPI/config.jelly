@@ -12,15 +12,15 @@
   -->
   
   <f:block>
-  <table style="width: 100%">
+  
   
   
   <f:block>
-  <table style="width: 95% ; border: 1px solid black">
+  
   <f:entry title="vManager Server API Url" field="vAPIUrl" description="vManager Server API Url"><f:textbox /></f:entry>
   
     <f:block>
-      <table>
+     
  
     <f:optionalBlock name="authRequired"  title="Authentication Required" description="If checked, User/Password are required." checked="${instance.authRequired}" inline="true">
      
@@ -31,10 +31,10 @@
      	
       
     </f:optionalBlock>
-     </table>
+     
       </f:block>
        <f:block>
-      <table>
+      
  
     <f:optionalBlock name="advConfig"  title="Override Default Configuration" description="" checked="${instance.advConfig}" inline="true">
      
@@ -44,19 +44,19 @@
      	
       
     </f:optionalBlock>
-     </table>
+     
       </f:block>
   
    <f:validateButton
    title="${%Test Connection}" progress="${%Testing...}"
    method="testConnection" with="vAPIUser,vAPIPassword,vAPIUrl,authRequired" />
   
-  </table>
+  
   </f:block>
   
   
   <f:block>
-  <table style="width: 95% ; border: 1px solid black">
+  
   
   <f:entry title="vAPI URL" field="apiUrl" description="The actual API REST path"><f:textbox /></f:entry>
   <f:entry title="Choose Request Method" field="requestMethod" >
@@ -82,7 +82,7 @@
           <f:entry title="Delete Input File" field="deleteInputFile" description="If checked, the job will delete the input file name after processing it."><f:checkbox name="deleteInputFile" checked="${it.deleteInputFile}"/></f:entry>
    
   </f:radioBlock>
-   </table>
+   
   </f:block>
   
   
@@ -94,7 +94,7 @@
    
   
    
-   </table>
+   
    </f:block>
 
 </j:jelly>

@@ -550,6 +550,10 @@ the following format within the job working directory: 
 
 ## Change Log
 
+##### Version 3.1.5 (April 8, 2021)
+-	Upgrading to Jenkins 2.277.1 Configuration Form Modernization.  
+	This releases will will the Jenkins "Configure System" page to fail to save.
+
 ##### Version 3.1.4 (March 11, 2021)
 
 -	Added an exit condition for cases when user choose to ignore specific session states and continue to wait. (mostly
