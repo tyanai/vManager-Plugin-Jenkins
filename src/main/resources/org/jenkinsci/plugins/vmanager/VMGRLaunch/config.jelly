@@ -101,6 +101,20 @@
             </f:block>
         </f:radioBlock>
     </f:optionalBlock>
+     <f:optionalBlock name="defineVarible"  title="Include Define Environment Variables" description="" checked="${instance.defineVarible}" inline="true">
+        <f:radioBlock name="defineVariableType" value="file" title="File input" checked="${instance.defineVariableType == 'file'}" inline="true">
+            <f:entry title="Name of input file" field="defineVaribleFile" description="Name of input file with define strings (not mandatory)"><f:textbox /></f:entry>
+         </f:radioBlock> 
+        <f:radioBlock name="defineVariableType" value="textarea" title="Define Variables Text Area" checked="${instance.defineVariableType == 'textarea'}" inline="true">
+            <f:block>
+                
+                    <f:entry title="Define Variables" field="defineVariableText" description="list of relevant define variables.">
+                        <f:textarea/>
+                    </f:entry>
+               
+            </f:block>
+       </f:radioBlock>  
+    </f:optionalBlock>
     
     
     <f:optionalBlock name="useUserOnFarm"  title="Use user's linux account privileges for this execution (16.1 and above only)" description="If selected, the session's artifacts will have the user's permissions" checked="${instance.useUserOnFarm}" inline="true">

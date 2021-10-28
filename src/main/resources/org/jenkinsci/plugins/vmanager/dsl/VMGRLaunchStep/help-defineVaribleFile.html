@@ -1,0 +1,15 @@
+<div>
+  In case of a need in setting the vsif define values, the pre-job should place into the workspace directory a file with a list of relevant defines and their values (one line per each definition) in the following format.</br>
+  Line 1: define_name,define_value</br>
+  Line 2: define_name,define_value</br></br>
+  Example:</br>
+  <strong>
+  REG_MODE,sanity</br>
+  SESSION_NAME,my_session</br>
+  </strong>
+  (Note the comma separator within the lines. <strong>Do not</strong> place comma at the end of the lines.)
+  </br>
+  The input file should be place into the working directory. 
+  In case this field is empty, The file name need to be: ${BUILD_NUMBER}.${BUILD_ID}.define.input</br>
+  Please fill this field only in case, you want to hard code the input file name, to be consist across all builds.
+</div>

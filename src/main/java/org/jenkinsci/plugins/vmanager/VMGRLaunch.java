@@ -49,7 +49,9 @@ public class VMGRLaunch extends Builder {
     private int connTimeout = 1;
     private int readTimeout = 30;
     private final boolean envVarible;
+    
     private final String envVaribleFile;
+    
     private final boolean attrValues;
     private final String attrValuesFile;
 
@@ -92,6 +94,16 @@ public class VMGRLaunch extends Builder {
     private final String envVariableText;
     private final String attrVariableType;
     private final String attrVariableText;
+    
+    private final String defineVaribleFile;
+    private final boolean defineVarible;
+    private final String defineVariableType;
+    private final String defineVariableText;
+    private String defineVaribleFileFix;
+    
+    
+    
+    
 
     //Variable that might contain macros
     private String sessionsInputFileFix;
@@ -100,6 +112,7 @@ public class VMGRLaunch extends Builder {
     private String credentialInputFileFix;
     private String envSourceInputFileFix;
     private String envVaribleFileFix;
+    
     private String attrValuesFileFix;
     private String famModeLocationFix;
     private final String executionScript;
@@ -114,7 +127,7 @@ public class VMGRLaunch extends Builder {
             int stepSessionTimeout, boolean generateJUnitXML, boolean extraAttributesForFailures, String staticAttributeList, boolean markBuildAsFailedIfAllRunFailed, boolean failJobIfAllRunFailed, String envSourceInputFile, boolean vMGRBuildArchive, boolean deleteAlsoSessionDirectory,
             boolean genericCredentialForSessionDelete, String archiveUser, String archivePassword, String famMode, String famModeLocation, boolean noAppendSeed, boolean markBuildAsPassedIfAllRunPassed, boolean failJobUnlessAllRunPassed, boolean userPrivateSSHKey, boolean attrValues,
             String attrValuesFile, String executionType, String sessionsInputFile, boolean deleteSessionInputFile, String envVariableType, String envVariableText, String attrVariableType, String attrVariableText, boolean pauseSessionOnBuildInterruption, String envSourceInputFileType,
-            String executionScript, String executionShellLocation, String executionVsifFile) {
+            String executionScript, String executionShellLocation, String executionVsifFile, String defineVaribleFile, boolean defineVarible, String defineVariableType, String defineVariableText) {
         this.vAPIUrl = vAPIUrl;
         this.vAPIUser = vAPIUser;
         this.vAPIPassword = vAPIPassword;
@@ -179,6 +192,11 @@ public class VMGRLaunch extends Builder {
         this.executionScript = executionScript;
         this.executionShellLocation = executionShellLocation;
         this.executionVsifFile = executionVsifFile;
+        
+        this.defineVaribleFile = defineVaribleFile;
+        this.defineVarible = defineVarible;
+        this.defineVariableType = defineVariableType;
+        this.defineVariableText = defineVariableText;
 
     }
 
@@ -409,6 +427,24 @@ public class VMGRLaunch extends Builder {
         return famModeLocation;
     }
 
+    public String getDefineVaribleFile() {
+        return defineVaribleFile;
+    }
+
+    public boolean isDefineVarible() {
+        return defineVarible;
+    }
+
+    public String getDefineVariableType() {
+        return defineVariableType;
+    }
+
+    public String getDefineVariableText() {
+        return defineVariableText;
+    }
+    
+    
+
     @Override
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
 
@@ -472,12 +508,16 @@ public class VMGRLaunch extends Builder {
             listener.getLogger().println("The deleteInputFile for vAPI is: " + deleteInputFile);
             if (envVarible) {
                 listener.getLogger().println("An environment varible file was selected.");
-                //listener.getLogger().println("The environment varible file is: " + envVaribleFile);
+                
             }
 
             if (attrValues) {
                 listener.getLogger().println("An attribute values file was selected.");
-                //listener.getLogger().println("The environment varible file is: " + envVaribleFile);
+                
+            }
+            
+            if (defineVarible) {
+                listener.getLogger().println("A define varible file was selected.");
             }
 
             if (useUserOnFarm) {
@@ -578,6 +618,7 @@ public class VMGRLaunch extends Builder {
             String[] sessionNames = null;
             String jsonEnvInput = null;
             String jsonAttrValuesInput = null;
+            String jsonDefineInput = null;
             String[] farmUserPassword = null;
             String tempUser = vAPIUser;
             String tempPassword = vAPIPassword;
@@ -666,6 +707,49 @@ public class VMGRLaunch extends Builder {
                     }
 
                 }
+                
+                               
+                //check if user set an define values in addition:
+                if (defineVarible) {
+                    if (defineVariableType == null || "".equals(defineVariableType) || "file".equals(defineVariableType)) {
+                        defineVaribleFileFix = defineVaribleFile;
+                        if (defineVaribleFile == null || defineVaribleFile.trim().equals("")) {
+                            listener.getLogger().println("The define values file chosen is dynamic. Define File directory dynamic workspace directory: '" + build.getWorkspace() + "'");
+                        } else {
+
+                            try {
+                                defineVaribleFileFix = TokenMacro.expandAll(build, listener, defineVaribleFile);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                listener.getLogger().println("Failed to extract out macro from the input of defineVaribleFile: " + defineVaribleFile);
+                                defineVaribleFileFix = defineVaribleFile;
+                            }
+
+                            listener.getLogger().println("The define values file chosen is static. Define values file name is: '" + defineVaribleFileFix.trim() + "'");
+                        }
+                        jsonDefineInput = utils.loadJSONDefineInput(build.getId(), build.getNumber(), "" + build.getWorkspace(), defineVaribleFileFix, listener);
+                        try {
+                            jsonDefineInput = TokenMacro.expandAll(build, listener, jsonDefineInput);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            listener.getLogger().println("Failed to extract out macro from the input of defineVaribleFile: " + defineVaribleFileFix);
+                        }
+                        listener.getLogger().println("Found the following define values for the vsif: " + jsonDefineInput);
+                    }
+                    if ("textarea".equals(defineVariableType)) {
+                        String tmpAttrText = null;
+                        String fetchDefineJsonFromTextArea = utils.loadJSONDefineValuesFromTextArea(build.getId(), build.getNumber(), "" + build.getWorkspace(), listener, defineVariableText);
+                        try {
+                            tmpAttrText = TokenMacro.expandAll(build, listener, StringUtils.normalizeSpace(fetchDefineJsonFromTextArea));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            listener.getLogger().println("Failed to extract out macro from the input of fetchJsonFromTextArea: " + StringUtils.normalizeSpace(fetchDefineJsonFromTextArea));
+                            tmpAttrText = StringUtils.normalizeSpace(fetchDefineJsonFromTextArea);
+                        }
+                        jsonDefineInput = tmpAttrText;
+                        listener.getLogger().println("Found the following define values textarea for the vsif: " + jsonDefineInput);
+                    }
+                }
 
                 //check if user set an attribute values in addition:
                 if (attrValues) {
@@ -732,7 +816,7 @@ public class VMGRLaunch extends Builder {
            
             
             String output = utils.executeVSIFLaunch(vsifFileNames, vAPIUrl, authRequired, tempUser, tempPassword, listener, dynamicUserId, build.getId(), build.getNumber(),
-                    "" + build.getWorkspace(), connTimeout, readTimeout, advConfig, jsonEnvInput, useUserOnFarm, userFarmType, farmUserPassword, stepHolder, envSourceInputFileFix, workingJobDir, vMGRBuildArchiver, userPrivateSSHKey, jsonAttrValuesInput, tmpExecutionType, sessionNames,envSourceInputFileType, launcher);
+                    "" + build.getWorkspace(), connTimeout, readTimeout, advConfig, jsonEnvInput, useUserOnFarm, userFarmType, farmUserPassword, stepHolder, envSourceInputFileFix, workingJobDir, vMGRBuildArchiver, userPrivateSSHKey, jsonAttrValuesInput, tmpExecutionType, sessionNames,envSourceInputFileType, launcher, jsonDefineInput);
             if (!"success".equals(output)) {
                 listener.getLogger().println("Failed to launch vsifs for build " + build.getId() + " " + build.getNumber() + "\n");
                 listener.getLogger().println(output + "\n");

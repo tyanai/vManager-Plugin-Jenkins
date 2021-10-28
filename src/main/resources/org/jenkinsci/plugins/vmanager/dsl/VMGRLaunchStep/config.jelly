@@ -79,7 +79,11 @@
         <f:entry title="Name of input file" field="attrValuesFile" description="Name of input file with attribute values in json format (not mandatory) - vManager 17.1 and above only"><f:textbox /></f:entry>
       
     </f:optionalBlock>
-    
+    <f:optionalBlock name="defineVarible"  title="Include Define Environment Variables" description="" checked="${instance.defineVarible}" inline="true">
+     	
+        <f:entry title="Name of input file" field="defineVaribleFile" description="Name of input file with define variables (not mandatory)"><f:textbox /></f:entry>
+      
+    </f:optionalBlock>
     
     <f:optionalBlock name="useUserOnFarm"  title="Use user's linux account privileges for this execution (16.1 and above only)" description="If selected, the session's artifacts will have the user's permissions" checked="${instance.useUserOnFarm}" inline="true">
          <f:entry title="Use user's SSH private key" field="userPrivateSSHKey" description="If checked, the vManager will use the stored SSH key of the user for the execution of the regression."><f:checkbox name="userPrivateSSHKey" checked="${it.userPrivateSSHKey}"/></f:entry>

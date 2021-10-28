@@ -550,9 +550,15 @@ the following format within the job working directory: 
 
 ## Change Log
 
+##### Version 3.1.6 (Oct 28, 2021)
+-	Add support in define variables for the launch operation. 
+	This might break compatability if you are using pipeline.  Add:  
+	defineVarible: false, defineVaribleFile:'', defineVariableType:'', defineVariableText:'' 
+	to the plugin command to overcome it.
+
 ##### Version 3.1.5 (April 8, 2021)
 -	Upgrading to Jenkins 2.277.1 Configuration Form Modernization.  
-	This releases will will the Jenkins "Configure System" page to fail to save.
+	This releases will fix the Jenkins "Configure System" saving failure.
 
 ##### Version 3.1.4 (March 11, 2021)
 

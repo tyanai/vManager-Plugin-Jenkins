@@ -452,7 +452,63 @@ public class Utils {
 
         return output;
     }
+    
+    public String loadJSONDefineInput(String buildID, int buildNumber, String workPlacePath, String envInputFile, TaskListener listener) throws Exception {
+        String output = null;
+        StringBuffer listOfDefineValues = new StringBuffer();
+        BufferedReader reader = null;
+        String fileName = null;
+        boolean notInTestMode = true;
+        if (listener == null) {
+            notInTestMode = false;
+        }
 
+        // Set the right File name.
+        if ("".equals(envInputFile) || envInputFile == null) {
+            fileName = buildNumber + "." + buildID + "." + "define.input";
+        } else {
+            fileName = envInputFile;
+        }
+
+        try {
+
+            reader = this.loadFileFromWorkSpace(buildID, buildNumber, workPlacePath, fileName, listener, false, "define.input");
+            String line = null;
+            boolean foundOneAttr = false;
+            while ((line = reader.readLine()) != null) {
+                String tmpLineResult = "";
+                StringTokenizer tokenizer = new StringTokenizer(line, ",");
+                tmpLineResult = tmpLineResult + "{\"name\":\"" + tokenizer.nextToken().trim() + "\",";
+                tmpLineResult = tmpLineResult + "\"value\":\"=" + tokenizer.nextToken().trim() + "\"},";
+                listOfDefineValues.append(tmpLineResult);
+                foundOneAttr = true;
+            }
+
+            output = listOfDefineValues.toString();
+            if (foundOneAttr) {
+                //Remove the last comma
+                output = output.substring(0, output.length() - 1);
+            }
+
+            output = "\"params\":[" + output + "]";
+
+        } catch (Exception e) {
+
+            if (notInTestMode) {
+                listener.getLogger().print("Failed to read input file for the define values.  Failed to load file '" + fileName + "'\n " + e.getMessage());
+            } else {
+
+                System.out.println("Failed to open the read file for the define values.  Failed to load file '" + fileName + "'");
+            }
+
+            throw e;
+        } finally {
+            reader.close();
+        }
+
+        return output;
+    }
+    
     public String loadJSONAttrValuesFromTextArea(String buildID, int buildNumber, String workPlacePath, TaskListener listener, String textarea) throws Exception {
         String output = null;
         StringBuffer listOfAttrValues = new StringBuffer();
@@ -493,6 +549,53 @@ public class Utils {
             } else {
 
                 System.out.println("Failed to parse attributes for vsif.\n ");
+            }
+
+            throw e;
+        }
+
+        return output;
+    }
+
+    public String loadJSONDefineValuesFromTextArea(String buildID, int buildNumber, String workPlacePath, TaskListener listener, String textarea) throws Exception {
+        String output = null;
+        StringBuffer listOfAttrValues = new StringBuffer();
+
+        boolean notInTestMode = true;
+        if (listener == null) {
+            notInTestMode = false;
+        }
+
+        try {
+
+            String line = null;
+            boolean foundOneAttr = false;
+            String[] lines = StringUtils.split(textarea, System.lineSeparator());
+            for (int i = 0; i < lines.length; i++) {
+
+                String tmpLineResult = "";
+                StringTokenizer tokenizer = new StringTokenizer(lines[i], ",");
+                tmpLineResult = tmpLineResult + "{\"name\":\"" + tokenizer.nextToken().trim() + "\",";
+                tmpLineResult = tmpLineResult + "\"value\":\"=" + tokenizer.nextToken().trim() + "\"},";
+                listOfAttrValues.append(tmpLineResult);
+                foundOneAttr = true;
+            }
+
+            output = listOfAttrValues.toString();
+            if (foundOneAttr) {
+                //Remove the last comma
+                output = output.substring(0, output.length() - 1);
+            }
+
+            output = "\"params\":[" + output + "]";
+
+        } catch (Exception e) {
+
+            if (notInTestMode) {
+                listener.getLogger().print("Failed to parse define for vsif.\n " + e.getMessage());
+            } else {
+
+                System.out.println("Failed to parse define for vsif.\n ");
             }
 
             throw e;
@@ -797,7 +900,7 @@ public class Utils {
     }
 
     public String executeVSIFLaunch(String[] vsifs, String url, boolean requireAuth, String user, String password, TaskListener listener, boolean dynamicUserId, String buildID, int buildNumber,
-            String workPlacePath, int connConnTimeOut, int connReadTimeout, boolean advConfig, String jsonEnvInput, boolean useUserOnFarm, String userFarmType, String[] farmUserPassword, StepHolder stepHolder, String envSourceInputFile, String workingJobDir, VMGRBuildArchiver vMGRBuildArchiver, boolean userPrivateSSHKey, String jsonAttrValuesInput, String executionType, String[] sessionNames, String envSourceInputFileType, Launcher launcher) throws Exception {
+            String workPlacePath, int connConnTimeOut, int connReadTimeout, boolean advConfig, String jsonEnvInput, boolean useUserOnFarm, String userFarmType, String[] farmUserPassword, StepHolder stepHolder, String envSourceInputFile, String workingJobDir, VMGRBuildArchiver vMGRBuildArchiver, boolean userPrivateSSHKey, String jsonAttrValuesInput, String executionType, String[] sessionNames, String envSourceInputFileType, Launcher launcher, String jsonDefineInput) throws Exception {
 
         boolean notInTestMode = true;
         if (listener == null) {
@@ -832,6 +935,9 @@ public class Utils {
                 }
                 if (jsonAttrValuesInput != null) {
                     input = input + "," + jsonAttrValuesInput;
+                }
+                if (jsonDefineInput != null) {
+                    input = input + "," + jsonDefineInput;
                 }
                 if (useUserOnFarm) {
                     String userFarm = null;

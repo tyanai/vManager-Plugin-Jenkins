@@ -114,6 +114,9 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
             if (step.isAttrValues()) {
                 listener.getLogger().println("An attribute values file was selected.");
             }
+            if (step.isDefineVarible()) {
+                listener.getLogger().println("A define varible file was selected.");
+            }
 
             if (step.isUseUserOnFarm()) {
                 listener.getLogger().println("An User's Credential use was selected.");
@@ -190,6 +193,7 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
             String[] vsifFileNames = null;
             String[] sessionNames = null;
             String jsonEnvInput = null;
+            String jsonDefineInput = null;
             String jsonAttrValuesInput = null;
             String[] farmUserPassword = null;
             String tempUser = step.getVAPIUser();
@@ -259,6 +263,17 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
                     jsonAttrValuesInput = utils.loadJSONAttrValuesInput(buildId, buildNumber, "" + workspace, step.getAttrValuesFile(), listener);
                     listener.getLogger().println("Found the following attribute values for the vsif: " + jsonAttrValuesInput);
                 }
+                
+                //check if user set an define values in addition:
+                if (step.isDefineVarible()) {
+                    if (step.getDefineVaribleFile() == null || step.getDefineVaribleFile().trim().equals("")) {
+                        listener.getLogger().println("The define values file chosen is dynamic. Define values File directory dynamic workspace directory: '" + workspace + "'");
+                    } else {
+                        listener.getLogger().println("The define values file chosen is static. Define values file name is: '" + step.getDefineVaribleFile().trim() + "'");
+                    }
+                    jsonDefineInput = utils.loadJSONDefineInput(buildId, buildNumber, "" + workspace, step.getDefineVaribleFile(), listener);
+                    listener.getLogger().println("Found the following define values for the vsif: " + jsonDefineInput);
+                }
 
                 if ("dynamic".equals(step.getUserFarmType())) {
                     if (step.getCredentialInputFile() == null || step.getCredentialInputFile().trim().equals("")) {
@@ -281,7 +296,7 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
             // Now call the actual launch
             // ----------------------------------------------------------------------------------------------------------------
             String output = utils.executeVSIFLaunch(vsifFileNames, step.getVAPIUrl(), step.isAuthRequired(), tempUser, tempPassword, listener, step.isDynamicUserId(), buildId, buildNumber,
-                    "" + workspace, step.getConnTimeout(), step.getReadTimeout(), step.isAdvConfig(), jsonEnvInput, step.isUseUserOnFarm(), step.getUserFarmType(), farmUserPassword, stepHolder, step.getEnvSourceInputFile(), workingJobDir, vMGRBuildArchiver, step.isUserPrivateSSHKey(), jsonAttrValuesInput, tmpExecutionType, sessionNames, step.getEnvSourceInputFileType(), launcher);
+                    "" + workspace, step.getConnTimeout(), step.getReadTimeout(), step.isAdvConfig(), jsonEnvInput, step.isUseUserOnFarm(), step.getUserFarmType(), farmUserPassword, stepHolder, step.getEnvSourceInputFile(), workingJobDir, vMGRBuildArchiver, step.isUserPrivateSSHKey(), jsonAttrValuesInput, tmpExecutionType, sessionNames, step.getEnvSourceInputFileType(), launcher, jsonDefineInput);
             if (!"success".equals(output)) {
                 listener.getLogger().println("Failed to launch vsifs for build " + buildId + " " + buildNumber + "\n");
                 listener.getLogger().println(output + "\n");

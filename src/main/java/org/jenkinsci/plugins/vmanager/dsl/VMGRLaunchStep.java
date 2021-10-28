@@ -95,13 +95,19 @@ public class VMGRLaunchStep extends Step {
     private final String executionShellLocation;
     private final String executionVsifFile;
     
+    private final String defineVaribleFile;
+    private final boolean defineVarible;
+    private final String defineVariableType;
+    private final String defineVariableText;
+    private String defineVaribleFileFix;
+    
 
     @DataBoundConstructor
     public VMGRLaunchStep(String vAPIUrl, String vAPIUser, String vAPIPassword, String vSIFName, String vSIFInputFile, String credentialInputFile, boolean deleteInputFile, boolean deleteCredentialInputFile, boolean useUserOnFarm, boolean authRequired, String vsifType, String userFarmType,
             boolean dynamicUserId, boolean advConfig, int connTimeout, int readTimeout, boolean envVarible, String envVaribleFile, String inaccessibleResolver, String stoppedResolver, String failedResolver, String doneResolver, String suspendedResolver, boolean waitTillSessionEnds, int stepSessionTimeout, 
             boolean generateJUnitXML, boolean extraAttributesForFailures, String staticAttributeList, boolean markBuildAsFailedIfAllRunFailed, boolean failJobIfAllRunFailed, String envSourceInputFile, boolean vMGRBuildArchive, boolean deleteAlsoSessionDirectory, boolean genericCredentialForSessionDelete, 
             String archiveUser, String archivePassword, String famMode, String famModeLocation, boolean noAppendSeed, boolean pipelineNodes, String masterWorkspaceLocation, boolean markBuildAsPassedIfAllRunPassed, boolean failJobUnlessAllRunPassed, boolean userPrivateSSHKey, boolean attrValues, 
-            String attrValuesFile, String executionType, String sessionsInputFile, boolean deleteSessionInputFile, boolean pauseSessionOnBuildInterruption, String envSourceInputFileType, String executionScript, String executionShellLocation, String executionVsifFile) {
+            String attrValuesFile, String executionType, String sessionsInputFile, boolean deleteSessionInputFile, boolean pauseSessionOnBuildInterruption, String envSourceInputFileType, String executionScript, String executionShellLocation, String executionVsifFile, String defineVaribleFile, boolean defineVarible, String defineVariableType, String defineVariableText) {
         this.vAPIUrl = vAPIUrl;
         this.vAPIUser = vAPIUser;
         this.vAPIPassword = vAPIPassword;
@@ -165,6 +171,11 @@ public class VMGRLaunchStep extends Step {
         this.executionScript = executionScript;
         this.executionShellLocation = executionShellLocation;
         this.executionVsifFile = executionVsifFile;
+        
+        this.defineVaribleFile = defineVaribleFile;
+        this.defineVarible = defineVarible;
+        this.defineVariableType = defineVariableType;
+        this.defineVariableText = defineVariableText;
     }
 
     
@@ -391,6 +402,22 @@ public class VMGRLaunchStep extends Step {
 
     public String getFamModeLocation() {
         return famModeLocation;
+    }
+    
+    public String getDefineVaribleFile() {
+        return defineVaribleFile;
+    }
+
+    public boolean isDefineVarible() {
+        return defineVarible;
+    }
+
+    public String getDefineVariableType() {
+        return defineVariableType;
+    }
+
+    public String getDefineVariableText() {
+        return defineVariableText;
     }
 
     
