@@ -42,7 +42,6 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 
-import org.apache.commons.httpclient.HttpStatus;
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -446,7 +445,7 @@ public class ReportManager {
 
         CloseableHttpResponse httpResponse = httpClient.execute(httpGet);
         StatusLine statusLine = httpResponse.getStatusLine();
-        if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
+        if (statusLine.getStatusCode() == HttpURLConnection.HTTP_OK) {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             try {
                 HttpEntity entity = httpResponse.getEntity();
