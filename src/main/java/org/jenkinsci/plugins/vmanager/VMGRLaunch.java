@@ -201,7 +201,7 @@ public class VMGRLaunch extends Builder {
     }
 
     /**
-     * We'll use this from the <tt>config.jelly</tt>.
+     * We'll use this from the <p>config.jelly</p>.
      */
     public String getExecutionVsifFile() {
         return executionVsifFile;
@@ -871,7 +871,7 @@ public class VMGRLaunch extends Builder {
      *
      * <p>
      * See
-     * <tt>src/main/resources/hudson/plugins/hello_world/HelloWorldBuilder/*.jelly</tt>
+     * <p>src/main/resources/hudson/plugins/hello_world/HelloWorldBuilder/*.jelly</p>
      * for the actual HTML fragment for the configuration screen.
      */
     @Extension

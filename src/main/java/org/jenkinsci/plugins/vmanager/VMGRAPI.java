@@ -211,7 +211,7 @@ public class VMGRAPI extends Builder {
 	 * 
 	 * <p>
 	 * See
-	 * <tt>src/main/resources/hudson/plugins/hello_world/HelloWorldBuilder/*.jelly</tt>
+	 * <p>src/main/resources/hudson/plugins/hello_world/HelloWorldBuilder/*.jelly</p>
 	 * for the actual HTML fragment for the configuration screen.
 	 */
 	@Extension

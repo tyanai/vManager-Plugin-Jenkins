@@ -180,7 +180,7 @@ public class VMGRLaunchStep extends Step {
 
     
     /**
-     * We'll use this from the <tt>config.jelly</tt>.
+     * We'll use this from the <p>config.jelly</p>.
      */
     
     public String getExecutionScript() {
