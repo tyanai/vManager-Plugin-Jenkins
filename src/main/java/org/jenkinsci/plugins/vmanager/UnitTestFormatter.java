@@ -47,7 +47,7 @@ public class UnitTestFormatter {
                         }
 
 			StringBuffer writer = new StringBuffer();
-			writer.append("<testsuite tests=\"vManager\">" + "\n");		
+			writer.append("<testsuite tests=\"Verisium Manager\">" + "\n");		
 			Iterator<JSONObject> runsIter = runs.iterator();
 			JSONObject tmpRun = null;
 			String testStatus = "NA";

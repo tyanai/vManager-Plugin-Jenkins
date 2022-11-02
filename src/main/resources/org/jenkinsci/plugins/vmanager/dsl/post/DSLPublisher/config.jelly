@@ -3,10 +3,10 @@
     
     
     <f:block>
-        <f:optionalBlock name="advancedFunctions"  title="Advanced Functions (can only be used post the 'vManager Launcher' Action execution)" description="More post functions that require a remote access to the vManager server." checked="${instance.advancedFunctions}" inline="true">
+        <f:optionalBlock name="advancedFunctions"  title="Advanced Functions (can only be used post the 'vManager Launcher' Action execution)" description="More post functions that require a remote access to the Verisium Manager server." checked="${instance.advancedFunctions}" inline="true">
             <f:block>
                 
-                    <f:entry title="vManager Server API Url" field="vAPIUrl" description="vManager Server API Url">
+                    <f:entry title="Verisium Manager Server API Url" field="vAPIUrl" description="Verisium Manager Server API Url">
                         <f:textbox />
                     </f:entry>
   
@@ -16,13 +16,13 @@
                             <f:optionalBlock name="authRequired"  title="Authentication Required" description="If checked, User/Password are required." checked="${instance.authRequired}" inline="true">
      
    		
-                                <f:entry title="Username" field="vAPIUser" description="vManager Username">
+                                <f:entry title="Username" field="vAPIUser" description="Verisium Manager Username">
                                     <f:textbox default="vAPI"/>
                                 </f:entry>
                                 <f:entry title="Pick User ID dynamically " field="dynamicUserId" description="If checked, the user id will get picked from the workspace">
                                     <f:checkbox name="dynamicUserId" checked="${it.dynamicUserId}"/>
                                 </f:entry>
-                                <f:entry title="Password" field="vAPIPassword" description="vManager password">
+                                <f:entry title="Password" field="vAPIPassword" description="Verisium Manager password">
                                     <f:password />
                                 </f:entry>
      	
@@ -59,7 +59,7 @@
                 
                 
                     <f:block>
-                        <f:optionalBlock name="retrieveSummaryReport"  title="Job Summary Report" description="If selected, the build step will fetch into Jenkins the vManager summary report (sessions, runs, metrics, vPlan grades)" checked="${instance.retrieveSummaryReport}" inline="true">
+                        <f:optionalBlock name="retrieveSummaryReport"  title="Job Summary Report" description="If selected, the build step will fetch into Jenkins the Verisium Manager summary report (sessions, runs, metrics, vPlan grades)" checked="${instance.retrieveSummaryReport}" inline="true">
                             <f:block>  
                                 
                                 <f:radioBlock name="summaryMode" value="full" title="Build, view and email by the plugin" checked="${instance.summaryMode == 'full'}" inline="true">
@@ -67,7 +67,7 @@
                                         
                             
                                             <f:block>
-                                                <f:entry title="vManager Server version:" field="vManagerVersion" >
+                                                <f:entry title="Verisium Manager Server version:" field="vManagerVersion" >
                                                     <f:select />
                                                 </f:entry>
                                                 <f:entry title="Ignore SSL/TLS Errors " field="ignoreSSLError" description="If checked, the plugin will also accept self-signed SSL certificate"><f:checkbox name="ignoreSSLError" checked="${it.ignoreSSLError}"/></f:entry>
@@ -77,7 +77,7 @@
                                                             <f:optionalBlock name="runReport"  title="Include Runs tree grades " description="" checked="${instance.runReport}" inline="true">
                                                                 <f:block>
                                                                     
-                                                                        <f:entry title="Tests view name (optional)" field="testsViewName" description="View name that you made within vManager for selecting columns during test failure analysis (leave as 'Test_Hierarchy' if not change is needed).">
+                                                                        <f:entry title="Tests view name (optional)" field="testsViewName" description="View name that you made within Verisium Manager for selecting columns during test failure analysis (leave as 'Test_Hierarchy' if not change is needed).">
                                                                             <f:textbox default="Test_Hierarchy"/>
                                                                         </f:entry>
                                                                         <f:entry title="Depth" field="testsDepth" description="Number of hierarchy levels the report will produce. Default is 6.">
@@ -89,7 +89,7 @@
                                                             <f:optionalBlock name="metricsReport"  title="Include Metrics grades " description="" checked="${instance.metricsReport}" inline="true">
                                                                 <f:block>
                                                                     
-                                                                        <f:entry title="Metrics view name (optional)" field="metricsViewName" description="View name that you made within vManager for selecting columns during Coverage (metrics) analysis (leave as 'All_Metrics' if not change is needed).">
+                                                                        <f:entry title="Metrics view name (optional)" field="metricsViewName" description="View name that you made within Verisium Manager for selecting columns during Coverage (metrics) analysis (leave as 'All_Metrics' if not change is needed).">
                                                                             <f:textbox default="All_Metrics"/>
                                                                         </f:entry>
                                 
@@ -111,10 +111,10 @@
                                                             <f:optionalBlock name="vPlanReport"  title="Include vPlan grades " description="" checked="${instance.vPlanReport}" inline="true">
                                                                 <f:block>
                                                                                                                  
-                                                                        <f:entry title="vPlanx file name" field="vPlanxFileName" description="vPlanx File location (Need full path and accees read rights by the vManager server)">
+                                                                        <f:entry title="vPlanx file name" field="vPlanxFileName" description="vPlanx File location (Need full path and accees read rights by the Verisium Manager server)">
                                                                             <f:textbox/>
                                                                         </f:entry>
-                                                                        <f:entry title="vPlan view name (optional)" field="vplanViewName" description="View name that you made within vManager for selecting columns during vPlan analysis (leave as 'All_Vplan' if not change is needed).">
+                                                                        <f:entry title="vPlan view name (optional)" field="vplanViewName" description="View name that you made within Verisium Manager for selecting columns during vPlan analysis (leave as 'All_Vplan' if not change is needed).">
                                                                             <f:textbox default="All_Vplan"/>
                                                                         </f:entry>
                                                                         <f:radioBlock name="vPlanInputType" value="basic" title="Basic settings" checked="${instance.vPlanInputType == 'basic'}" inline="true">

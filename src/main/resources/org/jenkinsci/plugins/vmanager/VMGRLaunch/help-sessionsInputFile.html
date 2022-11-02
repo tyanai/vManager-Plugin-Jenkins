@@ -1,12 +1,12 @@
 <div>
   This option is useful for those who wish to take benefit of their own environment and scripts for launching sessions using batch, but still want the benefit of having the Job waiting for the execution to end, generates JUnit report, produce triage link, real time view of the run's progress, summary report, etc'.</br>
-  This option is also useful for those who wish to take advantage of this plugin, but are not using the vManager Runner, and uses "collect" mode instead. For such flow they can still benefit from generated JUnit report, triage link, real time view of the run's progress, summary report, etc'.</br>
+  This option is also useful for those who wish to take advantage of this plugin, but are not using the Verisium Manager Runner, and uses "collect" mode instead. For such flow they can still benefit from generated JUnit report, triage link, real time view of the run's progress, summary report, etc'.</br>
   In this option, there is an assumption that a pre-step (usually from shell type) is taking over the session launch operation (or collect), and as such, in order for this plugin to continue monitoring those sessions - the session names need to be exchange between the shell step and this step.</br></br>
   In case of a need to launch the sessions using batch as a pre-step to this one (or collect), the pre-step should place into the workspace directory a file with the session or session names that were launched/collected - new line for each session name.</br>
   The input file should be place into the working directory. 
   In case this field is empty, The file name need to be: ${BUILD_NUMBER}.${BUILD_ID}.sessions.input</br>
   Please fill this field only in case, you want to hard code the input file name, to be consist across all builds.
   </br></br>
-  the vManager plugin will look for any of the input files mentioned above, and query the server for their respective id automatically.  From that point and on, the flow continues as if the sessions were launched/collected by this plugin.</br></br>  
+  the Verisium Manager plugin will look for any of the input files mentioned above, and query the server for their respective id automatically.  From that point and on, the flow continues as if the sessions were launched/collected by this plugin.</br></br>  
   The output of all IDs of the launched/collected sessions can be found at: ${BUILD_NUMBER}.${BUILD_ID}.session_launch.output</br>
 </div>

@@ -1,5 +1,5 @@
 <div>
-  Read Timeout is the time (in minutes) for the Jenkins executor to wait for vManager server to end the current operation.  In heavy operations such as collect compact or ranking, the time to response back can vary, and might even take an hour or so depends on the load the vManager server is experiencing. </br>
-  Setting the time to 0 means an unlimited time.  In case the vAPI call is taking too long, and is more than the Read Timeout set, the connection to the vManager server will be closed, and the Jenkins executor will be able to continue.  The vAPI operation will not fail, but the build will be marked as failed.</br>
+  Read Timeout is the time (in minutes) for the Jenkins executor to wait for Verisium Manager server to end the current operation.  In heavy operations such as collect compact or ranking, the time to response back can vary, and might even take an hour or so depends on the load the Verisium Manager server is experiencing. </br>
+  Setting the time to 0 means an unlimited time.  In case the vAPI call is taking too long, and is more than the Read Timeout set, the connection to the Verisium Manager server will be closed, and the Jenkins executor will be able to continue.  The vAPI operation will not fail, but the build will be marked as failed.</br>
   If no Read timeout is set, the default is 30 minutes.
 </div>

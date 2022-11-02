@@ -170,7 +170,7 @@ public class VmgrBuilds extends DashboardPortlet {
 
         @Override
         public String getDisplayName() {
-            return "vManager Latest Sessions";
+            return "Verisium Manager Latest Sessions";
         }
     }
 

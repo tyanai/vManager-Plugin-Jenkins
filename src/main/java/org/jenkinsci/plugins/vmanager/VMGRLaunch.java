@@ -907,7 +907,7 @@ public class VMGRLaunch extends Builder {
          */
         public FormValidation doCheckVAPIUrl(@QueryParameter String value) throws IOException, ServletException {
             if (value.length() == 0) {
-                return FormValidation.error("Please set the vManager vAPI HOST ");
+                return FormValidation.error("Please set the Verisium Manager vAPI HOST ");
             }
             if (value.length() < 4) {
                 return FormValidation.warning("Isn't the name too short?");
@@ -934,7 +934,7 @@ public class VMGRLaunch extends Builder {
             while (iter.hasNext()) {
                 tmpAttr = iter.next();
                 if (tmpAttr.indexOf(" ") > 0) {
-                    return FormValidation.error("'" + tmpAttr + "' is not a valid option for vManager attribute code name. Attribute code names can't have space.  Try using underscore instaed.");
+                    return FormValidation.error("'" + tmpAttr + "' is not a valid option for Verisium Manager attribute code name. Attribute code names can't have space.  Try using underscore instaed.");
                 } else if (tmpAttr.equals("first_failure_name")) {
                     return FormValidation.warning("'" + tmpAttr + "' is already included as part of the stack error message by default.");
                 } else if (tmpAttr.equals("first_failure_description")) {

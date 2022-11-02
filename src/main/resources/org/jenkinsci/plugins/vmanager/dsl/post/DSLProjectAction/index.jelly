@@ -36,7 +36,7 @@
                         <td style="border: 1px #bbb solid;" data="${it.getTimestampString(build)}">${it.getTimestampString(build)}</td>
                         <td style="border: 1px #bbb solid;" data="${it.getBuildOwner(build)}">${it.getBuildOwner(build)}</td>
                         <td style="border: 1px #bbb solid;" data="${it.getSessionStatus(build)}">${it.getSessionStatus(build)}</td>
-                        <td style="border: 1px #bbb solid;" data="${it.getSessionTriage(build)}"><a target="_blank" href="${it.getSessionTriage(build)}" tooltip="A Link to vManager Web Regression">Link</a></td>		
+                        <td style="border: 1px #bbb solid;" data="${it.getSessionTriage(build)}"><a target="_blank" href="${it.getSessionTriage(build)}" tooltip="A Link to Verisium Manager Web Regression">Link</a></td>		
                         <td style="border: 1px #bbb solid;" data="${it.getSessionName(build)}">${it.getSessionName(build)}</td>
                         <td style="border: 1px #bbb solid;" data="${it.getTotalRuns(build)}">${it.getTotalRuns(build)}</td>
                         <td style="border: 1px #bbb solid;" data="${it.getPassedRuns(build)}">${it.getPassedRuns(build)}</td>

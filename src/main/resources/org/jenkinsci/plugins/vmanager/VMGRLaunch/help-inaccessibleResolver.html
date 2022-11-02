@@ -13,8 +13,8 @@
   </br>
   <strong>Other Waiting Considerations</strong></br>
   1.  When all sessions on this build step are having the state 'completed' the build will be marked as success.</br>
-  2.  When the vManager server goes down, the build step will keep waiting till the server will go back up.  The build step will only change its state based on sessions state changes.</br>
-  3.  If the session was manually deleted on the vManager server, before reaching into final state, the build will be marked as a failure build.</br>
+  2.  When the Verisium Manager server goes down, the build step will keep waiting till the server will go back up.  The build step will only change its state based on sessions state changes.</br>
+  3.  If the session was manually deleted on the Verisium Manager server, before reaching into final state, the build will be marked as a failure build.</br>
   4.  In any case, if the number of minutes waiting is bigger than the timeout set here, the build will marked as a failed build.</br>
   
 </div>

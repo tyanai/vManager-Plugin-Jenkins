@@ -25,7 +25,7 @@ public class ReportBuildAction extends PostActionBase implements Serializable, R
 
     @Override
     public String getDisplayName() {
-        return "vManager Summary Report";
+        return "Verisium Manager Summary Report";
     }
 
     @Override

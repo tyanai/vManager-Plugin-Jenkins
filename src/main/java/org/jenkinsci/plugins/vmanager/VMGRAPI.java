@@ -246,7 +246,7 @@ public class VMGRAPI extends Builder {
 		 */
 		public FormValidation doCheckVAPIUrl(@QueryParameter String value) throws IOException, ServletException {
 			if (value.length() == 0)
-				return FormValidation.error("Please set the vManager vAPI HOST ");
+				return FormValidation.error("Please set the Verisium Manager vAPI HOST ");
 			if (value.length() < 4)
 				return FormValidation.warning("Isn't the name too short?");
 			return FormValidation.ok();
@@ -254,7 +254,7 @@ public class VMGRAPI extends Builder {
 
 		public FormValidation doCheckApiUrl(@QueryParameter String value) throws IOException, ServletException {
 			if (value.length() == 0)
-				return FormValidation.error("Please set the vManager vAPI URL ");
+				return FormValidation.error("Please set the Verisium Manager vAPI URL ");
 			if (value.length() < 8)
 				return FormValidation.warning("Isn't the name too short?");
 			return FormValidation.ok();

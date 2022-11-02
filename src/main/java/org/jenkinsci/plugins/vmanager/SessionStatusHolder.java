@@ -323,7 +323,7 @@ public class SessionStatusHolder {
 
 		} catch (IOException ex) {
 			//ex.printStackTrace();
-			System.out.println("vManager Dashboard - Can't find file " + fileInput);
+			System.out.println("Verisium Manager Dashboard - Can't find file " + fileInput);
 		} finally {
 			if (input != null) {
 				try {

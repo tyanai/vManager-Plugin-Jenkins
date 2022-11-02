@@ -446,7 +446,7 @@ public class ReportManager {
 
         CloseableHttpResponse httpResponse = httpClient.execute(httpGet);
         StatusLine statusLine = httpResponse.getStatusLine();
-        if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
+        if (statusLine.getStatusCode() == HttpURLConnection.HTTP_OK) {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             try {
                 HttpEntity entity = httpResponse.getEntity();
@@ -580,7 +580,7 @@ public class ReportManager {
                 }
                 StringBuffer writer = new StringBuffer();
                 writer.append("<div class=\"microAgentWaiting\"><div class=\"spinnerMicroAgentMessage\"><p><img src=\"/plugin/vmanager-plugin/img/support-icon.png\"></img></p><p>");
-                writer.append("Failure to retrieve the report from the vManager server for this build.  Check your parameters.<br>Below you can find the exception that was thrown during the retrieval process:<br><br><strong>");
+                writer.append("Failure to retrieve the report from the Verisium Manager server for this build.  Check your parameters.<br>Below you can find the exception that was thrown during the retrieval process:<br><br><strong>");
                 while ((output = br.readLine()) != null) {
                     writer.append(output + "<br>");
                 }
@@ -589,8 +589,8 @@ public class ReportManager {
                     //This is an error with the existance of the acctual API call.  Probably because the version is too old
                     if ("stream".equals(summaryReportParams.vManagerVersion)) {
                         writer.append("<br><br>");
-                        writer.append("Hint: This error usually indicates that you choosed the wrong vManager version at the plugin configuration section for vManagerVersion.<br>");
-                        writer.append("If that's the case, and if your vManager server version is below 19.09 - set vManagerVersion as \"html\" (if pipeline dsl is used), or \"Lower than 19.09\" for regular post configuration mode.<br>");
+                        writer.append("Hint: This error usually indicates that you choosed the wrong Verisium Manager version at the plugin configuration section for Verisium Manager Version.<br>");
+                        writer.append("If that's the case, and if your Verisium Manager server version is below 19.09 - set Verisium Manager Version as \"html\" (if pipeline dsl is used), or \"Lower than 19.09\" for regular post configuration mode.<br>");
                     }
                 }
 
@@ -604,7 +604,7 @@ public class ReportManager {
                 e.printStackTrace();
             } else {
                 if (!this.testMode) {
-                    listener.getLogger().println("Failed to retrieve report from the vManager server.");
+                    listener.getLogger().println("Failed to retrieve report from the Verisium Manager server.");
 
                     String fileOutput = buildNumber + "." + buildId + ".summary.report";
                     if (utils.getFilePath() == null){
@@ -613,7 +613,7 @@ public class ReportManager {
                     }
                     StringBuffer writer = new StringBuffer();
                     writer.append("<div class=\"microAgentWaiting\"><div class=\"spinnerMicroAgentMessage\"><p><img src=\"/plugin/vmanager-plugin/img/support-icon.png\"></img></p><p>");
-                    writer.append("Failure to retrieve the report from the vManager server for this build.  Check your parameters.<br>Below you can find the exception that was thrown during the retrieval process:<br><br><strong>");
+                    writer.append("Failure to retrieve the report from the Verisium Manager server for this build.  Check your parameters.<br>Below you can find the exception that was thrown during the retrieval process:<br><br><strong>");
                     writer.append(e.getMessage());
                     writer.append("</strong></p></div></div>");
                     utils.saveFileOnDisk(fileOutput, writer.toString());
@@ -687,7 +687,7 @@ public class ReportManager {
                     sb.append(output);
                 }
                 if (!this.testMode) {
-                    listener.getLogger().println("Failed to send report using the vManager server.  Exception is:\n" + sb.toString());
+                    listener.getLogger().println("Failed to send report using the Verisium Manager server.  Exception is:\n" + sb.toString());
                 }
             } else {
                 if (!this.testMode) {
@@ -699,7 +699,7 @@ public class ReportManager {
                 e.printStackTrace();
             } else {
                 if (!this.testMode) {
-                    listener.getLogger().println("Failed to send report using the vManager server.");
+                    listener.getLogger().println("Failed to send report using the Verisium Manager server.");
                 }
             }
             throw e;
@@ -721,7 +721,7 @@ public class ReportManager {
             
 
         } catch (IOException ex) {
-            System.out.println("vManager Action - Can't find file for loading report: " + fileInput);
+            System.out.println("Verisium Manager Action - Can't find file for loading report: " + fileInput);
             return output;
         }
 

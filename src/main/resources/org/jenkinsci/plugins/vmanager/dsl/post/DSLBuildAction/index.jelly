@@ -11,13 +11,13 @@
                 <tr style="border-top: 0px;">
                     <th align="left">Session Name</th>
                     <th align="left">Session ID</th>
-                    <th align="left">vManager Web</th>
+                    <th align="left">Verisium Manager Web</th>
                 </tr>
             <j:forEach var="session" items="${sessionId}">
                     <tr>    
                         <td style="border: 1px #bbb solid;" data="${it.getSessionName(session)}">${it.getSessionName(session)}</td>
                         <td style="border: 1px #bbb solid;" data="${session}">${session}</td>
-                        <td style="border: 1px #bbb solid;" data="${it.getSessionLinkForBuild(session)}"><a target="_blank" href="${it.getSessionLinkForBuild(session)}" tooltip="A Link to vManager Web Regression">Link</a></td>		
+                        <td style="border: 1px #bbb solid;" data="${it.getSessionLinkForBuild(session)}"><a target="_blank" href="${it.getSessionLinkForBuild(session)}" tooltip="A Link to Verisium Manager Web Regression">Link</a></td>		
                     </tr>
             </j:forEach>
             </table>

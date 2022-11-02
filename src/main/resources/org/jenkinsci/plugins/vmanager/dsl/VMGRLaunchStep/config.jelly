@@ -15,7 +15,7 @@
   
   <f:block>
   
-  <f:entry title="vManager Server API Url" field="vAPIUrl" description="vManager Server API Url"><f:textbox /></f:entry>
+  <f:entry title="Verisium Manager Server API Url" field="vAPIUrl" description="Verisium Manager Server API Url"><f:textbox /></f:entry>
   
     <f:block>
       
@@ -23,9 +23,9 @@
     <f:optionalBlock name="authRequired"  title="Authentication Required" description="If checked, User/Password are required." checked="${instance.authRequired}" inline="true">
      
    		
-        <f:entry title="Username" field="vAPIUser" description="vManager Username"><f:textbox default="vAPI"/></f:entry>
+        <f:entry title="Username" field="vAPIUser" description="Verisium Manager Username"><f:textbox default="vAPI"/></f:entry>
         <f:entry title="Pick User ID dynamically " field="dynamicUserId" description="If checked, the user id will get picked from the workspace"><f:checkbox name="dynamicUserId" checked="${it.dynamicUserId}"/></f:entry>
-        <f:entry title="Password" field="vAPIPassword" description="vManager password"><f:password /></f:entry>
+        <f:entry title="Password" field="vAPIPassword" description="Verisium Manager password"><f:password /></f:entry>
      	
       
     </f:optionalBlock>
@@ -52,7 +52,7 @@
   
   
   </f:block>
-  <f:entry title="Pause the vManager session's execution if build is interrupted." field="pauseSessionOnBuildInterruption" description="If checked, in case build is interrupted (aborted), the job will also try to pause the session on vManager."><f:checkbox name="pauseSessionOnBuildInterruption" checked="${it.pauseSessionOnBuildInterruption}"/></f:entry>
+  <f:entry title="Pause the Verisium Manager session's execution if build is interrupted." field="pauseSessionOnBuildInterruption" description="If checked, in case build is interrupted (aborted), the job will also try to pause the session on Verisium Manager."><f:checkbox name="pauseSessionOnBuildInterruption" checked="${it.pauseSessionOnBuildInterruption}"/></f:entry>
   <f:radioBlock name="executionType" value="launcher" title="Use session launcher" checked="${instance.executionType == 'launcher'}" inline="true">
   <f:block>
   
@@ -71,12 +71,12 @@
   
    <f:optionalBlock name="envVarible"  title="Include VSIF Environment Variables" description="" checked="${instance.envVarible}" inline="true">
      	
-        <f:entry title="Name of input file" field="envVaribleFile" description="Name of input file with environment variables in json format (not mandatory) - vManager 15.1 and above only"><f:textbox /></f:entry>
+        <f:entry title="Name of input file" field="envVaribleFile" description="Name of input file with environment variables in json format (not mandatory) - Verisium Manager 15.1 and above only"><f:textbox /></f:entry>
       
     </f:optionalBlock>
     <f:optionalBlock name="attrValues"  title="Include VSIF Attribute Values" description="" checked="${instance.attrValues}" inline="true">
      	
-        <f:entry title="Name of input file" field="attrValuesFile" description="Name of input file with attribute values in json format (not mandatory) - vManager 17.1 and above only"><f:textbox /></f:entry>
+        <f:entry title="Name of input file" field="attrValuesFile" description="Name of input file with attribute values in json format (not mandatory) - Verisium Manager 17.1 and above only"><f:textbox /></f:entry>
       
     </f:optionalBlock>
     <f:optionalBlock name="defineVarible"  title="Include Define Environment Variables" description="" checked="${instance.defineVarible}" inline="true">
@@ -86,14 +86,14 @@
     </f:optionalBlock>
     
     <f:optionalBlock name="useUserOnFarm"  title="Use user's linux account privileges for this execution (16.1 and above only)" description="If selected, the session's artifacts will have the user's permissions" checked="${instance.useUserOnFarm}" inline="true">
-         <f:entry title="Use user's SSH private key" field="userPrivateSSHKey" description="If checked, the vManager will use the stored SSH key of the user for the execution of the regression."><f:checkbox name="userPrivateSSHKey" checked="${it.userPrivateSSHKey}"/></f:entry>
-    	 <f:radioBlock name="userFarmType" value="static" title="Use same credentials as for vManager login" checked="${instance.userFarmType == 'static'}" inline="true">
+         <f:entry title="Use user's SSH private key" field="userPrivateSSHKey" description="If checked, the Verisium Manager will use the stored SSH key of the user for the execution of the regression."><f:checkbox name="userPrivateSSHKey" checked="${it.userPrivateSSHKey}"/></f:entry>
+    	 <f:radioBlock name="userFarmType" value="static" title="Use same credentials as for Verisium Manager login" checked="${instance.userFarmType == 'static'}" inline="true">
  	 </f:radioBlock>
   	<f:radioBlock name="userFarmType" value="dynamic" title="Dynamic credentials" checked="${instance.userFarmType == 'dynamic'}" inline="true">
          	<f:entry title="Name of credential file" field="credentialInputFile" description="Name of input file with credential values (not mandatory)"><f:textbox /></f:entry>
           	<f:entry title="Delete Credential File" field="deleteCredentialInputFile" description="If checked, the job will delete the credential file name after processing it."><f:checkbox name="deleteCredentialInputFile" checked="${it.deleteCredentialInputFile}"/></f:entry>
         </f:radioBlock>
-        <f:entry title="User Pre Exceution File" field="envSourceInputFile" description="Path to user env params declaration for sourcing prior to execution (not mandatory) - vManager 17.10 and above only"><f:textbox /></f:entry> 
+        <f:entry title="User Pre Exceution File" field="envSourceInputFile" description="Path to user env params declaration for sourcing prior to execution (not mandatory) - Verisium Manager 17.10 and above only"><f:textbox /></f:entry> 
         <f:entry title="User Pre Exceution File Type" field="envSourceInputFileType" ><f:select /></f:entry>
      </f:optionalBlock>
  
@@ -153,15 +153,15 @@
 </f:optionalBlock>
 </f:block> 
  <f:block>    
-     <f:optionalBlock name="vMGRBuildArchive"  title="Delete vManager Session when build is removed" description="If selected, the plugin will call vManager to delete the session when a manual/automatically build deletion is triggered" checked="${instance.vMGRBuildArchive}" inline="true">
+     <f:optionalBlock name="vMGRBuildArchive"  title="Delete Verisium Manager Session when build is removed" description="If selected, the plugin will call Verisium Manager to delete the session when a manual/automatically build deletion is triggered" checked="${instance.vMGRBuildArchive}" inline="true">
     	
          
          <f:radioBlock name="famMode" value="false" title="Sync Delete Methodology (built-in)" checked="${instance.famMode == 'false'}" inline="true">
            <f:entry title="Delete also session directory" field="deleteAlsoSessionDirectory" description="If checked, delete also the session directory on disk."><f:checkbox name="deleteAlsoSessionDirectory" checked="${it.deleteAlsoSessionDirectory}"/></f:entry>
            <f:optionalBlock name="genericCredentialForSessionDelete"  title="Dedicated user credentials for session delete operation" description="If supplied, the plugin will use these credentials for deleting the session.  Unless, it will use the same user/password that were used duting the build runtime." checked="${instance.genericCredentialForSessionDelete}" inline="true">
  		 
-                <f:entry title="Username" field="archiveUser" description="vManager username to be used during session deletion"><f:textbox /></f:entry>
-                <f:entry title="Password" field="archivePassword" description="vManager password to be used during session deletion"><f:password /></f:entry>
+                <f:entry title="Username" field="archiveUser" description="Verisium Manager username to be used during session deletion"><f:textbox /></f:entry>
+                <f:entry title="Password" field="archivePassword" description="Verisium Manager password to be used during session deletion"><f:password /></f:entry>
                 <f:validateButton title="${%Testing User credentials}" progress="${%Testing User credentials...}" method="testArchiveUser" with="archiveUser,archivePassword,vAPIUrl" />
   		 
            </f:optionalBlock>

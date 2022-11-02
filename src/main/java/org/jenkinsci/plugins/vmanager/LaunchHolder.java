@@ -125,7 +125,7 @@ public class LaunchHolder {
                 Thread.sleep(TIME_TO_SLEEP);
             } catch (InterruptedException e1) {
                 if (stepHolder.isPauseSessionOnBuildInterruption()) {
-                    listener.getLogger().print("Build " + buildID + " was interrupted. checking if there are sessions running in vManager to be also aborted...");
+                    listener.getLogger().print("Build " + buildID + " was interrupted. checking if there are sessions running in Verisium Manager to be also aborted...");
                     try {
                         java.util.logging.Logger logger = java.util.logging.Logger.getLogger(LaunchHolder.class.getName());
                         abortVManagerSessions(logger, url, requireAuth, user, password, listener, dynamicUserId, buildNumber, workPlacePath, buildID, connConnTimeOut, connReadTimeout, advConfig, notInTestMode, listOfSessions, workingJobDir);
@@ -182,7 +182,7 @@ public class LaunchHolder {
                             // Check if session exist:
                             if (tmpArray.size() == 0) {
                                 // MARK_THE_BUILD_FAIL
-                                buildResult = "(" + new Date().toString() + ") -  Session id (" + tmpSessionId + ") has been deleted on the vManager system.  Failing the build.\n";
+                                buildResult = "(" + new Date().toString() + ") -  Session id (" + tmpSessionId + ") has been deleted on the Verisium Manager system.  Failing the build.\n";
                                 if (notInTestMode) {
                                     listener.getLogger().print(buildResult);
                                 } else {
@@ -260,10 +260,10 @@ public class LaunchHolder {
                     } catch (java.net.ConnectException e) {
                         if (notInTestMode) {
                             if (debugPrint) {
-                                listener.getLogger().print("(" + new Date().toString() + ") - vManager Server is not responding or is down. Build will keep try to connect.\n");
+                                listener.getLogger().print("(" + new Date().toString() + ") - Verisium Manager Server is not responding or is down. Build will keep try to connect.\n");
                             }
                         } else {
-                            System.out.println("(" + new Date().toString() + ") - vManager Server is not responding or is down. Build will keep try to connect.'");
+                            System.out.println("(" + new Date().toString() + ") - Verisium Manager Server is not responding or is down. Build will keep try to connect.'");
                         }
                         break;
                     } catch (Exception e) {
@@ -544,7 +544,7 @@ public class LaunchHolder {
         if (conn.getResponseCode() != HttpURLConnection.HTTP_OK && conn.getResponseCode() != HttpURLConnection.HTTP_NO_CONTENT && conn.getResponseCode() != HttpURLConnection.HTTP_ACCEPTED && conn.getResponseCode() != HttpURLConnection.HTTP_CREATED && conn.getResponseCode() != HttpURLConnection.HTTP_PARTIAL && conn.getResponseCode() != HttpURLConnection.HTTP_RESET) {
             String reason = "";
             if (conn.getResponseCode() == 503) {
-                reason = "Failed to suspend sessions.  vAPI process failed to connect to remote vManager server.";
+                reason = "Failed to suspend sessions.  vAPI process failed to connect to remote Verisium Manager server.";
             }
             if (conn.getResponseCode() == 401) {
                 reason = "Failed to suspend sessions.  Authentication Error";
@@ -556,7 +556,7 @@ public class LaunchHolder {
             processErrorFromRespone(conn, logger);
 
         } else {
-            logger.log(Level.INFO, "Sessions were suspended in vManager as a result of build interuption.");
+            logger.log(Level.INFO, "Sessions were suspended in Verisium Manager as a result of build interuption.");
         }
 
         conn.disconnect();

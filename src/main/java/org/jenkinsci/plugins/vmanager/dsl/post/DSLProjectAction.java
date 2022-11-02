@@ -23,7 +23,7 @@ public class DSLProjectAction extends PostActionBase implements Serializable, Ac
 
     @Override
     public String getDisplayName() {
-        return "vManager Jobs Overview";
+        return "Verisium Manager Jobs Overview";
     }
 
     @Override

@@ -17,7 +17,7 @@
   
   <f:block>
   
-  <f:entry title="vManager Server API Url" field="vAPIUrl" description="vManager Server API Url"><f:textbox /></f:entry>
+  <f:entry title="Verisium Manager Server API Url" field="vAPIUrl" description="Verisium Manager Server API Url"><f:textbox /></f:entry>
   
     <f:block>
      
@@ -25,9 +25,9 @@
     <f:optionalBlock name="authRequired"  title="Authentication Required" description="If checked, User/Password are required." checked="${instance.authRequired}" inline="true">
      
    		
-        <f:entry title="vAPI User" field="vAPIUser" description="vManager vAPI User"><f:textbox default="vAPI"/></f:entry>
+        <f:entry title="vAPI User" field="vAPIUser" description="Verisium Manager vAPI User"><f:textbox default="vAPI"/></f:entry>
         <f:entry title="Pick User ID dynamically " field="dynamicUserId" description="If checked, the user id will get picked from the workspace"><f:checkbox name="dynamicUserId" checked="${it.dynamicUserId}"/></f:entry>
-        <f:entry title="vAPI Secret Key" field="vAPIPassword" description="vManager vAPI Secret Key"><f:password /></f:entry>
+        <f:entry title="vAPI Secret Key" field="vAPIPassword" description="Verisium Manager vAPI Secret Key"><f:password /></f:entry>
      	
       
     </f:optionalBlock>

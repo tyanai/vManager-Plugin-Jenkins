@@ -30,7 +30,7 @@ public class DSLBuildAction extends PostActionBase implements Serializable, RunA
 
     @Override
     public String getDisplayName() {
-        return "vManager Session Links";
+        return "Verisium Manager Session Links";
     }
 
     @Override

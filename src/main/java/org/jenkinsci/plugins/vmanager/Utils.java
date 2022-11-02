@@ -157,7 +157,7 @@ public class Utils {
         output = new String[listOfNames.size()];
         int i = 0;
         if (notInTestMode) {
-            listener.getLogger().print("Found the following " + type + " files for vManager plugin:\n");
+            listener.getLogger().print("Found the following " + type + " files for Verisium Manager plugin:\n");
         }
         String theFileName = null;
         while (iter.hasNext()) {
@@ -677,7 +677,7 @@ public class Utils {
         String textOut = null;
         try {
 
-            System.out.println("Trying to connect with vManager vAPI " + url);
+            System.out.println("Trying to connect with Verisium Manager vAPI " + url);
             String input = "{}";
 
             String apiURL = url + "/rest/sessions/count";
@@ -697,13 +697,13 @@ public class Utils {
             if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
                 String reason = "";
                 if (conn.getResponseCode() == 503) {
-                    reason = "vAPI process failed to connect to remote vManager server.";
+                    reason = "vAPI process failed to connect to remote Verisium Manager server.";
                 }
                 if (conn.getResponseCode() == 401) {
                     reason = "Authentication Error";
                 }
                 if (conn.getResponseCode() == 412) {
-                    reason = "vAPI requires vManager 'Integration Server' license.";
+                    reason = "vAPI requires Verisium Manager 'Integration Server' license.";
                 }
                 //String errorMessage = "Failed : HTTP error code : " + conn.getResponseCode() + " (" + reason + ")";
                 String errorMessage = processErrorFromRespone(conn, null, false);
@@ -723,7 +723,7 @@ public class Utils {
 
             JSONObject tmp = JSONObject.fromObject(result.toString());
 
-            textOut = " The current number of sessions held on this vManager server are: " + tmp.getString("count");
+            textOut = " The current number of sessions held on this Verisium Manager server are: " + tmp.getString("count");
 
         } catch (Exception e) {
 
@@ -746,7 +746,7 @@ public class Utils {
         try {
             List<String> items = Arrays.asList(listOfAttr.split("\\s*,\\s*"));
 
-            //System.out.println("Trying to connect with vManager vAPI " + url);
+            //System.out.println("Trying to connect with Verisium Manager vAPI " + url);
             //String input = "{}";
             String apiURL = url + "/rest/$schema/response?action=list&component=runs&extended=true";
 
@@ -755,7 +755,7 @@ public class Utils {
             if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
                 String reason = "";
                 if (conn.getResponseCode() == 503) {
-                    reason = "vAPI process failed to connect to remote vManager server.";
+                    reason = "vAPI process failed to connect to remote Verisium Manager server.";
                 }
                 if (conn.getResponseCode() == 401) {
                     reason = "Authentication Error";
@@ -798,7 +798,7 @@ public class Utils {
                     i++;
                 } else {
                     isSuccess = false;
-                    textOut = "Failed : '" + attr + "' doesn't exist for runs entities in the vManager server you are pointing at.\n";
+                    textOut = "Failed : '" + attr + "' doesn't exist for runs entities in the Verisium Manager server you are pointing at.\n";
                     break;
                 }
             }
@@ -918,7 +918,7 @@ public class Utils {
             listOfSessions = sessionNameIdHolder.getSessionNames(sessionNames, url, requireAuth, user, password, listener, dynamicUserId, buildID, buildNumber, workPlacePath, connConnTimeOut, connReadTimeout, advConfig, this);
             if (listOfSessions.size() == 0) {
                 listener.getLogger().print("Couldn't find any data for the given project and the supplied session names.\n");
-                return "Please check the input file that lists the session names and make sure you have the full session names as listed in vManager.";
+                return "Please check the input file that lists the session names and make sure you have the full session names as listed in Verisium Manager.";
 
             }
 
@@ -927,7 +927,7 @@ public class Utils {
             for (int i = 0; i < vsifs.length; i++) {
 
                 if (notInTestMode) {
-                    listener.getLogger().print("vManager vAPI - Trying to launch vsif file: '" + vsifs[i] + "'\n");
+                    listener.getLogger().print("Verisium Manager vAPI - Trying to launch vsif file: '" + vsifs[i] + "'\n");
                 }
                 String input = "{\"vsif\":\"" + vsifs[i] + "\"";
                 if (jsonEnvInput != null) {
@@ -989,7 +989,7 @@ public class Utils {
                 }
                 input = input + "}";
 
-                //listener.getLogger().print("vManager vAPI input: '" + input + "' with user/password: "+ user + "/" + password +"\n");
+                //listener.getLogger().print("Verisium Manager vAPI input: '" + input + "' with user/password: "+ user + "/" + password +"\n");
                 HttpURLConnection conn = getVAPIConnection(apiURL, requireAuth, user, password, "POST", dynamicUserId, buildID, buildNumber, workPlacePath, listener, connConnTimeOut, connReadTimeout, advConfig);
                 OutputStream os = conn.getOutputStream();
                 os.write(input.getBytes());
@@ -998,13 +998,13 @@ public class Utils {
                 if (conn.getResponseCode() != HttpURLConnection.HTTP_OK && conn.getResponseCode() != HttpURLConnection.HTTP_NO_CONTENT && conn.getResponseCode() != HttpURLConnection.HTTP_ACCEPTED && conn.getResponseCode() != HttpURLConnection.HTTP_CREATED && conn.getResponseCode() != HttpURLConnection.HTTP_PARTIAL && conn.getResponseCode() != HttpURLConnection.HTTP_RESET) {
                     String reason = "";
                     if (conn.getResponseCode() == 503) {
-                        reason = "vAPI process failed to connect to remote vManager server.";
+                        reason = "vAPI process failed to connect to remote Verisium Manager server.";
                     }
                     if (conn.getResponseCode() == 401) {
                         reason = "Authentication Error";
                     }
                     if (conn.getResponseCode() == 412) {
-                        reason = "vAPI requires vManager 'Integration Server' license.";
+                        reason = "vAPI requires Verisium Manager 'Integration Server' license.";
                     }
                     if (conn.getResponseCode() == 406) {
                         reason = "VSIF file '" + vsifs[i] + "' was not found on file system, or is not accessed by the vAPI process.\n";
@@ -1084,7 +1084,7 @@ public class Utils {
             String apiURL = url + "/rest" + apiUrl;
 
             if (notInTestMode) {
-                listener.getLogger().print("vManager vAPI - Trying to call vAPI '" + "/rest" + apiUrl + "'\n");
+                listener.getLogger().print("Verisium Manager vAPI - Trying to call vAPI '" + "/rest" + apiUrl + "'\n");
             }
             String input = jSON;
             HttpURLConnection conn = getVAPIConnection(apiURL, requireAuth, user, password, requestMethod, dynamicUserId, buildID, buildNumber, workPlacePath, listener, connConnTimeOut, connReadTimeout, advConfig);
@@ -1098,7 +1098,7 @@ public class Utils {
             if (conn.getResponseCode() != HttpURLConnection.HTTP_OK && conn.getResponseCode() != HttpURLConnection.HTTP_NO_CONTENT && conn.getResponseCode() != HttpURLConnection.HTTP_ACCEPTED && conn.getResponseCode() != HttpURLConnection.HTTP_CREATED && conn.getResponseCode() != HttpURLConnection.HTTP_PARTIAL && conn.getResponseCode() != HttpURLConnection.HTTP_RESET) {
                 String reason = "";
                 if (conn.getResponseCode() == 503) {
-                    reason = "vAPI process failed to connect to remote vManager server.";
+                    reason = "vAPI process failed to connect to remote Verisium Manager server.";
                 }
                 if (conn.getResponseCode() == 401) {
                     reason = "Authentication Error";
@@ -1110,7 +1110,7 @@ public class Utils {
                     reason = "The method specified in the Request-Line is not allowed for the resource identified by the Request-URI. The response MUST include an Allow header containing a list of valid methods for the requested resource.  Check if you selected the right request method (GET/POST/DELETE/PUT).";
                 }
                 if (conn.getResponseCode() == 412) {
-                    reason = "vAPI requires vManager 'Integration Server' license.";
+                    reason = "vAPI requires Verisium Manager 'Integration Server' license.";
                 }
                 //String errorMessage = "Failed : HTTP error code : " + conn.getResponseCode() + " (" + reason + ")\n";
                 String errorMessage = processErrorFromRespone(conn, listener, notInTestMode);

@@ -201,7 +201,7 @@ public class VMGRBuildArchiver {
                     if (conn.getResponseCode() != HttpURLConnection.HTTP_OK && conn.getResponseCode() != HttpURLConnection.HTTP_NO_CONTENT && conn.getResponseCode() != HttpURLConnection.HTTP_ACCEPTED && conn.getResponseCode() != HttpURLConnection.HTTP_CREATED && conn.getResponseCode() != HttpURLConnection.HTTP_PARTIAL && conn.getResponseCode() != HttpURLConnection.HTTP_RESET) {
                         String reason = "";
                         if (conn.getResponseCode() == 503) {
-                            reason = "Failed to delete sessions.  vAPI process failed to connect to remote vManager server.";
+                            reason = "Failed to delete sessions.  vAPI process failed to connect to remote Verisium Manager server.";
                         }
                         if (conn.getResponseCode() == 401) {
                             reason = "Failed to delete sessions.  Authentication Error";
@@ -227,7 +227,7 @@ public class VMGRBuildArchiver {
                 if (conn.getResponseCode() != HttpURLConnection.HTTP_OK && conn.getResponseCode() != HttpURLConnection.HTTP_NO_CONTENT && conn.getResponseCode() != HttpURLConnection.HTTP_ACCEPTED && conn.getResponseCode() != HttpURLConnection.HTTP_CREATED && conn.getResponseCode() != HttpURLConnection.HTTP_PARTIAL && conn.getResponseCode() != HttpURLConnection.HTTP_RESET) {
                     String reason = "";
                     if (conn.getResponseCode() == 503) {
-                        reason = "Failed to delete sessions.  vAPI process failed to connect to remote vManager server.";
+                        reason = "Failed to delete sessions.  vAPI process failed to connect to remote Verisium Manager server.";
                     }
                     if (conn.getResponseCode() == 401) {
                         reason = "Failed to delete sessions.  Authentication Error";
@@ -239,7 +239,7 @@ public class VMGRBuildArchiver {
                     processErrorFromRespone(conn, logger);
 
                 } else {
-                    logger.log(Level.INFO, "Sessions " + buildSdi.getProperty("sessions") + "were deleted from vManager DB");
+                    logger.log(Level.INFO, "Sessions " + buildSdi.getProperty("sessions") + "were deleted from Verisium Manager DB");
                 }
 
                 conn.disconnect();

@@ -1,6 +1,6 @@
 # Cadence vManager Jenkins Plugin
 
-This plugin adds an ability to perform REST over HTTP calls to Cadence vManager as a step in your build.
+This plugin adds an ability to integrate with Cadence Verisium Manager over HTTP calls as a step in your build.
 
 Plugin development and support is made by Cadence Design Systems. 
 
@@ -22,7 +22,7 @@ Also, in case you want to chart over the runs results, install the
 
 ### About
 
-Cadence vManager is exposing a REST API (vAPI) for performing automation
+Cadence Verisium Manager is exposing a REST API (vAPI) for performing automation
 queries and updates for its regression/test and coverage data.  This
 plugin enables you to add a remote execution for extracting runs
 information, reports data or even collecting and launching sessions as part of your
@@ -34,7 +34,7 @@ the session progress, creation of JUnit and summary report.
 
 ## Features
 
--   Free-style job plugin (can perform all vManager API call).
+-   Free-style job plugin (can perform all Verisium Manager API call).
 -   Support static/dynamic API calls
 -   Support dynamic authentication per user id.
 -   Special build step for performing launch of vsif files dynamically.
@@ -46,13 +46,13 @@ the session progress, creation of JUnit and summary report.
 -   Support the ability to delete sessions with every manual/automatic
     build removal (plugin ver 2.5.2 and above).
 -   Adds a link within the project page for direct access to the
-    vManager web analysis (post-build action).
+    Verisium Manager web analysis (post-build action).
 -   Adds a table of sessions within the project\'s page to track the
     session\'s history and give high level overview about the progress
     (post-build action).
--   Adds an ability to embed the vManager Summary Report within Jenkins
+-   Adds an ability to embed the Verisium Manager Summary Report within Jenkins
     as part of the build page.
--   Adds an ability to send vManager Summary Report to dynamically
+-   Adds an ability to send Verisium Manager Summary Report to dynamically
     selective users at the end of the regression.
 -   Support Collect Mode.
 
@@ -81,7 +81,7 @@ type](./docs/images/postbuild.png "Jenkins > Cadence vManager Plugin > postbuild
 
 ## Usage
 
-##### **vManager API**
+##### **Verisium Manager API**
 
 The step takes care for the following:
 
@@ -111,7 +111,7 @@ this field is empty, The file name need to be:
 Please fill this field only in case, you want to hard code the input
 file name, to be consist across all builds.
 
-##### **vManager Session Launcher**
+##### **Verisium Manager Session Launcher**
 
 There are three modes for launching a session using the vManager Session
 Launcher action:
@@ -135,7 +135,7 @@ The step takes care for the following:
 
 -   Authentication.
 -   Launching a vsif that is located on the NFS and is available to
-    vManager Server.
+    Verisium Manager Server.
 
 The below is an example of defining a **static vsif call.**
 
@@ -190,7 +190,7 @@ field is empty, The file name need to be:
 file name, to be consist across all
 builds.\
 \
-The vManager plugin will look for the any of the input files mentioned
+The Verisium Manager plugin will look for the any of the input files mentioned
 above, and query the server for their respective id automatically. From
 that point and on, the flow continues as if the sessions were launched
 by this plugin.
@@ -205,7 +205,7 @@ launched session:
 ![](./docs/images/batchmode.png "Jenkins > Cadence vManager Plugin > batchmode.png")
 
 This option is useful for those who wish to take advantage of this
-plugin, but are not using the vManager Runner, and uses \"**collect**\"
+plugin, but are not using the Verisium Manager Runner, and uses \"**collect**\"
 mode instead. For such flow they can still benefit from generated JUnit
 report, triage link, real time view of the run\'s progress, summary
 report, etc\'.\
@@ -225,7 +225,7 @@ field is empty, The file name need to be:
 Please fill this field only in case, you want to hard code the input
 file name, to be consist across all builds.\
 \
-the vManager plugin will look for any of the input files mentioned
+the Verisium Manager plugin will look for any of the input files mentioned
 above, and query the server for their respective id automatically. From
 that point and on, the flow continues as if the sessions were collected
 by this plugin.
@@ -234,7 +234,7 @@ by this plugin.
 
 please make sure \"**Wait for launched session to end**\" is checked
 \'on\' within the plugin configuration.  Basically, your collected
-sessions must be in a \"complete\" state within vManager.  The step will
+sessions must be in a \"complete\" state within Verisium Manager.  The step will
 only move FW once ALL your collected sessions are in a \"complete\"
 state, and as such, this flag must be turned on.  You can still define
 different states for the plugin to continue, if you like.\
@@ -248,7 +248,7 @@ at:
 **Setting the build to wait till all session end execution:**
 
 In case you want to hold the build till the session end its execution on
-the vManager side, please check the \'wait for launched session to end\"
+the Verisium Manager side, please check the \'wait for launched session to end\"
 check box.
 
  
@@ -284,10 +284,10 @@ build as a failed build. 
 1. When all sessions on this build step are having the state
 \'completed\' the build will be marked as
 success.
-2. When the vManager server goes down, the build step will keep waiting
+2. When the Verisium Manager server goes down, the build step will keep waiting
 till the server will go back up. The build step will only change its
 state based on sessions state changes.
-3. If the session was manually deleted on the vManager server, before
+3. If the session was manually deleted on the Verisium Manager server, before
 reaching into final state, the build will be marked as a failure
 build.
 4. In any case, if the number of minutes waiting is bigger than the
@@ -322,7 +322,7 @@ charting over your entire builds.  See below.
 
 **Launching session using pipeline syntax**
 
-The vManager Plugin (Launching New Session only) also support the
+The Verisium Manager Plugin (Launching New Session only) also support the
 Pipeline syntax:
 
 ![](./docs/images/pipeline.png "Jenkins > Cadence vManager Plugin > pipeline.png")
@@ -338,10 +338,10 @@ a build is being removed**
 
 <div>
 
-Choosing to delete vManager session during build removal, will trigger
+Choosing to delete Verisium Manager session during build removal, will trigger
 an operation during manual/automatic deletion of a build, to deal with
 the remote session/sessions that were created during that build on the
-vManager DB.\
+Verisium Manager DB.\
 When this option is enabled the build will place an instruction file
 (sdi.properties) within the job directory that specify the sessions to
 get deleted, as well as other parameters - that will be used during the
@@ -353,7 +353,7 @@ during removal, and will keep their sessions.\
 You can choose between two methodologies: \
 \
 **Sync Delete Methodology (built-in)**\
-In case you select the sync methodology, the plugin will call vManager
+In case you select the sync methodology, the plugin will call Verisium Manager
 vAPI during the build removal process for deleting the sessions that
 were created during that same build.\
 With this option you can also supply a generic user/password to be used
@@ -362,14 +362,14 @@ the build will be picked automatically. \
 Please note that the sync methodology is lacking two main aspects:
 1. Since Jenkins ignores any exception thrown within the callback
 functions of RunListener, the build will get deleted even if the session
-failed to get deleted from vManager DB.
+failed to get deleted from Verisium Manager DB.
 2. When the vAPI is down, it can take up to 20 seconds to finish the
 operation (as it needs to wait till vAPI will be available) - the UX at
 that time, might appears as sluggish to the end user.\
 \
 **Async Delete Methodology (externally)**\
 In case you want to introduce a more robust approach (promising a
-session deletion even if vManager Server is down, as well as faster UX),
+session deletion even if Verisium Manager Server is down, as well as faster UX),
 you should use the async methodology.\
 When Async Methodology is used, the callback function will not try to
 delete the session, but instead will copy the sdi.properties file into
@@ -385,7 +385,7 @@ requires the use of forward slash instead of backslash.
 
 ## Dashboard
 
-The vManager Plugin also support a new Dashboard portal using the
+The Verisium Manager Plugin also support a new Dashboard portal using the
 Dashboard-view plugin.  The new portal reflects the session\'s states
 launched by the various builds:
 
@@ -407,21 +407,21 @@ The job will pick the userid which is in the file, and connect to vAPI
 using this userid and the vAPI secret key.
 
 
-## vManager Post Build Actions
+## Verisium Manager Post Build Actions
 
-The vManager Plugin also supports a post-build action that brings:
+The Verisium Manager Plugin also supports a post-build action that brings:
 
 -   High level view at the  session\'s states launched by the various
     builds:
--   Project level hyperlink that links to vManager Web Regression for
+-   Project level hyperlink that links to Verisium Manager Web Regression for
     the last build available for further analysis
 -   Fine grained view of the session launched at the build (run) level
     (in case more than one session was launched during the regression)
--   Build level hyperlink that links to vManager Web Regression for the
+-   Build level hyperlink that links to Verisium Manager Web Regression for the
     launched session for further analysis
--   Adds an ability to embed the vManager Summary Report within Jenkins
+-   Adds an ability to embed the Verisium Manager Summary Report within Jenkins
     as part of the build page.
--   Adds an ability to send vManager Summary Report to dynamically
+-   Adds an ability to send Verisium Manager Summary Report to dynamically
     selective users at the end of the regression.
 
 The action is also available for pipeline usage using the
@@ -470,8 +470,8 @@ build. (vManager Analysis)*]
 
 *Security issue* was introduced in version 2.7.0. Please use version 2.7.1 and above if possible. If you are already using the below capability on 2.7.0, upgrading to 2.7.1 will add a new checkbox to get your consent regard SSL validation.  Please check for more information within the plugin\'s configurations.
 
-1.  The vManager 2.7.0 post-build now have the ability to embed into
-    Jenkins the vManager Summary Report.  This gives you the ability to
+1.  The Verisium Manager 2.7.0 post-build now have the ability to embed into
+    Jenkins the Verisium Manager Summary Report.  This gives you the ability to
     have a quick view of your verification closure, vPlan progress and
     test based hierarchy aggregation right from the Jenkins build page
     using Javascript collapse/expand capability to view the hierarchies
@@ -515,7 +515,7 @@ additional vAPI flag \"Jenkins\":true that is only supported in vManager
 19.09 onward. 
 
 In order to make this feature available also for users who are currently
-not using vManager \>19.09, please set the \"vManager Version\" drop
+not using Verisium Manager \>19.09, please set the \"vManager Version\" drop
 down accordingly (default to 19.09), so that the plugin will know
 parse/modify the report and make it Jenkins complaint.  The outcome in
 both options is the same although there can be differences in the
@@ -523,19 +523,19 @@ performance of the overall operation.
 
 **Email**
 
-The email feature comes in this plugin is making use of the vManager
+The email feature comes in this plugin is making use of the Verisium Manager
 Server Email capability.  Please make sure that Sendmail package is
-installed on your Linux machine where the vManager server is installed
+installed on your Linux machine where the Verisium Manager server is installed
 if you would like to use this capability.
 
 
 **Bring the summary report yourself (view mode only)**
 
-As the vAPI runs under the vManager server account, it can introduce a
+As the vAPI runs under the Verisium Manager server account, it can introduce a
 limitation when trying to get access to coverage or vPlan data.  In such
 cases, the vAPI can\'t be used for getting the report, and the user have
 the option to generate the report himself using batch command.  This
-option is only available for users with vManager version **19.09** and
+option is only available for users with Verisium Manager version **19.09** and
 above as the report generated must have a very specific format that can
 only be achieved by adding the flag \"-jenkins true\" within the batch
 command -- which only supported starting 19.09.  In order for the plugin
@@ -549,6 +549,9 @@ the following format within the job working directory: 
 ![](./docs/images/report_conf.png "Jenkins > Cadence vManager Plugin > report_conf.png")
 
 ## Change Log
+
+##### Version 3.1.7 (Nov 2, 2022)
+-	Replace Apache HTTP deprecated usages with non-deprecated equivalents. 
 
 ##### Version 3.1.6 (Oct 28, 2021)
 -	Add support in define variables for the launch operation. 
@@ -607,7 +610,7 @@ the following format within the job working directory: 
 
 ##### Version 3.0.2 (Jan 26, 2020)
 
--   Added support in vManager session suspension/pause when user abort/cancel/stop Jenkins jobs. 
+-   Added support in Verisium Manager session suspension/pause when user abort/cancel/stop Jenkins jobs. 
 
 ##### Version 3.0.0 (Nov 1, 2019)
 
@@ -642,11 +645,11 @@ the following format within the job working directory: 
 ##### Version 2.5.9 (Sep 10, 2019)
 
 -   Added a link within the project page for direct access to the
-    vManager web analysis (post-build action)
+    Verisium Manager web analysis (post-build action)
 -   Added a table of sessions within the project\'s page to track the
     session\'s history and give high level overview about the progress
     (post-build action)
--   Added support for vManager HA architecture
+-   Added support for Verisium Manager HA architecture
 -   Fix JUnit report to aggregate all runs from all session\'s that were
     launched as part of the build (before only the last session\'s runs
     were collected).  This is only relevant for build that launches
@@ -660,7 +663,7 @@ the following format within the job working directory: 
 
 -   A fix for Dashboard view with jobs that lack the build area (there
     was an issue that caused the list of jobs to become empty within the
-    vManager Latest Job plugin).
+    Verisium Manager Latest Job plugin).
 
 ##### Version 2.5.6 (June 28, 2019)
 
@@ -689,9 +692,9 @@ the following format within the job working directory: 
 
 ##### Version 2.5.1 (Nov 22, 2017)
 
--   Added support in Pipeline.  You can now call vManager Launch using
+-   Added support in Pipeline.  You can now call Verisium Manager Launch using
     the Pipeline syntax.  (Requires Jenkins 2.19.1 and above.)
--   vManager Dashboard will now fetch historical data from the build
+-   Verisium Manager Dashboard will now fetch historical data from the build
     directory instead of the workspace directory.  Once this plugin is
     updated, the Dashboard will only show historical jobs running from
     when the update occurred and on.
@@ -773,7 +776,7 @@ the following format within the job working directory: 
 ##### Version 1.2 (Aug 14, 2014)
 
 -   Update code for supporting the automatic launching of vAPI using
-    vManager Server.
+    Verisium Manager Server.
 
 ##### Version 1.1 (July 17, 2014)
 

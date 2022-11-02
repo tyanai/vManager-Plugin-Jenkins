@@ -3,5 +3,5 @@
 -->
 <?jelly escape-by-default='true'?>
 <div>
-  This plugin is used in order to interact from remote with Cadence vManager API. 
+  This plugin is used in order to interact from remote with Cadence Verisium Manager API. 
 </div>
