@@ -61,7 +61,7 @@ public class VMGRAPI extends Builder {
 	}
 
 	/**
-	 * We'll use this from the <tt>config.jelly</tt>.
+	 * We'll use this from the <p>config.jelly</p>.
 	 */
 	public String getVAPIUrl() {
 		return vAPIUrl;
