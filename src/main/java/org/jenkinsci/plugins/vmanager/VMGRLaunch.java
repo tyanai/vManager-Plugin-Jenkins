@@ -1,28 +1,38 @@
 package org.jenkinsci.plugins.vmanager;
 
+import com.cloudbees.plugins.credentials.CredentialsMatchers;
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
+import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
+import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.BuildListener;
 import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.Item;
 import hudson.model.Run;
 import hudson.model.listeners.RunListener;
+import hudson.security.ACL;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 
 import javax.servlet.ServletException;
+import jenkins.model.Jenkins;
 
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jenkinsci.plugins.tokenmacro.TokenMacro;
+import org.kohsuke.stapler.AncestorInPath;
 
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
@@ -35,6 +45,7 @@ public class VMGRLaunch extends Builder {
     private final boolean advConfig;
     private final String vAPIUser;
     private final String vAPIPassword;
+    private final String vAPICredentials;
     private final String vSIFName;
     private final String vSIFInputFile;
     private final String credentialInputFile;
@@ -49,9 +60,9 @@ public class VMGRLaunch extends Builder {
     private int connTimeout = 1;
     private int readTimeout = 30;
     private final boolean envVarible;
-    
+
     private final String envVaribleFile;
-    
+
     private final boolean attrValues;
     private final String attrValuesFile;
 
@@ -94,16 +105,12 @@ public class VMGRLaunch extends Builder {
     private final String envVariableText;
     private final String attrVariableType;
     private final String attrVariableText;
-    
+
     private final String defineVaribleFile;
     private final boolean defineVarible;
     private final String defineVariableType;
     private final String defineVariableText;
     private String defineVaribleFileFix;
-    
-    
-    
-    
 
     //Variable that might contain macros
     private String sessionsInputFileFix;
@@ -112,12 +119,13 @@ public class VMGRLaunch extends Builder {
     private String credentialInputFileFix;
     private String envSourceInputFileFix;
     private String envVaribleFileFix;
-    
+
     private String attrValuesFileFix;
     private String famModeLocationFix;
     private final String executionScript;
     private final String executionShellLocation;
     private final String executionVsifFile;
+    private final String credentialType;
 
     // Fields in config.jelly must match the parameter names in the
     // "DataBoundConstructor"
@@ -127,7 +135,7 @@ public class VMGRLaunch extends Builder {
             int stepSessionTimeout, boolean generateJUnitXML, boolean extraAttributesForFailures, String staticAttributeList, boolean markBuildAsFailedIfAllRunFailed, boolean failJobIfAllRunFailed, String envSourceInputFile, boolean vMGRBuildArchive, boolean deleteAlsoSessionDirectory,
             boolean genericCredentialForSessionDelete, String archiveUser, String archivePassword, String famMode, String famModeLocation, boolean noAppendSeed, boolean markBuildAsPassedIfAllRunPassed, boolean failJobUnlessAllRunPassed, boolean userPrivateSSHKey, boolean attrValues,
             String attrValuesFile, String executionType, String sessionsInputFile, boolean deleteSessionInputFile, String envVariableType, String envVariableText, String attrVariableType, String attrVariableText, boolean pauseSessionOnBuildInterruption, String envSourceInputFileType,
-            String executionScript, String executionShellLocation, String executionVsifFile, String defineVaribleFile, boolean defineVarible, String defineVariableType, String defineVariableText) {
+            String executionScript, String executionShellLocation, String executionVsifFile, String defineVaribleFile, boolean defineVarible, String defineVariableType, String defineVariableText, String vAPICredentials, String credentialType) {
         this.vAPIUrl = vAPIUrl;
         this.vAPIUser = vAPIUser;
         this.vAPIPassword = vAPIPassword;
@@ -192,16 +200,20 @@ public class VMGRLaunch extends Builder {
         this.executionScript = executionScript;
         this.executionShellLocation = executionShellLocation;
         this.executionVsifFile = executionVsifFile;
-        
+
         this.defineVaribleFile = defineVaribleFile;
         this.defineVarible = defineVarible;
         this.defineVariableType = defineVariableType;
         this.defineVariableText = defineVariableText;
+        this.vAPICredentials = vAPICredentials;
+        this.credentialType = credentialType;
 
     }
 
     /**
-     * We'll use this from the <p>config.jelly</p>.
+     * We'll use this from the
+     * <p>
+     * config.jelly</p>.
      */
     public String getExecutionVsifFile() {
         return executionVsifFile;
@@ -214,7 +226,7 @@ public class VMGRLaunch extends Builder {
     public String getExecutionScript() {
         return executionScript;
     }
-    
+
     public String getSessionsInputFile() {
         return sessionsInputFile;
     }
@@ -249,6 +261,10 @@ public class VMGRLaunch extends Builder {
 
     public boolean isExtraAttributesForFailures() {
         return extraAttributesForFailures;
+    }
+
+    public String getCredentialType() {
+        return credentialType;
     }
 
     public boolean isNoAppendSeed() {
@@ -442,8 +458,10 @@ public class VMGRLaunch extends Builder {
     public String getDefineVariableText() {
         return defineVariableText;
     }
-    
-    
+
+    public String getVAPICredentials() {
+        return vAPICredentials;
+    }
 
     @Override
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener) {
@@ -451,7 +469,17 @@ public class VMGRLaunch extends Builder {
         String workingJobDir = build.getRootDir().getAbsolutePath();
         listener.getLogger().println("Root dir is: " + workingJobDir);
         listener.getLogger().println("The HOST for vAPI is: " + vAPIUrl);
-        listener.getLogger().println("The vAPIUser for vAPI is: " + vAPIUser);
+        listener.getLogger().println("The user/password type for vAPI is: " + credentialType);
+        String tempUser = vAPIUser;
+        String tempPassword = vAPIPassword;
+        if ("credential".equals(credentialType)) {
+            //overwrite the plain text with the credentials
+            StandardUsernamePasswordCredentials c = CredentialsProvider.findCredentialById(this.vAPICredentials, StandardUsernamePasswordCredentials.class, build, Collections.<DomainRequirement>emptyList());
+            tempUser = c.getUsername();
+            tempPassword = c.getPassword().getPlainText();
+            listener.getLogger().println("Credentials set with ID " + this.vAPICredentials);
+        }
+        listener.getLogger().println("The vAPIUser for vAPI is: " + tempUser);
         listener.getLogger().println("The vAPIPassword for vAPI is: *******");
         listener.getLogger().println("The authRequired for vAPI is: " + authRequired);
         listener.getLogger().println("The id is: " + build.getId());
@@ -508,14 +536,14 @@ public class VMGRLaunch extends Builder {
             listener.getLogger().println("The deleteInputFile for vAPI is: " + deleteInputFile);
             if (envVarible) {
                 listener.getLogger().println("An environment varible file was selected.");
-                
+
             }
 
             if (attrValues) {
                 listener.getLogger().println("An attribute values file was selected.");
-                
+
             }
-            
+
             if (defineVarible) {
                 listener.getLogger().println("A define varible file was selected.");
             }
@@ -620,8 +648,7 @@ public class VMGRLaunch extends Builder {
             String jsonAttrValuesInput = null;
             String jsonDefineInput = null;
             String[] farmUserPassword = null;
-            String tempUser = vAPIUser;
-            String tempPassword = vAPIPassword;
+
             String tmpExecutionType = executionType;
 
             if ("batch".equals(executionType)) {
@@ -641,15 +668,14 @@ public class VMGRLaunch extends Builder {
                 //Launch the session and create the sessions.input
                 tmpExecutionType = "batch"; // once we found the sessin name, the execution continues as if user did the batch first
                 //BatchExecManager batchExecManager = new BatchExecManager(listener,TokenMacro.expandAll(build, listener, executionScript),executionShellLocation,executionVsifFile,build.getId(), build.getNumber());
-                utils.batchExecManager(listener,TokenMacro.expandAll(build, listener, executionScript),executionShellLocation,TokenMacro.expandAll(build, listener, executionVsifFile),build.getId(), build.getNumber(),launcher);
+                utils.batchExecManager(listener, TokenMacro.expandAll(build, listener, executionScript), executionShellLocation, TokenMacro.expandAll(build, listener, executionVsifFile), build.getId(), build.getNumber(), launcher);
                 //batchExecManager.execBatchCommand(build.getExecutor().getCurrentWorkspace());
                 sessionNames = utils.loadDataFromInputFiles(build.getId(), build.getNumber(), "" + build.getWorkspace(), "", listener, false, "session names", "sessions.input");
                 if (sessionNames.length == 0) {
                     listener.getLogger().println("No session were found within sessions.input file.  Exit Job.\n");
                     return false;
                 }
-                
-                
+
             } else {
                 if ("static".equals(vsifType)) {
                     listener.getLogger().println("The VSIF file chosen is static. VSIF file static location is: '" + vSIFNameFix + "'");
@@ -707,8 +733,7 @@ public class VMGRLaunch extends Builder {
                     }
 
                 }
-                
-                               
+
                 //check if user set an define values in addition:
                 if (defineVarible) {
                     if (defineVariableType == null || "".equals(defineVariableType) || "file".equals(defineVariableType)) {
@@ -812,18 +837,15 @@ public class VMGRLaunch extends Builder {
 
             // Now call the actual launch
             // ----------------------------------------------------------------------------------------------------------------
-            
-           
-            
             String output = utils.executeVSIFLaunch(vsifFileNames, vAPIUrl, authRequired, tempUser, tempPassword, listener, dynamicUserId, build.getId(), build.getNumber(),
-                    "" + build.getWorkspace(), connTimeout, readTimeout, advConfig, jsonEnvInput, useUserOnFarm, userFarmType, farmUserPassword, stepHolder, envSourceInputFileFix, workingJobDir, vMGRBuildArchiver, userPrivateSSHKey, jsonAttrValuesInput, tmpExecutionType, sessionNames,envSourceInputFileType, launcher, jsonDefineInput);
+                    "" + build.getWorkspace(), connTimeout, readTimeout, advConfig, jsonEnvInput, useUserOnFarm, userFarmType, farmUserPassword, stepHolder, envSourceInputFileFix, workingJobDir, vMGRBuildArchiver, userPrivateSSHKey, jsonAttrValuesInput, tmpExecutionType, sessionNames, envSourceInputFileType, launcher, jsonDefineInput);
             if (!"success".equals(output)) {
                 listener.getLogger().println("Failed to launch vsifs for build " + build.getId() + " " + build.getNumber() + "\n");
                 listener.getLogger().println(output + "\n");
                 return false;
             }
             // ----------------------------------------------------------------------------------------------------------------
-             
+
         } catch (Exception e) {
             listener.getLogger().println("Failed to build " + build.getId() + " " + build.getNumber());
             listener.getLogger().println(e.getMessage());
@@ -871,7 +893,8 @@ public class VMGRLaunch extends Builder {
      *
      * <p>
      * See
-     * <p>src/main/resources/hudson/plugins/hello_world/HelloWorldBuilder/*.jelly</p>
+     * <p>
+     * src/main/resources/hudson/plugins/hello_world/HelloWorldBuilder/*.jelly</p>
      * for the actual HTML fragment for the configuration screen.
      */
     @Extension
@@ -1004,6 +1027,28 @@ public class VMGRLaunch extends Builder {
             return items;
         }
 
+        public ListBoxModel doFillVAPICredentialsItems(
+                @AncestorInPath Item item,
+                @QueryParameter String vAPICredentials
+        ) {
+            StandardListBoxModel result = new StandardListBoxModel();
+            if (item == null) {
+                if (!Jenkins.getInstance().hasPermission(Jenkins.ADMINISTER)) {
+                    return result.includeCurrentValue(vAPICredentials); // (2)
+                }
+            } else {
+                if (!item.hasPermission(Item.EXTENDED_READ)
+                        && !item.hasPermission(CredentialsProvider.USE_ITEM)) {
+                    return result.includeCurrentValue(vAPICredentials); // (2)
+                }
+            }
+            return result
+                    .includeEmptyValue()
+                    .includeMatchingAs(ACL.SYSTEM, Jenkins.getInstance(), StandardUsernamePasswordCredentials.class, Collections.<DomainRequirement>emptyList(), CredentialsMatchers.always())
+                    .includeCurrentValue(vAPICredentials); // (5)
+
+        }
+
         /**
          * This human readable name is used in the configuration screen.
          */
@@ -1019,16 +1064,45 @@ public class VMGRLaunch extends Builder {
         }
 
         public FormValidation doTestConnection(@QueryParameter("vAPIUser") final String vAPIUser, @QueryParameter("vAPIPassword") final String vAPIPassword,
-                @QueryParameter("vAPIUrl") final String vAPIUrl, @QueryParameter("authRequired") final boolean authRequired) throws IOException,
-                ServletException {
+                @QueryParameter("vAPIUrl") final String vAPIUrl, @QueryParameter("authRequired") final boolean authRequired,
+                @QueryParameter("credentialType") final String credentialType, @QueryParameter("vAPICredentials") final String vAPICredentials, @AncestorInPath Item item)
+                throws IOException, ServletException {
             try {
+                String tempUser = vAPIUser;
+                String tempPassword = vAPIPassword;
+                boolean foundMatchUserPassword = false;
+                if ("credential".equals(credentialType)) {
+                    //System.out.println("Trying to find the credential...");
+                    //overwrite the plain text with the credentials
+                    //StandardUsernamePasswordCredentials c = CredentialsProvider.findCredentialById(vAPICredentials, StandardUsernamePasswordCredentials.class, item, Collections.<DomainRequirement>emptyList());
+                    List<StandardUsernamePasswordCredentials> listOfC = CredentialsProvider.lookupCredentials(StandardUsernamePasswordCredentials.class, item, ACL.SYSTEM, Collections.<DomainRequirement>emptyList());
+                    Iterator<StandardUsernamePasswordCredentials> cIterator = listOfC.iterator();
+                    StandardUsernamePasswordCredentials tmpHolder = null;
+                    while (cIterator.hasNext()) {
+                        tmpHolder = cIterator.next();
+                        if (vAPICredentials.equals(tmpHolder.getId())) {
+                            tempUser = tmpHolder.getUsername();
+                            tempPassword = tmpHolder.getPassword().getPlainText();
+                            foundMatchUserPassword = true;
+                            break;
+                        }
 
-                Utils utils = new Utils();
-                String output = utils.checkVAPIConnection(vAPIUrl, authRequired, vAPIUser, vAPIPassword);
-                if (!output.startsWith("Failed")) {
-                    return FormValidation.ok("Success. " + output);
+                    }
+
                 } else {
-                    return FormValidation.error(output);
+                    foundMatchUserPassword = true;
+                }
+
+                if (foundMatchUserPassword) {
+                    Utils utils = new Utils();
+                    String output = utils.checkVAPIConnection(vAPIUrl, authRequired, tempUser, tempPassword);
+                    if (!output.startsWith("Failed")) {
+                        return FormValidation.ok("Success. " + output);
+                    } else {
+                        return FormValidation.error(output);
+                    }
+                } else {
+                    return FormValidation.error("Could not extract the user/password from the supplied Credential object.  Object was not found within your Jenkins domain.");
                 }
             } catch (Exception e) {
                 return FormValidation.error("Client error : " + e.getMessage());
@@ -1067,6 +1141,37 @@ public class VMGRLaunch extends Builder {
             } catch (Exception e) {
                 return FormValidation.error("Client error : " + e.getMessage());
             }
+        }
+
+        public FormValidation doCheckVAPICredentials(
+                @AncestorInPath Item item, // (2)
+                @QueryParameter String value // (1)
+
+        ) {
+            if (item == null) {
+                if (!Jenkins.getInstance().hasPermission(Jenkins.ADMINISTER)) {
+                    return FormValidation.ok(); // (3)
+                }
+            } else {
+                if (!item.hasPermission(Item.EXTENDED_READ)
+                        && !item.hasPermission(CredentialsProvider.USE_ITEM)) {
+                    return FormValidation.ok(); // (3)
+                }
+            }
+            if (StringUtils.isBlank(value)) { // (4)
+                return FormValidation.ok(); // (4)
+            }
+            //.includeMatchingAs(ACL.SYSTEM,Jenkins.getInstance(),StandardUsernamePasswordCredentials.class,Collections.<DomainRequirement>emptyList(),CredentialsMatchers.always())
+            if (CredentialsProvider.listCredentials( // (6)
+                    StandardUsernamePasswordCredentials.class, // (1)
+                    item,
+                    ACL.SYSTEM,
+                    Collections.<DomainRequirement>emptyList(),
+                    CredentialsMatchers.always() // (6)
+            ).isEmpty()) {
+                return FormValidation.error("Cannot find currently selected credentials");
+            }
+            return FormValidation.ok();
         }
 
     }

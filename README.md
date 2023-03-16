@@ -10,9 +10,8 @@ Plugin development and support is made by Cadence Design Systems.
 
 ### Plugin Dependency
 
-Please make sure you have the **dashboard-view** &
-**workflow-step-api **plugin installed on your Jenkins before trying to
-install this plugin.
+Please make sure you have **dashboard-view**, **workflow-step-api** & **credentials** 
+plugin installed on your Jenkins before trying to install this plugin.
 
 Also, in case you want to chart over the runs results, install the
 **Junit Plugin** as well.
@@ -30,19 +29,17 @@ build process.
 
 This plugin can also work in a hybrid model - aka, keep your current way of
 launching sessions using batch, while letting this plugin take over monitoring 
-the session progress, creation of JUnit and summary report.
+the session\'s progress, creation of JUnit and summary report.
 
 ## Features
 
--   Free-style job plugin (can perform all Verisium Manager API call).
+-   Free-style job plugin (can perform all Verisium Manager vAPI call).
 -   Support static/dynamic API calls
 -   Support dynamic authentication per user id.
 -   Special build step for performing launch of vsif files dynamically.
--   Support Dashboard portal for showing the session status. (plugin ver
-    1.9 and above).
--   Support the JUnit Report format for showing pass/fail runs charts
-    (plugin ver 1.9 and above).
--   Support the Jenkins Pipeline Step API (plugin ver 2.5.1 and above).
+-   Support Dashboard portal for showing the session status.
+-   Support the JUnit Report format for showing pass/fail runs charts.
+-   Support the Jenkins Pipeline Step API.
 -   Support the ability to delete sessions with every manual/automatic
     build removal (plugin ver 2.5.2 and above).
 -   Adds a link within the project page for direct access to the
@@ -108,8 +105,8 @@ The input file should be place into the workspace directory. In case
 this field is empty, The file name need to be:
 \$BUILD\_NUMBER..\$BUILD\_ID.vapi.input
 
-Please fill this field only in case, you want to hard code the input
-file name, to be consist across all builds.
+Please fill this field only in case you want to hard code the input
+file name to be consist across all builds.
 
 ##### **Verisium Manager Session Launcher**
 
@@ -172,8 +169,8 @@ This option is useful for those who wish to take benefit of their own
 environment and scripts for launching sessions using batch, but still
 want the benefit of having the Job waiting for the execution to end,
 generates JUnit report, produce triage link, real time view of the
-run\'s progress, etc\']\
-[In this option, there is an assumption that a pre-step (usually from
+run\'s progress, etc\'.
+In this option, there is an assumption that a pre-step (usually from
 shell type) is taking over the session launch operation, and as such, in
 order for this plugin to continue monitor those sessions - the session
 names need to be exchange between the shell step and this
@@ -185,8 +182,8 @@ with the session or session names that were launched - new line for each
 session name.\
 The input file should be place into the working directory. In case this
 field is empty, The file name need to be:
-\${BUILD\_NUMBER}.\${BUILD\_ID}.sessions.input]\
-[Please fill this field only in case, you want to hard code the input
+\${BUILD\_NUMBER}.\${BUILD\_ID}.sessions.input\
+Please fill this field only in case, you want to hard code the input
 file name, to be consist across all
 builds.\
 \
@@ -549,6 +546,9 @@ the following format within the job working directory: 
 ![](./docs/images/report_conf.png "Jenkins > Cadence vManager Plugin > report_conf.png")
 
 ## Change Log
+##### Version 3.1.8 (March 16, 2023)
+-	Added the ability to use Jenkins Credential for username/password (not supported on pipeline yet). 
+        Added default selection for radio buttons to minimize configuration complexity.
 
 ##### Version 3.1.7 (Nov 2, 2022)
 -	Replace Apache HTTP deprecated usages with non-deprecated equivalents. 

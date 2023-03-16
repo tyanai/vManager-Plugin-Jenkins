@@ -1,5 +1,5 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:c="/lib/credentials">
   <!--
     This jelly script is used for per-project configuration.
 
@@ -24,10 +24,15 @@
  
     <f:optionalBlock name="authRequired"  title="Authentication Required" description="If checked, User/Password are required." checked="${instance.authRequired}" inline="true">
      
-   		
-        <f:entry title="Username" field="vAPIUser" description="Verisium Manager Username"><f:textbox default="vAPI"/></f:entry>
+   	<f:radioBlock name="credentialType" value="text" title="Plain Text" checked="${(instance.credentialType == null) ? 'true' : (instance.credentialType == 'text')}" inline="true">	
+            <f:entry title="Username" field="vAPIUser" description="Verisium Manager Username"><f:textbox default="vAPI"/></f:entry>
+            <f:entry title="Password" field="vAPIPassword" description="Verisium Manager password"><f:password /></f:entry>
+        </f:radioBlock> 
+        <f:radioBlock name="credentialType" value="credential" title="Credential Storage" checked="${instance.credentialType == 'credential'}" inline="true">	
+            <f:entry field="vAPICredentials" title="${%Credentials}"><c:select/></f:entry>
+        </f:radioBlock> 
         <f:entry title="Pick User ID dynamically " field="dynamicUserId" description="If checked, the user id will get picked from the workspace"><f:checkbox name="dynamicUserId" checked="${it.dynamicUserId}"/></f:entry>
-        <f:entry title="Password" field="vAPIPassword" description="Verisium Manager password"><f:password /></f:entry>
+
      	
       
     </f:optionalBlock>
@@ -50,7 +55,7 @@
   
    <f:validateButton
    title="${%Test Connection}" progress="${%Testing...}"
-   method="testConnection" with="vAPIUser,vAPIPassword,vAPIUrl,authRequired" />
+   method="testConnection" with="vAPIUser,vAPIPassword,vAPIUrl,authRequired,credentialType,vAPICredentials" />
   
   
   </f:block>
@@ -188,7 +193,7 @@
  <f:block>    
      <f:optionalBlock name="vMGRBuildArchive"  title="Delete Verisium Manager Session when build is removed" description="If selected, the plugin will call Verisium Manager to delete the session when a manual/automatically build deletion is triggered" checked="${instance.vMGRBuildArchive}" inline="true">
     	
-         <f:radioBlock name="famMode" value="false" title="Sync Delete Methodology (built-in)" checked="${instance.famMode == 'false'}" inline="true">
+         <f:radioBlock name="famMode" value="false" title="Sync Delete Methodology (built-in)" checked="${(instance.famMode == null) ? 'true' : (instance.famMode == 'false')}" inline="true">
            <f:entry title="Delete also session directory" field="deleteAlsoSessionDirectory" description="If checked, delete also the session directory on disk."><f:checkbox name="deleteAlsoSessionDirectory" checked="${it.deleteAlsoSessionDirectory}"/></f:entry>
            <f:optionalBlock name="genericCredentialForSessionDelete"  title="Dedicated user credentials for session delete operation" description="If supplied, the plugin will use these credentials for deleting the session.  Unless, it will use the same user/password that were used duting the build runtime." checked="${instance.genericCredentialForSessionDelete}" inline="true">
  		 

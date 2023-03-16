@@ -1,5 +1,5 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:c="/lib/credentials">
     
     
     <f:block>
@@ -16,14 +16,15 @@
                             <f:optionalBlock name="authRequired"  title="Authentication Required" description="If checked, User/Password are required." checked="${instance.authRequired}" inline="true">
      
    		
-                                <f:entry title="Username" field="vAPIUser" description="Verisium Manager Username">
-                                    <f:textbox default="vAPI"/>
-                                </f:entry>
+                                <f:radioBlock name="credentialType" value="text" title="Plain Text" checked="${(instance.credentialType == null) ? 'true' : (instance.credentialType == 'text')}" inline="true">
+                                    <f:entry title="Username" field="vAPIUser" description="Verisium Manager Username"><f:textbox default="vAPI"/></f:entry>
+                                    <f:entry title="Password" field="vAPIPassword" description="Verisium Manager password"><f:password /></f:entry>
+                                </f:radioBlock> 
+                                <f:radioBlock name="credentialType" value="credential" title="Credential Storage" checked="${instance.credentialType == 'credential'}" inline="true">	
+                                    <f:entry field="vAPICredentials" title="${%Credentials}"><c:select/></f:entry>
+                                </f:radioBlock>
                                 <f:entry title="Pick User ID dynamically " field="dynamicUserId" description="If checked, the user id will get picked from the workspace">
                                     <f:checkbox name="dynamicUserId" checked="${it.dynamicUserId}"/>
-                                </f:entry>
-                                <f:entry title="Password" field="vAPIPassword" description="Verisium Manager password">
-                                    <f:password />
                                 </f:entry>
      	
       
@@ -51,7 +52,7 @@
   
                     <f:validateButton
                         title="${%Test Connection}" progress="${%Testing...}"
-                        method="testConnection" with="vAPIUser,vAPIPassword,vAPIUrl,authRequired" />
+                        method="testConnection" with="vAPIUser,vAPIPassword,vAPIUrl,authRequired,credentialType,vAPICredentials" />
   
                 
             
@@ -62,7 +63,7 @@
                         <f:optionalBlock name="retrieveSummaryReport"  title="Job Summary Report" description="If selected, the build step will fetch into Jenkins the Verisium Manager summary report (sessions, runs, metrics, vPlan grades)" checked="${instance.retrieveSummaryReport}" inline="true">
                             <f:block>  
                                 
-                                <f:radioBlock name="summaryMode" value="full" title="Build, view and email by the plugin" checked="${instance.summaryMode == 'full'}" inline="true">
+                                <f:radioBlock name="summaryMode" value="full" title="Build, view and email by the plugin" checked="${(instance.summaryMode == null) ? 'true' : (instance.summaryMode == 'full')}" inline="true">
                                     <f:block>    
                                         
                             
@@ -71,7 +72,7 @@
                                                     <f:select />
                                                 </f:entry>
                                                 <f:entry title="Ignore SSL/TLS Errors " field="ignoreSSLError" description="If checked, the plugin will also accept self-signed SSL certificate"><f:checkbox name="ignoreSSLError" checked="${it.ignoreSSLError}"/></f:entry>
-                                                <f:radioBlock name="summaryType" value="wizard" title="Retrieve and Present Job Summary Report" checked="${instance.summaryType == 'wizard'}" inline="true">
+                                                <f:radioBlock name="summaryType" value="wizard" title="Retrieve and Present Job Summary Report" checked="${(instance.summaryType == null) ? 'true' : (instance.summaryType == 'wizard')}" inline="true">
                                                     <f:block>
                                                        
                                                             <f:optionalBlock name="runReport"  title="Include Runs tree grades " description="" checked="${instance.runReport}" inline="true">
@@ -92,8 +93,8 @@
                                                                         <f:entry title="Metrics view name (optional)" field="metricsViewName" description="View name that you made within Verisium Manager for selecting columns during Coverage (metrics) analysis (leave as 'All_Metrics' if not change is needed).">
                                                                             <f:textbox default="All_Metrics"/>
                                                                         </f:entry>
-                                
-                                                                        <f:radioBlock name="metricsInputType" value="basic" title="Basic settings" checked="${instance.metricsInputType == 'basic'}" inline="true">
+                                                                                                                                        
+                                                                        <f:radioBlock name="metricsInputType" value="basic" title="Basic settings" checked="${(instance.metricsInputType == null) ? 'true' : (instance.metricsInputType == 'basic')}" inline="true">
                                                                             <f:entry title="Depth" field="metricsDepth" description="Number of hierarchy levels the report will produce. Default is 6.">
                                                                                 <f:number default="6"/>
                                                                             </f:entry>
@@ -116,8 +117,8 @@
                                                                         </f:entry>
                                                                         <f:entry title="vPlan view name (optional)" field="vplanViewName" description="View name that you made within Verisium Manager for selecting columns during vPlan analysis (leave as 'All_Vplan' if not change is needed).">
                                                                             <f:textbox default="All_Vplan"/>
-                                                                        </f:entry>
-                                                                        <f:radioBlock name="vPlanInputType" value="basic" title="Basic settings" checked="${instance.vPlanInputType == 'basic'}" inline="true">
+                                                                        </f:entry>                                                          
+                                                                        <f:radioBlock name="vPlanInputType" value="basic" title="Basic settings" checked="${(instance.vPlanInputType == null) ? 'true' : (instance.vPlanInputType == 'basic')}" inline="true">
                                
                                                                             <f:entry title="Depth" field="vPlanDepth" description="Number of hierarchy levels the report will produce. Default is 6.">
                                                                                 <f:number default="6"/>
