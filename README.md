@@ -546,9 +546,14 @@ the following format within the job working directory: 
 ![](./docs/images/report_conf.png "Jenkins > Cadence vManager Plugin > report_conf.png")
 
 ## Change Log
+
+##### Version 3.1.9 (May 17, 2023)
+-	Added support to evaluate env variable expression within the Post-Build Plugin.
+-   Added support for 'vPlan in DB' as part of the summary report within the Post-Build Plugin.
+
 ##### Version 3.1.8 (March 16, 2023)
 -	Added the ability to use Jenkins Credential for username/password (not supported on pipeline yet). 
-        Added default selection for radio buttons to minimize configuration complexity.
+-   Added default selection for radio buttons to minimize configuration complexity.
 
 ##### Version 3.1.7 (Nov 2, 2022)
 -	Replace Apache HTTP deprecated usages with non-deprecated equivalents. 

@@ -112,7 +112,7 @@
                                                             <f:optionalBlock name="vPlanReport"  title="Include vPlan grades " description="" checked="${instance.vPlanReport}" inline="true">
                                                                 <f:block>
                                                                                                                  
-                                                                        <f:entry title="vPlanx file name" field="vPlanxFileName" description="vPlanx File location (Need full path and accees read rights by the Verisium Manager server)">
+                                                                        <f:entry title="vPlanx file name" field="vPlanxFileName" description="vPlanx File location (Need full path and accees read rights by the Verisium Manager server).  If you are using vPlan in DB, please add (DB) in Parenthesis (Example: a_name (DB))">
                                                                             <f:textbox/>
                                                                         </f:entry>
                                                                         <f:entry title="vPlan view name (optional)" field="vplanViewName" description="View name that you made within Verisium Manager for selecting columns during vPlan analysis (leave as 'All_Vplan' if not change is needed).">

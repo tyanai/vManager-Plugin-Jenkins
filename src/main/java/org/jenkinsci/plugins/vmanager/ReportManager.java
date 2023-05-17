@@ -58,6 +58,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
+import org.jenkinsci.plugins.tokenmacro.TokenMacro;
 import org.json.simple.JSONArray;
 
 import org.json.simple.JSONObject;
@@ -78,7 +79,7 @@ public class ReportManager {
     private TaskListener listener;
     private boolean testMode = false;
     private Utils utils;
-    private FilePath fp;
+   
 
     public ReportManager(Run<?, ?> build, SummaryReportParams summaryReportParams, VAPIConnectionParam vAPIConnectionParam, TaskListener listener,FilePath filePath) {
         this.build = build;
@@ -90,7 +91,7 @@ public class ReportManager {
         String workingDir = job.getBuildDir() + File.separator + build.getNumber();
         vmgrRun = new VMGRRun(build, workingDir, job.getBuildDir().getAbsolutePath());
         this.utils = new Utils(build,listener,filePath);
-        //this.fp = fp;
+        
 
     }
 
@@ -241,7 +242,15 @@ public class ReportManager {
                         metricsData = (JSONObject) jsonParser.parse(tmpDataHolder);
                         metricsData.replace("depth", summaryReportParams.metricsDepth);
                     } else {
-                        tmpDataHolder = summaryReportParams.metricsAdvanceInput.trim();
+                        try {
+                            FilePath filePath = build.getExecutor().getCurrentWorkspace();
+                            tmpDataHolder =TokenMacro.expandAll(build, filePath, listener, summaryReportParams.metricsAdvanceInput.trim());
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            listener.getLogger().println("Failed to extract out macro from the input of report metricsAdvanceInput: " + summaryReportParams.metricsAdvanceInput);
+                            tmpDataHolder = summaryReportParams.metricsAdvanceInput.trim();
+                        }
+                        
                         metricsData = (JSONObject) jsonParser.parse(tmpDataHolder);
                     }
                 } catch (Exception e) {
@@ -250,16 +259,26 @@ public class ReportManager {
                 }
                 postData = postData + ",\"metricsData\":[" + metricsData.toJSONString() + "]";
             }
-
+            
+            String parsedVPlanFileName = null;
             if (summaryReportParams.vPlanReport) {
                 String tmpDataHolder = null;
+                
                 try {
                     if (summaryReportParams.vPlanInputType.equals("basic")) {
                         tmpDataHolder = SummaryReportParams.vPlanData;
                         vplanData = (JSONObject) jsonParser.parse(tmpDataHolder);
                         vplanData.replace("depth", summaryReportParams.vPlanDepth);
                     } else {
-                        tmpDataHolder = summaryReportParams.vPlanAdvanceInput.trim();
+                        try {
+                            FilePath filePath = build.getExecutor().getCurrentWorkspace();
+                            tmpDataHolder =TokenMacro.expandAll(build, filePath, listener, summaryReportParams.vPlanAdvanceInput.trim());
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            listener.getLogger().println("Failed to extract out macro from the input of report vPlanAdvanceInput: " + summaryReportParams.vPlanAdvanceInput);
+                            tmpDataHolder = summaryReportParams.vPlanAdvanceInput.trim();
+                        }
+                        
                         vplanData = (JSONObject) jsonParser.parse(tmpDataHolder);
                     }
                 } catch (Exception e) {
@@ -269,7 +288,23 @@ public class ReportManager {
 
                 try {
                     ctxData = (JSONObject) jsonParser.parse(SummaryReportParams.ctxData);
-                    ctxData.put("vplanFile", summaryReportParams.vPlanxFileName.trim());
+                    
+                    //Check if this is a vPlan in DB
+                    if (summaryReportParams.vPlanxFileName.trim().indexOf("(DB)") > -1){
+                        ctxData.put("db-vplan", true);
+                        summaryReportParams.vPlanxFileName = summaryReportParams.vPlanxFileName.substring(0,summaryReportParams.vPlanxFileName.trim().indexOf("(DB)")).trim();
+                    }
+                    
+                    try {
+                        FilePath filePath = build.getExecutor().getCurrentWorkspace();
+                        parsedVPlanFileName =TokenMacro.expandAll(build, filePath, listener, summaryReportParams.vPlanxFileName.trim());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        listener.getLogger().println("Failed to extract out macro from the input of report vPlanxFileName: " + summaryReportParams.vPlanxFileName);
+                        parsedVPlanFileName = summaryReportParams.vPlanxFileName.trim();
+                    }
+                    
+                    ctxData.put("vplanFile", parsedVPlanFileName);
                 } catch (Exception e) {
                     listener.getLogger().println("ReportManager - fail to parse ctxData json input for vPlan name: " + summaryReportParams.vPlanxFileName);
                     throw e;
@@ -281,15 +316,29 @@ public class ReportManager {
             //See if there's anything additional that comes from ctxData optional input:
             if (summaryReportParams.ctxInput) {
                 try {
-                    ctxData = (JSONObject) jsonParser.parse(summaryReportParams.ctxAdvanceInput);
+                    String ctxDataStringForEvaluating = null;
+                    try {
+                        FilePath filePath = build.getExecutor().getCurrentWorkspace();
+                        ctxDataStringForEvaluating = TokenMacro.expandAll(build, filePath, listener, summaryReportParams.ctxAdvanceInput);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        listener.getLogger().println("Failed to extract out macro from the input of report ctxData: " + summaryReportParams.ctxAdvanceInput);
+                        ctxDataStringForEvaluating = summaryReportParams.ctxAdvanceInput;
+                    }
+                  
+                    ctxData = (JSONObject) jsonParser.parse(ctxDataStringForEvaluating);
+                    
+                    
                     if (summaryReportParams.vPlanReport) {
                         if (!summaryReportParams.vPlanxFileName.trim().equals("")) {
                             //There is a vPlan, check if there's also in the ctxData
                             if (!ctxData.containsKey("vplanFile")) {
-                                ctxData.put("vplanFile", summaryReportParams.vPlanxFileName.trim());
+                                ctxData.put("vplanFile", parsedVPlanFileName);
                             }
                         }
                     }
+                    
+                    
 
                 } catch (Exception e) {
                     listener.getLogger().println("ReportManager - fail to parse ctxData json input for vPlan name: " + summaryReportParams.vPlanxFileName);
