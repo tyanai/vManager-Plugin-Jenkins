@@ -547,7 +547,7 @@ the following format within the job working directory: 
 
 ## Change Log
 
-##### Version 3.1.9 (May 17, 2023)
+##### Version 3.2.0 (May 17, 2023)
 -	Added support to evaluate env variable expression within the Post-Build Plugin.
 -   Added support for 'vPlan in DB' as part of the summary report within the Post-Build Plugin.
 
