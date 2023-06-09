@@ -342,7 +342,11 @@ public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializa
 
         this.build = run;
         DSLBuildAction buildAction = new DSLBuildAction("NA", run);
-        run.addAction(buildAction);
+        List<DSLBuildAction> buildActionList = run.getActions(DSLBuildAction.class);
+        if (buildActionList.isEmpty()){
+            run.addAction(buildAction);
+        }
+        
 
         if (advancedFunctions) {
 
@@ -356,7 +360,10 @@ public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializa
             if (retrieveSummaryReport) {
 
                 ReportBuildAction reportAction = new ReportBuildAction(run, summaryReportParams, vAPIConnectionParam, tl, fp, launcher);
-                run.addAction(reportAction);
+                List<ReportBuildAction> reportActionList = run.getActions(ReportBuildAction.class);
+                if (reportActionList.isEmpty()){
+                    run.addAction(reportAction);
+                }
             }
         }
 

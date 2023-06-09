@@ -319,8 +319,8 @@ charting over your entire builds.  See below.
 
 **Launching session using pipeline syntax**
 
-The Verisium Manager Plugin (Launching New Session only) also support the
-Pipeline syntax:
+The Verisium Manager Plugin also support the Pipeline syntax 
+(you can generate the command below also using \"Pipeline Syntaxt\"):
 
 ![](./docs/images/pipeline.png "Jenkins > Cadence vManager Plugin > pipeline.png")
 
@@ -495,6 +495,13 @@ sections (tests, metrics, vplan) to include in the report, as well as
 other advanced parameters within each section.  Using this mode is the
 fastest way to try out the capability. 
 
+If you wish to generate the report alongside the regression while keep updating the results
+as the regression progress, you can use the pipeline \"parallel\" syntax while running the
+\"Post Plugin\" in parallel to the "Regression Plugin" in a loop as long as the regression 
+continues.  Make sure to run the \"Post Plugin\" only after the file session_status.properties
+is available in your workspace directory.  (See  [here](./docs/examples/ongoing_report.js) for an example) This site was built using here.
+
+
 **Retrieve and Present Job Summary Report (free vAPI syntax)**
 
 In case a finer granularity is needed for the summary report such that
@@ -546,6 +553,10 @@ the following format within the job working directory: 
 ![](./docs/images/report_conf.png "Jenkins > Cadence vManager Plugin > report_conf.png")
 
 ## Change Log
+
+##### Version 3.2.1 (June 9, 2023)
+-	Added support to call the Post-Build plugin multiple times within the same job without duplication
+	of the sidebar links.
 
 ##### Version 3.2.0 (May 17, 2023)
 -	Added support to evaluate env variable expression within the Post-Build Plugin.
