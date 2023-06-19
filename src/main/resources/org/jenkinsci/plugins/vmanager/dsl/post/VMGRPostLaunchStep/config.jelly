@@ -93,7 +93,7 @@
                                                                             <f:textbox default="All_Metrics"/>
                                                                         </f:entry>
                                 
-                                                                        <f:radioBlock name="metricsInputType" value="basic" title="Basic settings" checked="${instance.metricsInputType == 'basic'}" inline="true">
+                                                                        <f:radioBlock name="metricsInputType" value="basic" title="Basic settings" checked="${(instance.metricsInputType == null) ? 'true' : (instance.metricsInputType == 'basic')}" inline="true">
                                                                             <f:entry title="Depth" field="metricsDepth" description="Number of hierarchy levels the report will produce. Default is 6.">
                                                                                 <f:number default="6"/>
                                                                             </f:entry>
@@ -117,7 +117,7 @@
                                                                         <f:entry title="vPlan view name (optional)" field="vplanViewName" description="View name that you made within Verisium Manager for selecting columns during vPlan analysis (leave as 'All_Vplan' if not change is needed).">
                                                                             <f:textbox default="All_Vplan"/>
                                                                         </f:entry>
-                                                                        <f:radioBlock name="vPlanInputType" value="basic" title="Basic settings" checked="${instance.vPlanInputType == 'basic'}" inline="true">
+                                                                        <f:radioBlock name="vPlanInputType" value="basic" title="Basic settings" checked="${(instance.vPlanInputType == null) ? 'true' : (instance.vPlanInputType == 'basic')}" inline="true">
                                
                                                                             <f:entry title="Depth" field="vPlanDepth" description="Number of hierarchy levels the report will produce. Default is 6.">
                                                                                 <f:number default="6"/>
@@ -163,8 +163,8 @@
                                             <f:block>
                                                 <f:optionalBlock name="sendEmail"  title="Email the Regression Summary Report " description="" checked="${instance.sendEmail}" inline="true">
                                                     <f:block>
-                                                           
-                                                            <f:radioBlock name="emailType" value="static" title="Static list of email addresses" checked="${instance.emailType == 'static'}" inline="true">
+                                                                                                                                                 
+                                                            <f:radioBlock name="emailType" value="static" title="Static list of email addresses" checked="${(instance.emailType == null) ? 'true' : (instance.emailType == 'static')}" inline="true">
                                                                 <f:entry title="Email addresses" field="emailList" description="Comma separated list of emails.">
                                                                     <f:textarea/>
                                                                 </f:entry>

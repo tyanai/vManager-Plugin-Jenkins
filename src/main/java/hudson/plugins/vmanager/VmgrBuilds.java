@@ -155,6 +155,7 @@ public class VmgrBuilds extends DashboardPortlet {
 
     /**
      * for unit test
+     * @return 
      */
     protected List<Job> getDashboardJobs() {
         return getDashboard().getJobs();

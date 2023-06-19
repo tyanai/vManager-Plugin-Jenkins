@@ -62,6 +62,7 @@ public class VMGRAPI extends Builder {
 
 	/**
 	 * We'll use this from the <p>config.jelly</p>.
+         * @return 
 	 */
 	public String getVAPIUrl() {
 		return vAPIUrl;
@@ -243,6 +244,8 @@ public class VMGRAPI extends Builder {
 		 *         Note that returning {@link FormValidation#error(String)} does
 		 *         not prevent the form from being saved. It just means that a
 		 *         message will be displayed to the user.
+                 * @throws java.io.IOException
+                 * @throws javax.servlet.ServletException
 		 */
 		public FormValidation doCheckVAPIUrl(@QueryParameter String value) throws IOException, ServletException {
 			if (value.length() == 0)
