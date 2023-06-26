@@ -331,7 +331,11 @@ public class LaunchHolder {
 
                 JSONObject responseItems = JSONObject.fromObject(tmp.getString("items"));
                 JSONObject properties = JSONObject.fromObject(responseItems.getString("properties"));
-                List<String> extraItems = Arrays.asList(stepHolder.getjUnitRequestHolder().getStaticAttributeList().split("\\s*,\\s*"));
+                
+                List<String> extraItems = new ArrayList<String>();
+                if (stepHolder.getjUnitRequestHolder().getStaticAttributeList() != null){
+                    extraItems = Arrays.asList(stepHolder.getjUnitRequestHolder().getStaticAttributeList().split("\\s*,\\s*"));
+                }
                 Iterator<String> iterExtra = extraItems.iterator();
 
                 String attr = null;
