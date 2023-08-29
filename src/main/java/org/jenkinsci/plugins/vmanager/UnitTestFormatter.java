@@ -130,6 +130,14 @@ public class UnitTestFormatter {
 	}
 	
 	private String addExtraAttrValues(JSONObject tmpRun){
+                if (!jUnitRequestHolder.istExtraAttributesForFailures()){
+                    return "";
+                }
+                
+                if(jUnitRequestHolder.getStaticAttributeList() == null || "".equals(jUnitRequestHolder.getStaticAttributeList().trim())){
+                    return "";
+                }
+                
 		List<String> items = Arrays.asList(jUnitRequestHolder.getStaticAttributeList().split("\\s*,\\s*"));
 		
 		Iterator<String> iter = items.iterator();

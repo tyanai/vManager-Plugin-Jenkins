@@ -554,6 +554,9 @@ the following format within the job working directory: 
 
 ## Change Log
 
+##### Version 3.2.1.3 (Aug 29, 2023)
+-	Fixed NullPointer Exception while trying to generate the JUnit XML File (when no Extra Attributes are wanted)
+
 ##### Version 3.2.1 (June 9, 2023)
 -	Added support to call the Post-Build plugin multiple times within the same job without duplication
 	of the sidebar links.
