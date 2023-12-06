@@ -469,7 +469,16 @@ public class VMGRLaunch extends Builder {
 
         String workingJobDir = build.getRootDir().getAbsolutePath();
         listener.getLogger().println("Root dir is: " + workingJobDir);
-        listener.getLogger().println("The HOST for vAPI is: " + vAPIUrl);
+        
+        String macroVAPIUrl = vAPIUrl;
+        try {
+            macroVAPIUrl = TokenMacro.expandAll(build, listener, vAPIUrl);
+        } catch (Exception e) {
+            e.printStackTrace();
+            listener.getLogger().println("Failed to extract out macro from the input of vAPIUrl: " + vAPIUrl);
+        }
+        
+        listener.getLogger().println("The HOST for vAPI is: " + macroVAPIUrl);
         listener.getLogger().println("The user/password type for vAPI is: " + credentialType);
         String tempUser = vAPIUser;
         String tempPassword = vAPIPassword;
@@ -838,7 +847,7 @@ public class VMGRLaunch extends Builder {
 
             // Now call the actual launch
             // ----------------------------------------------------------------------------------------------------------------
-            String output = utils.executeVSIFLaunch(vsifFileNames, vAPIUrl, authRequired, tempUser, tempPassword, listener, dynamicUserId, build.getId(), build.getNumber(),
+            String output = utils.executeVSIFLaunch(vsifFileNames, macroVAPIUrl, authRequired, tempUser, tempPassword, listener, dynamicUserId, build.getId(), build.getNumber(),
                     "" + build.getWorkspace(), connTimeout, readTimeout, advConfig, jsonEnvInput, useUserOnFarm, userFarmType, farmUserPassword, stepHolder, envSourceInputFileFix, workingJobDir, vMGRBuildArchiver, userPrivateSSHKey, jsonAttrValuesInput, tmpExecutionType, sessionNames, envSourceInputFileType, launcher, jsonDefineInput);
             if (!"success".equals(output)) {
                 listener.getLogger().println("Failed to launch vsifs for build " + build.getId() + " " + build.getNumber() + "\n");

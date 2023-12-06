@@ -86,6 +86,15 @@ public class ReportManager {
         this.summaryReportParams = summaryReportParams;
         this.vAPIConnectionParam = vAPIConnectionParam;
         this.listener = listener;
+              
+        if (vAPIConnectionParam != null){
+            try {
+                this.vAPIConnectionParam.vAPIUrl = TokenMacro.expandAll(build,filePath, listener, vAPIConnectionParam.vAPIUrl);
+            } catch (Exception e) {
+                e.printStackTrace();
+                listener.getLogger().println("Failed to extract out macro from the input of vAPIUrl: " + vAPIConnectionParam.vAPIUrl);
+            }
+        }
 
         Job job = build.getParent();
         String workingDir = job.getBuildDir() + File.separator + build.getNumber();
