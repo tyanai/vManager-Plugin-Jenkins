@@ -554,6 +554,9 @@ the following format within the job working directory: 
 
 ## Change Log
 
+##### Version 3.2.1.5 (Jan 29, 2024)
+-	Increased max number of session per jon from 100 to 10000 
+
 ##### Version 3.2.1.4 (Dec 6, 2023)
 -	Added support in Token for the URL part
 
