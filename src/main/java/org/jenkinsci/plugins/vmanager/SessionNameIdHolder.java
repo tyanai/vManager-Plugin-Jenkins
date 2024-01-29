@@ -17,7 +17,7 @@ public class SessionNameIdHolder {
 	
 	
 	
-	private String postSessionData = "{\"filter\":{\"@c\":\".ChainedFilter\",\"condition\":\"OR\",\"chain\":[" + "######"  + "]},\"settings\":{\"write-hidden\":true,\"stream-mode\":false},\"projection\":{\"type\": \"SELECTION_ONLY\",\"selection\":[\"name\",\"id\"]}}";
+	private String postSessionData = "{\"filter\":{\"@c\":\".ChainedFilter\",\"condition\":\"OR\",\"chain\":[" + "######"  + "]},\"pageLength\":10000,\"settings\":{\"write-hidden\":true,\"stream-mode\":false},\"projection\":{\"type\": \"SELECTION_ONLY\",\"selection\":[\"name\",\"id\"]}}";
 
 	
 	
