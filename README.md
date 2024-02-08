@@ -554,6 +554,9 @@ the following format within the job working directory: 
 
 ## Change Log
 
+##### Version 3.2.1.6 (Feb 8, 2024)
+-	Fix - Exit criteria for a single session execution with state \"Failed\" didn\'t trigger when session ended
+
 ##### Version 3.2.1.5 (Jan 29, 2024)
 -	Increased max number of session per jon from 100 to 10000 
 

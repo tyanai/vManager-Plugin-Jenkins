@@ -203,10 +203,23 @@ public class LaunchHolder {
                                 if ("true".equals(lastKnownSessionCompletedState)){
                                     //This is already the second time. that means no auto re-run and the session don't have any run in running or waiting state - mark as done.
                                     sessionFinalState.put(tmpSessionId, "true");
+                                    //Special Treat in case the session state is "Failed" but runs kept running and session completes succesfully
+                                    if (("failed").equals(sessionState) && checkIfAllSessionsEnded(tmpSessionId, listener)){
+                                        buildResult = "(" + new Date().toString() + ") - All sessions got into a state in which the build step can continue.\n";
+                                        if (notInTestMode) {
+                                            listener.getLogger().print(buildResult);
+                                        } else {
+                                            System.out.println(buildResult);
+                                        }
+                                        buildResult = "success";
+                                        keepWaiting = false;
+                                        break;
+                                    }
                                 } else {
                                     //Mark for first try.  If re-run is started, the second try will invalidate it.
                                     sessionCompletedLastState.put(tmpSessionId, "true");
                                     sessionFinalState.put(tmpSessionId, "false");
+                                    
                                 }
                             } else {
                                 sessionCompletedLastState.put(tmpSessionId, "false");
@@ -238,6 +251,8 @@ public class LaunchHolder {
                                 keepWaiting = false;
                                 break;
                             }
+                            
+                           
 
                             if (toFail(sessionState, tmpSessionId,listener)) {
                                 // MARK_BUILD_FAIL
