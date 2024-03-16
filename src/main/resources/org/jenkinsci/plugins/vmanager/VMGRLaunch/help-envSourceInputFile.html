@@ -1,0 +1,12 @@
+<div>
+  <strong>Supported by Verisium Manager 17.10 and above only</strong></br>
+  In case of a need in adding environment variables per user for the regression time <strong>post</strong> vsif parsing stage, users can create a list of aliases and store them within a file. The job will 'source' that file prior of reading the vsif.</br>
+  Note that this can also serve for any pre stage execution, not just for aliases.
+  </br>
+  Relative path is also supported (aka ~/doSomething.sh).
+  </br>
+  Script must be in bash or csh.
+  </br></br>
+  The file should be place into a directory with a read permission for the user who launches the regression.</br> 
+  In case this field is empty, this field is ignored</br>
+</div>

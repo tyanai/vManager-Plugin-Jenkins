@@ -1,0 +1,33 @@
+<div>
+    In case of a need to take advantage of the full summary report flags, you can use a json structure to define the rest of the flags the vAPI supports.</br>
+    The following structure addresses the flags relevant for the vPlan part only (for more information, check the full vAPI electronic docs on the web):</br>
+    {</br>
+      "depth": 4,</br>
+      "perspective": "string",</br>
+      "multiPerspectives": [array - look for more information within the documentation]
+      "instances": true,</br>
+      "types": true,</br>
+      "extended": true,</br>
+      "path": "string",</br>
+      "vplanNode": "string"</br>
+    }</br></br>
+    
+    {
+      "depth": 20,
+      "perspective": "APB_UART",
+      "instances": true,
+      "types": true,
+      "extended": true
+    }
+     
+depth:	integer ($int32) (vPlan tree level depth. Default value is the whole tree)</br>
+perspective:	string (Perspective to report. if not specified the default plan perspective would be used)</br>
+multiPerspectives:	[...]</br>
+vplanNode:	string (Full Path to perspective/section/port in vPlan tree.)</br>
+path:           string (specify if to use vplanNode, instances or types for vPlan entity. If not specified the perspective is used)</br>
+instances:	boolean (Specify if vPlan entity is in the instances hierarchy)</br>
+types:          boolean (Specify if vPlan entity is in the types hierarchy)</br>
+extended:	boolean (Enables or disables extended vplan report. if not specified the report would be extended according to vplan configuration)</br></br>
+
+None of the fields are mandatory to exclude "depth".
+</div>

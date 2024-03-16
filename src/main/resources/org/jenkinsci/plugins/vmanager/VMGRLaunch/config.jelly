@@ -1,4 +1,5 @@
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:c="/lib/credentials">
   <!--
     This jelly script is used for per-project configuration.
 
@@ -11,38 +12,59 @@
   -->
   
   <f:block>
-  <table style="width: 100%">
+  
   
   
   <f:block>
-  <table style="width: 95% ; border: 1px solid black">
-  <f:entry title="vAPI HOST" field="vAPIUrl" description="vManager vAPI HTTP HOST"><f:textbox /></f:entry>
-  <f:entry title="vAPI PORT" field="vAPIPort" description="vManager vAPI HTTP PORT"><f:textbox /></f:entry>
+  
+  <f:entry title="Verisium Manager Server API Url" field="vAPIUrl" description="Verisium Manager Server API Url"><f:textbox /></f:entry>
   
     <f:block>
-      <table>
+     
  
     <f:optionalBlock name="authRequired"  title="Authentication Required" description="If checked, User/Password are required." checked="${instance.authRequired}" inline="true">
      
-   		
-        <f:entry title="vAPI User" field="vAPIUser" description="vManager vAPI User"><f:textbox default="vAPI"/></f:entry>
+   	<f:radioBlock name="credentialType" value="text" title="Plain Text" checked="${(instance.credentialType == null) ? 'true' : (instance.credentialType == 'text')}" inline="true">	
+            <f:entry title="Username" field="vAPIUser" description="Verisium Manager Username"><f:textbox default="vAPI"/></f:entry>
+            <f:entry title="Password" field="vAPIPassword" description="Verisium Manager password"><f:password /></f:entry>
+        </f:radioBlock> 
+        <f:radioBlock name="credentialType" value="credential" title="Credential Storage" checked="${instance.credentialType == 'credential'}" inline="true">	
+            <f:entry field="vAPICredentials" title="${%Credentials}"><c:select/></f:entry>
+        </f:radioBlock> 
         <f:entry title="Pick User ID dynamically " field="dynamicUserId" description="If checked, the user id will get picked from the workspace"><f:checkbox name="dynamicUserId" checked="${it.dynamicUserId}"/></f:entry>
-        <f:entry title="vAPI Secret Key" field="vAPIPassword" description="vManager vAPI Secret Key"><f:password /></f:entry>
+
      	
       
     </f:optionalBlock>
-     </table>
+     
+      </f:block>
+      
+      <f:block>
+      
+ 
+    <f:optionalBlock name="advConfig"  title="Override Default Configuration" description="" checked="${instance.advConfig}" inline="true">
+     
+   		
+        <f:entry title="Connection Timeout" field="connTimeout" description="Connection timeout in minutes (0 for unlimited)"><f:number default="1"/></f:entry>
+        <f:entry title="Read Timeout" field="readTimeout" description="Read timeout in minutes (0 for unlimited)"><f:number  default="30"/></f:entry>
+     	
+      
+    </f:optionalBlock>
+    
       </f:block>
   
    <f:validateButton
    title="${%Test Connection}" progress="${%Testing...}"
-   method="testConnection" with="vAPIUser,vAPIPassword,vAPIUrl,vAPIPort,authRequired" />
+   method="testConnection" with="vAPIUser,vAPIPassword,vAPIUrl,authRequired,credentialType,vAPICredentials" />
   
-  </table>
+  
   </f:block>
-  
+  <f:entry title="Pause the Verisium Manager session's execution if build is interrupted." field="pauseSessionOnBuildInterruption" description="If checked, in case build is interrupted (aborted), the job will also try to pause the session on Verisium Manager."><f:checkbox name="pauseSessionOnBuildInterruption" checked="${it.pauseSessionOnBuildInterruption}"/></f:entry>
+  <f:radioBlock name="executionType" value="launcher" title="Use session launcher" checked="${instance.executionType == 'launcher'}" inline="true">
   <f:block>
-  <table style="width: 95% ; border: 1px solid black">
+  
+  
+  
   <f:radioBlock name="vsifType" value="static" title="Static VSIF file name" checked="${instance.vsifType == 'static'}" inline="true">
           <f:entry title="VSIF file location" field="vSIFName" description="Default VSIF file location with VSIF file name."><f:textbox /></f:entry>
   </f:radioBlock>
@@ -54,19 +76,143 @@
           <f:entry title="Delete Input File" field="deleteInputFile" description="If checked, the job will delete the VSIF file name after processing it."><f:checkbox name="deleteInputFile" checked="${it.deleteInputFile}"/></f:entry>
    
   </f:radioBlock>
-   </table>
-  </f:block>
   
   
+   <f:optionalBlock name="envVarible"  title="Include VSIF Environment Variables" description="" checked="${instance.envVarible}" inline="true">
+        <f:radioBlock name="envVariableType" value="file" title="File input" checked="${instance.envVariableType == 'file'}" inline="true">
+            <f:entry title="Name of input file" field="envVaribleFile" description="Name of input file with environment variables in json format (not mandatory) - Verisium Manager 15.1 and above only"><f:textbox /></f:entry>
+         </f:radioBlock> 
+        <f:radioBlock name="envVariableType" value="textarea" title="Environment Variables Text Area" checked="${instance.envVariableType == 'textarea'}" inline="true">
+            <f:block>
+                
+                    <f:entry title="Environment Variables" field="envVariableText" description="list of relevant environment variables in json keys format.">
+                        <f:textarea/>
+                    </f:entry>
+               
+            </f:block>
+       </f:radioBlock>  
+    </f:optionalBlock>
+    <f:optionalBlock name="attrValues"  title="Include VSIF Attribute Values" description="" checked="${instance.attrValues}" inline="true">
+     	<f:radioBlock name="attrVariableType" value="file" title="File input" checked="${instance.attrVariableType == 'file'}" inline="true">
+            <f:entry title="Name of input file" field="attrValuesFile" description="Name of input file with attribute values in json format (not mandatory) - Verisium Manager 17.1 and above only"><f:textbox /></f:entry>
+        </f:radioBlock>
+        <f:radioBlock name="attrVariableType" value="textarea" title="Attribute Values Text Area" checked="${instance.attrVariableType == 'textarea'}" inline="true"> 
+           <f:block>
+                 
+                    <f:entry title="Attribute Values" field="attrVariableText" description="list of relevant attribute values.">
+                        <f:textarea/>
+                    </f:entry>
+                
+            </f:block>
+        </f:radioBlock>
+    </f:optionalBlock>
+     <f:optionalBlock name="defineVarible"  title="Include Define Environment Variables" description="" checked="${instance.defineVarible}" inline="true">
+        <f:radioBlock name="defineVariableType" value="file" title="File input" checked="${instance.defineVariableType == 'file'}" inline="true">
+            <f:entry title="Name of input file" field="defineVaribleFile" description="Name of input file with define strings (not mandatory)"><f:textbox /></f:entry>
+         </f:radioBlock> 
+        <f:radioBlock name="defineVariableType" value="textarea" title="Define Variables Text Area" checked="${instance.defineVariableType == 'textarea'}" inline="true">
+            <f:block>
+                
+                    <f:entry title="Define Variables" field="defineVariableText" description="list of relevant define variables.">
+                        <f:textarea/>
+                    </f:entry>
+               
+            </f:block>
+       </f:radioBlock>  
+    </f:optionalBlock>
+    
+    
+    <f:optionalBlock name="useUserOnFarm"  title="Use user's linux account privileges for this execution (16.1 and above only)" description="If selected, the session's artifacts will have the user's permissions" checked="${instance.useUserOnFarm}" inline="true">
+         <f:entry title="Use user's SSH private key" field="userPrivateSSHKey" description="If checked, the Verisium Manager will use the stored SSH key of the user for the execution of the regression."><f:checkbox name="userPrivateSSHKey" checked="${it.userPrivateSSHKey}"/></f:entry>
+    	 <f:radioBlock name="userFarmType" value="static" title="Use same credentials as for Verisium Manager login" checked="${instance.userFarmType == 'static'}" inline="true">
+ 	 </f:radioBlock>
+  	<f:radioBlock name="userFarmType" value="dynamic" title="Dynamic credentials" checked="${instance.userFarmType == 'dynamic'}" inline="true">
+         	<f:entry title="Name of credential file" field="credentialInputFile" description="Name of input file with credential values (not mandatory)"><f:textbox /></f:entry>
+          	<f:entry title="Delete Credential File" field="deleteCredentialInputFile" description="If checked, the job will delete the credential file name after processing it."><f:checkbox name="deleteCredentialInputFile" checked="${it.deleteCredentialInputFile}"/></f:entry>
+        </f:radioBlock>
+        <f:entry title="User Pre Exceution File" field="envSourceInputFile" description="Path to user env params declaration for sourcing prior to execution (not mandatory) - Verisium Manager 17.10 and above only"><f:textbox /></f:entry>
+        <f:entry title="User Pre Exceution File Type" field="envSourceInputFileType" ><f:select /></f:entry>
+     </f:optionalBlock>
+ 
+ 
+ </f:block>  
+ </f:radioBlock>  
+ 
+ <f:radioBlock name="executionType" value="batch" title="Continue from a pre-launched session / Collect mode" checked="${instance.executionType == 'batch'}" inline="true">
+  <f:block>
   
-   
-   
-   
-   
-   
   
+          <f:entry title="Name of input file" field="sessionsInputFile" description="Name of input file with one or more session names (mandatory)"><f:textbox /></f:entry>
+          <f:entry title="Delete Input File" field="deleteSessionInputFile" description="If checked, the job will delete the input file after processing it."><f:checkbox name="deleteSessionInputFile" checked="${it.deleteSessionInputFile}"/></f:entry>
+  
+ 
+  </f:block>  
+ </f:radioBlock>  
+
+<f:radioBlock name="executionType" value="hybrid" title="Launch using Batch and vAPI" checked="${instance.executionType == 'hybrid'}" inline="true">
+  <f:block>
+  
+  
+          <f:entry title="Full path for the batch script location" field="executionScript" description="Name of script file that gets vsif name as an input. Example: /home/tyanai/run.sh (mandatory)"><f:textbox /></f:entry>
+          <f:entry title="Full path for the shell type" field="executionShellLocation" description="Location of the script shell type. Example: /bin/sch (mandatory)"><f:textbox /></f:entry>
+          <f:entry title="Full path for vsif location" field="executionVsifFile" description="Full path for the vsif input file: /home/tyanai/vsif/test.vsif (mandatory)"><f:textbox /></f:entry>   
+ 
+ 
+  </f:block>  
+ </f:radioBlock>  
+ 
+ <f:block> 
+ <f:optionalBlock name="waitTillSessionEnds"  title="Wait for launched sessions to end" description="If selected, the build step will not finish until all sessions launched by this build ended" checked="${instance.waitTillSessionEnds}" inline="true">
+ 
+     
+    	<f:entry title="Sessions Timeout" field="stepSessionTimeout" description="Timeout in minutes (0 for unlimited), after which the build step will mark this build as a failure"><f:number default="30"/></f:entry>
+  		<f:entry title="In case session status was changed to 'inaccessible'" field="inaccessibleResolver" ><f:select /></f:entry>
+  		<f:entry title="In case session status was changed to 'stopped'" field="stoppedResolver" ><f:select /></f:entry>
+  		<f:entry title="In case session status was changed to 'failed'" field="failedResolver" ><f:select /></f:entry>
+  		<f:entry title="In case session status was changed to 'done'" field="doneResolver" ><f:select /></f:entry>
+  		<f:entry title="In case session status was changed to 'suspended'" field="suspendedResolver" ><f:select /></f:entry>
+  		<f:entry title="Show regression as failed if all runs failed" field="markBuildAsFailedIfAllRunFailed" description="If checked, the Dashboard will show the session status as Failed, instead of completed."><f:checkbox name="markBuildAsFailedIfAllRunFailed" checked="${it.markBuildAsFailedIfAllRunFailed}"/></f:entry>
+                <f:entry title="Fail the job if all runs failed" field="failJobIfAllRunFailed" description="If checked, the Jenkins job will fail and stop its execution."><f:checkbox name="failJobIfAllRunFailed" checked="${it.failJobIfAllRunFailed}"/></f:entry>
+  		<f:entry title="Show regression as passed only if all runs passed" field="markBuildAsPassedIfAllRunPassed" description="If checked, the Dashboard will show the session status as Failed, instead of completed, when not all runs passed."><f:checkbox name="markBuildAsPassedIfAllRunPassed" checked="${it.markBuildAsPassedIfAllRunPassed}"/></f:entry>
+                <f:entry title="Fail the job unless all runs passed" field="failJobUnlessAllRunPassed" description="If checked, the Jenkins job will fail and stop its execution, unless all runs passed."><f:checkbox name="failJobUnlessAllRunPassed" checked="${it.failJobUnlessAllRunPassed}"/></f:entry>
+
+  		
+  		
+  		<f:optionalBlock name="generateJUnitXML"  title="Generate JUnit Test Result" description="If selected, the job will create an XML file with the session's run result in the format of JUnit Report." checked="${instance.generateJUnitXML}" inline="true">
+ 		 <f:entry title="Do not append seed to test name " field="noAppendSeed" description="If checked, the junit report will only contain the test name, without appending the seed that was used."><f:checkbox name="noAppendSeed" checked="${it.noAppendSeed}"/></f:entry>
+                 <f:optionalBlock name="extraAttributesForFailures"  title="Add extra attributes for failure stack" description="If selected, the job will add extra attributes for failure stack." checked="${instance.extraAttributesForFailures}" inline="true">
+ 		 
+           <f:entry title="Attribute List (attribute codes must be used)" field="staticAttributeList" description="Static extra attributes for failure stack, separated by comma"><f:textbox /></f:entry>
+           <f:validateButton title="${%Test Attributes Validity}" progress="${%Testing Attribute Codes Validity...}" method="testExtraStaticAttr" with="vAPIUser,vAPIPassword,vAPIUrl,authRequired,staticAttributeList" />
+  		 
+ 		 </f:optionalBlock>
+		</f:optionalBlock>
+
+</f:optionalBlock>
+</f:block> 
+ <f:block>    
+     <f:optionalBlock name="vMGRBuildArchive"  title="Delete Verisium Manager Session when build is removed" description="If selected, the plugin will call Verisium Manager to delete the session when a manual/automatically build deletion is triggered" checked="${instance.vMGRBuildArchive}" inline="true">
+    	
+         <f:radioBlock name="famMode" value="false" title="Sync Delete Methodology (built-in)" checked="${(instance.famMode == null) ? 'true' : (instance.famMode == 'false')}" inline="true">
+           <f:entry title="Delete also session directory" field="deleteAlsoSessionDirectory" description="If checked, delete also the session directory on disk."><f:checkbox name="deleteAlsoSessionDirectory" checked="${it.deleteAlsoSessionDirectory}"/></f:entry>
+           <f:optionalBlock name="genericCredentialForSessionDelete"  title="Dedicated user credentials for session delete operation" description="If supplied, the plugin will use these credentials for deleting the session.  Unless, it will use the same user/password that were used duting the build runtime." checked="${instance.genericCredentialForSessionDelete}" inline="true">
+ 		 
+                <f:entry title="Username" field="archiveUser" description="Verisium Manager username to be used during session deletion"><f:textbox /></f:entry>
+                <f:entry title="Password" field="archivePassword" description="Verisium Manager password to be used during session deletion"><f:password /></f:entry>
+                <f:validateButton title="${%Testing User credentials}" progress="${%Testing User credentials...}" method="testArchiveUser" with="archiveUser,archivePassword,vAPIUrl" />
+  		 
+           </f:optionalBlock>
+	</f:radioBlock>	
+        <f:radioBlock name="famMode" value="true" title="Async Delete Methodology (externally)" checked="${instance.famMode == 'true'}" inline="true">
+            <f:entry title="External path location" field="famModeLocation" description="location where sdi files will get copied to "><f:textbox /></f:entry>
+        </f:radioBlock>
+     	
+     </f:optionalBlock>
+ </f:block>   
+    
+    
    
-   </table>
+
    </f:block>
 
 </j:jelly>

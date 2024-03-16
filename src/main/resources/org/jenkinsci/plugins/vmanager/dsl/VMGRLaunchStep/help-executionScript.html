@@ -1,0 +1,21 @@
+<div>
+  <strong>Start your session from shell using batch, and continue monitoring from vAPI</strong></br>
+  In case you need to launch your session using batch first, please create a wrapper script that gets as an input the vSIF full path.</br>
+  The plugin will execute your script on the selective agent (Jenkins) and will extract the session name out of it.</br>
+  The plugin will then use that session_name to keep monitor your execution.</br></br>
+  Example for such script file can be:</br>
+  ---------------------------</br>
+  #!/bin/csh</br></br>
+  source ~/.cshrc</br></br>
+  setenv VMGR_REGION default</br>
+  setenv VMGR_REGION_ROUTE_POLICY LOCAL</br>
+  setenv VMGR_USER some_user_id</br>
+  setenv VMGR_PASSWORD XXXXXX</br></br>
+
+  vmanager -execcmd "launch $1"</br>
+  ---------------------------</br></br>
+  Please also make sure that</br>
+  1) The path to the script is a full path.  No shortcuts or relative paths are allowed.</br>
+  2) The shell type (bash, csh, sh) is supplied with full path as well.</br>
+  3) This mode can only be used with an Agent that runs on Linux.</br>  
+</div>

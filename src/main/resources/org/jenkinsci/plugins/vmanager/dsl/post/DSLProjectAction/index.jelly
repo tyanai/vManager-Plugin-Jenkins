@@ -1,0 +1,53 @@
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler"
+         xmlns:l="/lib/layout" xmlns:t="/lib/hudson">
+    <j:set var="iconSize" value="16x16" />
+    <l:layout>
+        <st:include it="${it.project}" page="sidepanel.jelly" optional="true"/>
+        <l:main-panel>
+            <h2><img src="/plugin/vmanager-plugin/img/project_icon.png" style="width: 32px; height: 32px; margin-right: 10px;"/>${it.DisplayName}</h2>
+            <h4>Project: ${it.ProjectName} (showing last 15 builds)</h4>
+            <j:set var="vmgrBuilds" value="${it.getFinishedVMGRBuilds()}"/>
+            <table id="statistics" class="sortable pane bigtable" style="margin-top: 0px;">
+                <tr style="border-top: 0px;">
+                    <th align="left">Build</th>
+                    <th align="left">Time</th>
+                    <th align="left">Owner</th>
+                    <th align="left">Status</th>
+                    <th align="left">Web</th>
+                    <th align="left">Name</th>
+                    <th align="left">#Runs</th>
+                    <th align="left">#Passed</th>
+                    <th align="left">#Failed</th>
+                    <th align="left">#Running</th>
+                    <th align="left">#Waiting</th>
+                    <th align="left">#Other</th>
+                    <th align="left">#Sessions</th>
+                </tr>
+            <j:forEach var="build" items="${vmgrBuilds}">
+                    <!--p>${projectMessage}</p-->
+                    <tr>
+                        
+                        <td style="border: 1px #bbb solid;" data="${it.getBuildColumnSortData(build)}">
+                            <a href="${h.getRelativeLinkTo(build.getRun().parent)}/${build.getRun().number}" >
+                                <img src="${imagesURL}/16x16/${build.getRun().buildStatusUrl}" alt="${build.getRun().iconColor.description}" title="${build.getRun().iconColor.description}" />${build.getRun().displayName}
+                            </a>
+                        </td>
+                        <td style="border: 1px #bbb solid;" data="${it.getTimestampString(build)}">${it.getTimestampString(build)}</td>
+                        <td style="border: 1px #bbb solid;" data="${it.getBuildOwner(build)}">${it.getBuildOwner(build)}</td>
+                        <td style="border: 1px #bbb solid;" data="${it.getSessionStatus(build)}">${it.getSessionStatus(build)}</td>
+                        <td style="border: 1px #bbb solid;" data="${it.getSessionTriage(build)}"><a target="_blank" href="${it.getSessionTriage(build)}" tooltip="A Link to Verisium Manager Web Regression">Link</a></td>		
+                        <td style="border: 1px #bbb solid;" data="${it.getSessionName(build)}">${it.getSessionName(build)}</td>
+                        <td style="border: 1px #bbb solid;" data="${it.getTotalRuns(build)}">${it.getTotalRuns(build)}</td>
+                        <td style="border: 1px #bbb solid;" data="${it.getPassedRuns(build)}">${it.getPassedRuns(build)}</td>
+                        <td style="border: 1px #bbb solid;" data="${it.getFailedRuns(build)}">${it.getFailedRuns(build)}</td>
+                        <td style="border: 1px #bbb solid;" data="${it.getRunningRuns(build)}">${it.getRunningRuns(build)}</td>
+                        <td style="border: 1px #bbb solid;" data="${it.getWaitingRuns(build)}">${it.getWaitingRuns(build)}</td>
+                        <td style="border: 1px #bbb solid;" data="${it.getOtherRuns(build)}">${it.getOtherRuns(build)}</td>
+                        <td style="border: 1px #bbb solid;" data="${it.getTotalSessions(build)}">${it.getTotalSessions(build)}</td>
+                    </tr>
+            </j:forEach>
+            </table>
+        </l:main-panel>
+    </l:layout>
+</j:jelly>
