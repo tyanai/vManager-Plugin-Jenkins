@@ -61,6 +61,7 @@ public class VmgrBuilds extends DashboardPortlet {
         String sessionId = BuildStatusMap.getValue(run.getRun().getId(), run.getRun().getNumber(), run.getJobWorkingDir() + "", "id", false);
         if (sessionId != null) {
             if (sessionId.indexOf(",") > -1) {
+                
                 sessionId = sessionId.substring(0, sessionId.indexOf(","));
             }
         }
