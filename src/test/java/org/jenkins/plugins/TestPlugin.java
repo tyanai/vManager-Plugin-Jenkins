@@ -1,13 +1,7 @@
 package org.jenkins.plugins;
 
-import hudson.plugins.vmanager.BuildStatusMap;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import org.jenkinsci.plugins.vmanager.JUnitRequestHolder;
 import org.jenkinsci.plugins.vmanager.ReportManager;
 import org.jenkinsci.plugins.vmanager.Utils;
-import org.jenkinsci.plugins.vmanager.StepHolder;
 import org.jenkinsci.plugins.vmanager.SummaryReportParams;
 import org.jenkinsci.plugins.vmanager.VAPIConnectionParam;
 

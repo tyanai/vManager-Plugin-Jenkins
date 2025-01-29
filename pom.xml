@@ -4,7 +4,8 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-    <version>3.8</version>
+    <version>4.51</version>
+    <relativePath />
   </parent>
 
   <artifactId>vmanager-plugin</artifactId>
@@ -20,9 +21,10 @@
   </licenses>
   
   <properties>
-    <findbugs.failOnError>false</findbugs.failOnError> <!-- TODO fix -->
-    <java.level>8</java.level>
-    <jenkins.version>2.68</jenkins.version>
+    <findbugs.failOnError>false</findbugs.failOnError>
+    <!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
+    <jenkins.baseline>2.346</jenkins.baseline>
+    <jenkins.version>${jenkins.baseline}.3</jenkins.version>
   </properties>
   
   <developers>
@@ -34,11 +36,22 @@
   </developers>
   
   <scm>
-    <connection>scm:git:git://github.com/jenkinsci/vmanager-plugin.git</connection>
+    <connection>scm:git:https://github.com/jenkinsci/vmanager-plugin.git</connection>
     <developerConnection>scm:git:git@github.com:jenkinsci/vmanager-plugin.git</developerConnection>
     <url>http://github.com/jenkinsci/vmanager-plugin</url>
     <tag>vmanager-plugin-3.1.9</tag>
   </scm>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>io.jenkins.tools.bom</groupId>
+        <artifactId>bom-${jenkins.baseline}.x</artifactId>
+        <version>1763.v092b_8980a_f5e</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
   
   <!-- get every artifact through repo.jenkins-ci.org, which proxies all the artifacts that we need -->
   <repositories>
@@ -59,7 +72,6 @@
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>dashboard-view</artifactId>
-      <version>2.10</version>
       <exclusions>
         <exclusion>
           <groupId>org.jenkins-ci.main</groupId>
@@ -70,20 +82,17 @@
     <dependency>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>credentials</artifactId>
-        <version>2.1.10</version>
     </dependency>
 
 
     <dependency>
       <groupId>org.jenkins-ci.plugins</groupId>
       <artifactId>token-macro</artifactId>
-      <version>2.3</version>
     </dependency>
     <!-- dependencies on Jenkins Pipeline plugins -->
     <dependency>
 	<groupId>org.jenkins-ci.plugins.workflow</groupId>
 	<artifactId>workflow-step-api</artifactId>
-	<version>2.14</version>
     </dependency>
     <dependency>
         <groupId>com.googlecode.json-simple</groupId>
@@ -93,7 +102,6 @@
 	<dependency>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>apache-httpcomponents-client-4-api</artifactId>
-        <version>4.5.10-1.0</version>
     </dependency>
   </dependencies>
  

@@ -24,18 +24,8 @@
 package org.jenkinsci.plugins.vmanager;
 
 import hudson.FilePath;
-import hudson.Launcher;
-import hudson.Launcher.ProcStarter;
-import hudson.Proc;
 import hudson.model.TaskListener;
-import hudson.remoting.VirtualChannel;
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import jenkins.MasterToSlaveFileCallable;
-import org.apache.commons.lang.exception.ExceptionUtils;
 
 /**
  *
