@@ -4,11 +4,7 @@
   <parent>
     <groupId>org.jenkins-ci.plugins</groupId>
     <artifactId>plugin</artifactId>
-<<<<<<< Updated upstream
-    <version>4.51</version>
-=======
     <version>4.88</version>
->>>>>>> Stashed changes
     <relativePath />
   </parent>
 
@@ -27,11 +23,7 @@
   <properties>
     <findbugs.failOnError>false</findbugs.failOnError>
     <!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
-<<<<<<< Updated upstream
-    <jenkins.baseline>2.346</jenkins.baseline>
-=======
     <jenkins.baseline>2.462</jenkins.baseline>
->>>>>>> Stashed changes
     <jenkins.version>${jenkins.baseline}.3</jenkins.version>
   </properties>
   
@@ -54,9 +46,6 @@
       <dependency>
         <groupId>io.jenkins.tools.bom</groupId>
         <artifactId>bom-${jenkins.baseline}.x</artifactId>
-<<<<<<< Updated upstream
-        <version>1763.v092b_8980a_f5e</version>
-=======
         <version>4023.va_eeb_b_4e45f07</version>
         <type>pom</type>
         <scope>import</scope>
@@ -65,7 +54,6 @@
         <groupId>io.jenkins.tools.bom</groupId>
         <artifactId>bom-weekly</artifactId>
         <version>4023.va_eeb_b_4e45f07</version>
->>>>>>> Stashed changes
         <type>pom</type>
         <scope>import</scope>
       </dependency>
