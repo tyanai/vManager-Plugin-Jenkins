@@ -19,6 +19,8 @@ import org.jenkinsci.plugins.vmanager.VMGRRun;
 
 public class DSLBuildAction extends PostActionBase implements Serializable, RunAction2,  SimpleBuildStep.LastBuildAction  {
 
+    private static final long serialVersionUID = 2000009076155338045L;
+    
     private String message;
     private transient Run<?, ?> build;
     private final List projectActions;

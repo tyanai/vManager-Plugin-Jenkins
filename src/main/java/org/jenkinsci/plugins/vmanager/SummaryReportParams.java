@@ -23,11 +23,13 @@
  */
 package org.jenkinsci.plugins.vmanager;
 
+import java.io.Serializable;
+
 /**
  *
  * @author tyanai
  */
-public class SummaryReportParams {
+public class SummaryReportParams  implements Serializable{
     
     public boolean runReport;
     public boolean metricsReport;
@@ -62,7 +64,7 @@ public class SummaryReportParams {
     
     public final static String  staticReportParams = "$jenkins_mode\"override\":true,\"sessionsViewName\":\"All_Sessions\",\"linkOutput\":$link_output,\"title\":\"Summary report\",\"includeSessions\":true,\"includeAll\":false$test_view_name$metrics_view_name$vplan_view_name$test_depth";
     public boolean includeTests = true;
-    public static String metricsData = "{\"scope\":\"default\",\"extended\":false,\"instances\":true,\"types\":true,\"depth\":6}";
-    public static String vPlanData = "{\"extended\":true,\"instances\":true,\"types\":true,\"depth\":6}";
-    public static String ctxData = "{}";
+    public final static String metricsData = "{\"scope\":\"default\",\"extended\":false,\"instances\":true,\"types\":true,\"depth\":6}";
+    public final static String vPlanData = "{\"extended\":true,\"instances\":true,\"types\":true,\"depth\":6}";
+    public final static String ctxData = "{}";
 }

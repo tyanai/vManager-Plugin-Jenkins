@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -77,7 +78,7 @@ public class LaunchHolder {
         HttpURLConnection conn = null;
         long startTime = new Date().getTime();
         long startTimeForDebugInfo = new Date().getTime();
-        long timeToWaitOverall = stepHolder.getStepSessionTimeout() * 60 * 1000;
+        long timeToWaitOverall = ((long)stepHolder.getStepSessionTimeout()) * 60 * 1000;
         long timeBetweenPrintStatus = 30 * 60 * 1000;
         boolean debugPrint = true;
         String buildResult = null;
@@ -95,7 +96,7 @@ public class LaunchHolder {
         // Init the SessionStatusHolder - it will be saving the aggregated
         // sessions info every check in the file system
         SessionStatusHolder sessionStatusHolder = new SessionStatusHolder(url, requireAuth, user, password, listener, dynamicUserId, buildNumber, workPlacePath, buildID, connConnTimeOut,
-                connReadTimeout, advConfig, notInTestMode, listOfSessions, stepHolder.isMarkBuildAsFailedIfAllRunFailed(), stepHolder.isFailJobIfAllRunFailed(), workingJobDir, stepHolder.isMarkBuildAsPassedIfAllRunPassed(), stepHolder.isFailJobUnlessAllRunPassed());
+                connReadTimeout, advConfig, listOfSessions, stepHolder.isMarkBuildAsFailedIfAllRunFailed(), stepHolder.isFailJobIfAllRunFailed(), workingJobDir, stepHolder.isMarkBuildAsPassedIfAllRunPassed(), stepHolder.isFailJobUnlessAllRunPassed());
 
         //While we iterate over session status, we can use it to grab the real session name for later usages
         Map<String, String> sessionIdName = new HashMap<String, String>();
@@ -140,6 +141,7 @@ public class LaunchHolder {
                 break;
             }
 
+            
             try {
 
                 // Check if to print information
@@ -160,17 +162,17 @@ public class LaunchHolder {
                 while (sessionIter.hasNext()) {
                     tmpSessionId = sessionIter.next();
                     tmpPostData = postData1 + tmpSessionId + postData2;
-
+                    BufferedReader br = null;
                     try {
                         conn = utils.getVAPIConnection(apiURL, requireAuth, user, password, requestMethod, dynamicUserId, buildID, buildNumber, workPlacePath, listener, connConnTimeOut,
                                 connReadTimeout, advConfig);
 
                         OutputStream os = conn.getOutputStream();
-                        os.write(tmpPostData.getBytes());
+                        os.write(tmpPostData.getBytes(Charset.forName("UTF-8")));
                         os.flush();
 
                         if (checkResponseCode(conn)) {
-                            BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+                            br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
                             StringBuilder result = new StringBuilder();
                             String output;
                             while ((output = br.readLine()) != null) {
@@ -287,7 +289,12 @@ public class LaunchHolder {
                         }
                         e.printStackTrace();
                     } finally {
-                        conn.disconnect();
+                        if (br != null){
+                            br.close();
+                        }
+                        if (conn != null){
+                            conn.disconnect();
+                        }
 
                     }
 
@@ -326,21 +333,33 @@ public class LaunchHolder {
         if (stepHolder.getjUnitRequestHolder() != null) {
             //listener.getLogger().print("(" + new Date().toString() + ") Starting to dump JUnit XML ");
             if (stepHolder.getjUnitRequestHolder().isGenerateJUnitXML()) {
-
-                // Fill in the Extra runs attribute map
-                apiURL = url + "/rest/$schema/response?action=list&component=runs&extended=true";
-                conn = utils.getVAPIConnection(apiURL, requireAuth, user, password, "GET", dynamicUserId, buildID, buildNumber, workPlacePath, listener, connConnTimeOut, connReadTimeout, advConfig);
-                BufferedReader brExtra = new BufferedReader(new InputStreamReader((conn.getInputStream())));
-
+                
                 StringBuilder resultExtra = new StringBuilder();
+                BufferedReader brExtra = null;
+                try{
+                // Fill in the Extra runs attribute map
+                    apiURL = url + "/rest/$schema/response?action=list&component=runs&extended=true";
+                    conn = utils.getVAPIConnection(apiURL, requireAuth, user, password, "GET", dynamicUserId, buildID, buildNumber, workPlacePath, listener, connConnTimeOut, connReadTimeout, advConfig);
+                    brExtra = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
 
-                String outputExtra;
+                    String outputExtra;
 
-                while ((outputExtra = brExtra.readLine()) != null) {
-                    resultExtra.append(outputExtra);
+                    while ((outputExtra = brExtra.readLine()) != null) {
+                        resultExtra.append(outputExtra);
+                    }
+
+                } catch (Exception e){
+                        e.printStackTrace();
+                } finally{
+                    if (brExtra != null){
+                        brExtra.close();
+                    }
+                    if (conn != null){
+                        conn.disconnect();
+                    }
+                    
                 }
-
-                conn.disconnect();
+                
 
                 JSONObject tmp = JSONObject.fromObject(resultExtra.toString());
 
@@ -355,7 +374,7 @@ public class LaunchHolder {
 
                 String attr = null;
                 JSONObject attrObject = null;
-                String extraAttributesForRuns = "";
+                StringBuilder  extraAttributesForRuns = new StringBuilder();
 
                 while (iterExtra.hasNext()) {
                     attr = iterExtra.next();
@@ -368,7 +387,7 @@ public class LaunchHolder {
                                 || attr.equals("test_name")) {
                             continue;
                         } else {
-                            extraAttributesForRuns = extraAttributesForRuns + ",\"" + attr + "\"";
+                            extraAttributesForRuns.append(",\"").append(attr).append("\"");
                         }
                     }
                 }
@@ -381,20 +400,21 @@ public class LaunchHolder {
                 String tmpSessionId = null;
                 List<JSONObject> entireSessionsRuns = new ArrayList<JSONObject>();
                 while (sessionIter.hasNext()) {
-                    runsJSONData = new String(runsList);
+                    runsJSONData = runsList;
                     tmpSessionId = sessionIter.next();
                     runsJSONData = runsJSONData.replaceAll("######", tmpSessionId);
-                    runsJSONData = runsJSONData.replaceAll("###ATTR###", extraAttributesForRuns);
+                    runsJSONData = runsJSONData.replaceAll("###ATTR###", extraAttributesForRuns.toString());
+                    BufferedReader br = null;
                     try {
                         conn = utils.getVAPIConnection(runsRestURL, requireAuth, user, password, requestMethod, dynamicUserId, buildID, buildNumber, workPlacePath, listener, connConnTimeOut,
                                 connReadTimeout, advConfig);
 
                         OutputStream os = conn.getOutputStream();
-                        os.write(runsJSONData.getBytes());
+                        os.write(runsJSONData.getBytes(Charset.forName("UTF-8")));
                         os.flush();
 
                         if (checkResponseCode(conn)) {
-                            BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+                            br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
                             StringBuilder result = new StringBuilder();
                             String output;
                             while ((output = br.readLine()) != null) {
@@ -415,12 +435,15 @@ public class LaunchHolder {
                         }
                         e.printStackTrace();
                     } finally {
+                        if (br != null){
+                            br.close();
+                        }
                         conn.disconnect();
 
                     }
                 }
                 if (entireSessionsRuns.size() > 0) {
-                    UnitTestFormatter unitTestFormatter = new UnitTestFormatter(entireSessionsRuns, tmpSessionId, stepHolder.getjUnitRequestHolder(), extraAttrLabels);
+                    UnitTestFormatter unitTestFormatter = new UnitTestFormatter(entireSessionsRuns, stepHolder.getjUnitRequestHolder(), extraAttrLabels);
                     unitTestFormatter.dumpXMLFile(workPlacePath, buildNumber, buildID, utils);
                 }
             }
@@ -557,7 +580,7 @@ public class LaunchHolder {
         HttpURLConnection conn = utils.getVAPIConnection(apiURL, requireAuth, user, password, "POST", dynamicUserId, buildId, buildNumber, workPlacePath, listener, connConnTimeOut, connReadTimeout, advConfig);
 
         OutputStream os = conn.getOutputStream();
-        os.write(postData.getBytes());
+        os.write(postData.getBytes(Charset.forName("UTF-8")));
         os.flush();
 
         if (conn.getResponseCode() != HttpURLConnection.HTTP_OK && conn.getResponseCode() != HttpURLConnection.HTTP_NO_CONTENT && conn.getResponseCode() != HttpURLConnection.HTTP_ACCEPTED && conn.getResponseCode() != HttpURLConnection.HTTP_CREATED && conn.getResponseCode() != HttpURLConnection.HTTP_PARTIAL && conn.getResponseCode() != HttpURLConnection.HTTP_RESET) {
@@ -582,24 +605,27 @@ public class LaunchHolder {
 
     }
 
-    public void processErrorFromRespone(HttpURLConnection conn, Logger logger) {
+    public void processErrorFromRespone(HttpURLConnection conn, Logger logger) throws IOException {
         String errorMessage = "";
         StringBuilder resultFromError = null;
         int responseCode = 0;
+        BufferedReader br = null;
         try {
             resultFromError = new StringBuilder(conn.getResponseMessage());
             responseCode = conn.getResponseCode();
-            BufferedReader br = new BufferedReader(new InputStreamReader((conn.getErrorStream())));
+            br = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "UTF-8"));
 
             String output;
             while ((output = br.readLine()) != null) {
                 resultFromError.append(output);
             }
-        } catch (Exception e) {
-
+        } catch (IOException e) {
+            e.printStackTrace();
         } finally {
             errorMessage = "Failed : HTTP error code : " + responseCode + " (" + resultFromError + ")\n";
-
+            if (br != null){
+                br.close();
+            }
             logger.log(Level.SEVERE, errorMessage);
 
         }

@@ -25,6 +25,7 @@ package org.jenkinsci.plugins.vmanager;
 
 import hudson.FilePath;
 import hudson.Launcher;
+import hudson.model.Executor;
 import hudson.model.Job;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -36,6 +37,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.KeyManagementException;
@@ -137,37 +139,39 @@ public class ReportManager {
     private String getReportEmailAddresses() {
 
         String[] emails;
-        String output = null;
+        StringBuilder output = null;
+        String result = null;
 
         if ("static".equals(summaryReportParams.emailType)) {
             String[] values = summaryReportParams.emailList.split(",");
-            output = "";
+            output = new StringBuilder("");
             for (String email : values) {
-                output = output + "\"" + email.trim() + "\",";
+                output.append("\"").append(email.trim()).append("\",");
             }
             //Remove the last comma
             if (output.length() > 2) {
-                output = output.substring(0, output.length() - 1);
+                result = output.toString().substring(0, output.toString().length() - 1);
             }
         } else {
             try {
                 emails = utils.loadDataFromInputFiles(vmgrRun.getRun().getId(), vmgrRun.getRun().getNumber(), "" + vmgrRun.getJobWorkingDir(), summaryReportParams.emailInputFile, listener, summaryReportParams.deleteEmailInputFile, "emails", "emails.input");
-                output = "";
+                output =  new StringBuilder("");
                 for (String email : emails) {
-                    output = output + "\"" + email.trim() + "\",";
+                    output.append("\"").append(email.trim()).append("\",");
                 }
 
                 //Remove the last comma
                 if (output.length() > 2) {
-                    output = output.substring(0, output.length() - 1);
+                    result = output.toString().substring(0, output.toString().length() - 1);
                 }
 
             } catch (Exception e) {
+                e.printStackTrace();
                 listener.getLogger().println("Failed to find the email input file " + summaryReportParams.emailInputFile + " or any email file within the workspace for this build.\n " + e.getMessage());
             }
         }
 
-        return output;
+        return result;
 
     }
 
@@ -252,7 +256,13 @@ public class ReportManager {
                         metricsData.replace("depth", summaryReportParams.metricsDepth);
                     } else {
                         try {
-                            FilePath filePath = build.getExecutor().getCurrentWorkspace();
+                            Executor exceutor = build.getExecutor();
+                            FilePath filePath = null;
+                            if (exceutor != null){
+                                filePath = exceutor.getCurrentWorkspace();
+                            } else {
+                                throw new Exception("Failed to find Executor");
+                            }
                             tmpDataHolder =TokenMacro.expandAll(build, filePath, listener, summaryReportParams.metricsAdvanceInput.trim());
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -280,7 +290,13 @@ public class ReportManager {
                         vplanData.replace("depth", summaryReportParams.vPlanDepth);
                     } else {
                         try {
-                            FilePath filePath = build.getExecutor().getCurrentWorkspace();
+                            Executor exceutor = build.getExecutor();
+                            FilePath filePath = null;
+                            if (exceutor != null){
+                                filePath = exceutor.getCurrentWorkspace();
+                            } else {
+                                throw new Exception("Failed to find Executor");
+                            }
                             tmpDataHolder =TokenMacro.expandAll(build, filePath, listener, summaryReportParams.vPlanAdvanceInput.trim());
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -305,7 +321,13 @@ public class ReportManager {
                     }
                     
                     try {
-                        FilePath filePath = build.getExecutor().getCurrentWorkspace();
+                        Executor exceutor = build.getExecutor();
+                        FilePath filePath = null;
+                        if (exceutor != null){
+                            filePath = exceutor.getCurrentWorkspace();
+                        } else {
+                            throw new Exception("Failed to find Executor");
+                        }
                         parsedVPlanFileName =TokenMacro.expandAll(build, filePath, listener, summaryReportParams.vPlanxFileName.trim());
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -327,7 +349,13 @@ public class ReportManager {
                 try {
                     String ctxDataStringForEvaluating = null;
                     try {
-                        FilePath filePath = build.getExecutor().getCurrentWorkspace();
+                        Executor exceutor = build.getExecutor();
+                        FilePath filePath = null;
+                        if (exceutor != null){
+                            filePath = exceutor.getCurrentWorkspace();
+                        } else {
+                            throw new Exception("Failed to find Executor");
+                        }
                         ctxDataStringForEvaluating = TokenMacro.expandAll(build, filePath, listener, summaryReportParams.ctxAdvanceInput);
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -446,13 +474,12 @@ public class ReportManager {
         int buildNumber = 20;
         String buildId = "20";
         String jobWorkingDir = "c://temp";
-        String jobRootDir = "c://temp";
+        
 
         if (!this.testMode) {
             buildNumber = vmgrRun.getRun().getNumber();
             buildId = vmgrRun.getRun().getId();
             jobWorkingDir = vmgrRun.getJobWorkingDir();
-            jobRootDir = build.getRootDir().getAbsolutePath();
         }
 
         //Fix for SECURITY-1615 - Use Apache dedicated instead
@@ -492,12 +519,15 @@ public class ReportManager {
                     }
                     throw e;
                 } finally {
-                    reader.close();
+                    if (reader != null){
+                        reader.close();
+                    }
+                    
                 }
             }
 
             String userpass = username + ":" + vAPIConnectionParam.vAPIPassword;
-            String basicAuth = "Basic " + java.util.Base64.getUrlEncoder().encodeToString(userpass.getBytes());
+            String basicAuth = "Basic " + java.util.Base64.getUrlEncoder().encodeToString(userpass.getBytes(Charset.forName("UTF-8")));
             httpGet.setHeader("Authorization", basicAuth);
         }
 
@@ -510,7 +540,7 @@ public class ReportManager {
                 entity.writeTo(outputStream);
                 EntityUtils.consume(entity);
 
-                String output = outputStream.toString();
+                String output = outputStream.toString(Charset.forName("UTF-8"));
                 int start = output.indexOf("<head>");
                 int end = output.indexOf("</head>") + 7;
                 output = output.substring(0, start) + output.substring(end, output.length());
@@ -579,7 +609,7 @@ public class ReportManager {
             jobWorkingDir = vmgrRun.getJobWorkingDir();
             jobRootDir = build.getRootDir().getAbsolutePath();
         }
-
+        BufferedReader br = null;
         try {
             conn = utils.getVAPIConnection(apiURL, vAPIConnectionParam.authRequired, vAPIConnectionParam.vAPIUser, vAPIConnectionParam.vAPIPassword, "POST", vAPIConnectionParam.dynamicUserId, buildId, buildNumber, jobRootDir, listener, vAPIConnectionParam.connTimeout, vAPIConnectionParam.readTimeout, vAPIConnectionParam.advConfig);
             OutputStream os = conn.getOutputStream();
@@ -590,12 +620,12 @@ public class ReportManager {
                 System.out.println(postData);
             }
 
-            os.write(postData.getBytes());
+            os.write(postData.getBytes(Charset.forName("UTF-8")));
             os.flush();
 
             if (checkResponseCode(conn)) {
 
-                BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+                br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
 
                 String fileOutput;
                 StringBuffer sb;
@@ -627,7 +657,7 @@ public class ReportManager {
 
             } else {
 
-                BufferedReader br = new BufferedReader(new InputStreamReader((conn.getErrorStream())));
+                br = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "UTF-8"));
 
                 String output;
                 String fileOutput = buildNumber + "." + buildId + ".summary.report";
@@ -680,8 +710,14 @@ public class ReportManager {
             throw e;
 
         } finally {
+            if (conn != null){
+                conn.disconnect();
+            }
             
-            conn.disconnect();
+            if (br != null){
+                br.close();
+            }
+            
 
         }
         
@@ -709,16 +745,14 @@ public class ReportManager {
 
         int buildNumber = 20;
         String buildId = "20";
-        String jobWorkingDir = "c://temp";
         String jobRootDir = "c://temp";
 
         if (!this.testMode) {
             buildNumber = vmgrRun.getRun().getNumber();
-            buildId = vmgrRun.getRun().getId();
-            jobWorkingDir = vmgrRun.getJobWorkingDir();
+            buildId = vmgrRun.getRun().getId();  
             jobRootDir = build.getRootDir().getAbsolutePath();
         }
-
+        BufferedReader br = null;
         try {
             conn = utils.getVAPIConnection(apiURL, vAPIConnectionParam.authRequired, vAPIConnectionParam.vAPIUser, vAPIConnectionParam.vAPIPassword, "POST", vAPIConnectionParam.dynamicUserId, buildId, buildNumber, jobRootDir, listener, vAPIConnectionParam.connTimeout, vAPIConnectionParam.readTimeout, vAPIConnectionParam.advConfig);
 
@@ -730,12 +764,13 @@ public class ReportManager {
                 System.out.println(postData);
             }
 
-            os.write(postData.getBytes());
+            os.write(postData.getBytes(Charset.forName("UTF-8")));
             os.flush();
-
+            
+            
             if (!checkResponseCode(conn)) {
 
-                BufferedReader br = new BufferedReader(new InputStreamReader((conn.getErrorStream())));
+                br = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "UTF-8"));
 
                 String output;
                 StringBuffer sb = new StringBuffer();
@@ -762,7 +797,12 @@ public class ReportManager {
             throw e;
 
         } finally {
-            conn.disconnect();
+            if (conn != null){
+                conn.disconnect();
+            }
+            if (br != null){
+                br.close();
+            }
 
         }
 
@@ -774,7 +814,7 @@ public class ReportManager {
         String output = "<div class=\"microAgentWaiting\"><div class=\"spinnerMicroAgentMessage\"><p><img src=\"/plugin/vmanager-plugin/img/weblinks.png\"></img></p><p>Failed to find a report file for this build.<br>Please check that the following file exist:<br>" + fileInput + "</p></div></div>";
         try {
                                                                                              
-            output = new String(Files.readAllBytes(Paths.get(fileInput)));
+            output = new String(Files.readAllBytes(Paths.get(fileInput)),Charset.forName("UTF-8"));
             
 
         } catch (IOException ex) {

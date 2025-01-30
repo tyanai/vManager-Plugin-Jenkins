@@ -23,11 +23,13 @@
  */
 package org.jenkinsci.plugins.vmanager;
 
+import java.io.Serializable;
+
 /**
  *
  * @author tyanai
  */
-public class VAPIConnectionParam {
+public class VAPIConnectionParam implements Serializable {
     
     public String vAPIUrl;
     public boolean authRequired;

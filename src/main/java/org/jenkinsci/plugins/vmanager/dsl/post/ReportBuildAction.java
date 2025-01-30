@@ -4,6 +4,8 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import jenkins.model.RunAction2;
 import org.jenkinsci.plugins.vmanager.PostActionBase;
@@ -12,12 +14,18 @@ import org.jenkinsci.plugins.vmanager.SummaryReportParams;
 import org.jenkinsci.plugins.vmanager.VAPIConnectionParam;
 
 public class ReportBuildAction extends PostActionBase implements Serializable, RunAction2 {
-
+    
+    private static final long serialVersionUID = 5000009076155338045L;
     private transient Run<?, ?> build;
     private transient TaskListener listener;
     private transient ReportManager reportManager;
     
 
+    private void readObject(ObjectInputStream in) throws ClassNotFoundException, IOException {
+        // do normal serialization first!
+        in.defaultReadObject();
+    }
+    
     @Override 
     public String getIconFileName() {
         return "/plugin/vmanager-plugin/img/report.png";

@@ -13,8 +13,12 @@ import org.jenkinsci.plugins.vmanager.VMGRBuildArchiver;
 import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 
+
+
 public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
 
+    private static final long serialVersionUID = 1000009076155338045L;
+    
     private transient final VMGRLaunchStep step;
 
     VMGRLaunchStepImpl(VMGRLaunchStep step, StepContext context) {
@@ -31,7 +35,7 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
         Launcher launcher = getContext().get(Launcher.class);
         FilePath filePath = getContext().get(FilePath.class);
         String buildId = envVars.get("BUILD_ID");
-        int buildNumber = new Integer(envVars.get("BUILD_NUMBER"));
+        int buildNumber = Integer.parseInt(envVars.get("BUILD_NUMBER"));
 
         String workspace = envVars.get("WORKSPACE");
 
@@ -59,8 +63,7 @@ public class VMGRLaunchStepImpl extends SynchronousNonBlockingStepExecution {
             boolean result = false;
 
             try {
-                theWSDir.mkdir();
-                result = true;
+                result = theWSDir.mkdir();
             } catch (SecurityException se) {
                 listener.getLogger().println("Failed to create workspace dir.  Permisisons issues");
                 throw se;

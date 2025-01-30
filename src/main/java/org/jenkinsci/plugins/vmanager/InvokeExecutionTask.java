@@ -69,6 +69,9 @@ public class InvokeExecutionTask extends  MasterToSlaveFileCallable<Void> implem
                 jobListener.getLogger().print("Select shell type for this execution is " + executionShellLocation + "\n");
                 jobListener.getLogger().print("Select vsif for this execution is " + vsifFile + "\n");
                 boolean foundGoodVSIF = false;
+                BufferedReader in = null;
+                BufferedReader inError = null;
+                
                 try {
                     
                     /*
@@ -83,8 +86,8 @@ public class InvokeExecutionTask extends  MasterToSlaveFileCallable<Void> implem
                     ProcessBuilder builder = new ProcessBuilder(command);
                     builder.redirectErrorStream(true);
                     Process proc = builder.start();
-                    BufferedReader in = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-                    BufferedReader inError = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
+                    in = new BufferedReader(new InputStreamReader(proc.getInputStream(), "UTF-8"));
+                    inError = new BufferedReader(new InputStreamReader(proc.getErrorStream(), "UTF-8"));
                     
                     String s = null;
 
@@ -129,7 +132,15 @@ public class InvokeExecutionTask extends  MasterToSlaveFileCallable<Void> implem
                         }
 
                         jobListener.getLogger().println(ExceptionUtils.getFullStackTrace(ex));
-                    }
+                    } finally { 
+                        if (in != null){
+                            in.close();
+                        }
+                        if (inError != null){
+                            inError.close();
+                        }
+            
+                    } 
                
 
                 if (foundGoodVSIF) {

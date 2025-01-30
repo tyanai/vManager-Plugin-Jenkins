@@ -13,15 +13,14 @@ import net.sf.json.JSONObject;
 public class UnitTestFormatter {
 	
 	List runs = null;
-	String sessionId = null;
+	
 	JUnitRequestHolder jUnitRequestHolder = null;
 	Map<String,String> extraAttrLabels = null;
 	
 	
-	public UnitTestFormatter(List runs, String sessionId,JUnitRequestHolder jUnitRequestHolder, Map<String,String> extraAttrLabels) {
+	public UnitTestFormatter(List runs,JUnitRequestHolder jUnitRequestHolder, Map<String,String> extraAttrLabels) {
 		super();
 		this.runs = runs;
-		this.sessionId = sessionId;
 		this.jUnitRequestHolder = jUnitRequestHolder;
 		this.extraAttrLabels = extraAttrLabels;
 		
@@ -83,7 +82,7 @@ public class UnitTestFormatter {
 				
 				if (tmpRun.has("duration")) {
 					try{
-						testDuration = new Integer(tmpRun.getString("duration")).intValue();
+						testDuration = Integer.parseInt(tmpRun.getString("duration"));
 					} catch (Exception e){
 						//In case it's not a number like "undefined"
 					}

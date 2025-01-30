@@ -12,6 +12,7 @@ import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
 
 public class VMGRPostLaunchStepImpl extends SynchronousNonBlockingStepExecution<Void> {
     
+   private static final long serialVersionUID = 6000009076155338045L;
    private transient final VMGRPostLaunchStep step;
    
    VMGRPostLaunchStepImpl(VMGRPostLaunchStep step, StepContext context) {

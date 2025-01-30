@@ -27,7 +27,10 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.Launcher.ProcStarter;
 import hudson.Proc;
+import hudson.model.Executor;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 
 import javax.net.ssl.*;
 
@@ -46,8 +49,9 @@ public class Utils {
     private Run build = null;
 
     public Utils(Run run, TaskListener listener) {
-        if (run.getExecutor() != null) {
-            filePath = run.getExecutor().getCurrentWorkspace();
+        Executor executor = run.getExecutor();
+        if (executor != null) {
+            filePath = executor.getCurrentWorkspace();
         }
 
         jobListener = listener;
@@ -150,7 +154,10 @@ public class Utils {
 
             throw e;
         } finally {
-            reader.close();
+            if (reader != null){
+                reader.close();
+            }
+               
         }
 
         Iterator<String> iter = listOfNames.iterator();
@@ -161,7 +168,7 @@ public class Utils {
         }
         String theFileName = null;
         while (iter.hasNext()) {
-            theFileName = new String(iter.next());
+            theFileName = iter.next();
             output[i++] = theFileName;
             if (notInTestMode) {
                 listener.getLogger().print(i + " '" + theFileName + "'\n");
@@ -177,7 +184,10 @@ public class Utils {
             }
             try {
                 File fileToDelete = new File(fileName);
-                fileToDelete.renameTo(new File(fileToDelete + ".delete"));
+                boolean renamed = fileToDelete.renameTo(new File(fileToDelete + ".delete"));
+                if (!renamed){
+                    listener.getLogger().print("Failed to rename input file from workspace.  Failed to rename file '" + fileName + "'\n");
+                }
             } catch (Exception e) {
                 if (notInTestMode) {
                     listener.getLogger().print("Failed to delete input file from workspace.  Failed to delete file '" + fileName + "'\n");
@@ -229,7 +239,9 @@ public class Utils {
 
             throw e;
         } finally {
-            reader.close();
+            if (reader != null){
+                reader.close();
+            }
         }
 
         if (deleteInputFile) {
@@ -238,10 +250,13 @@ public class Utils {
             }
             try {
                 File fileToDelete = new File(fileName);
-                fileToDelete.renameTo(new File(fileToDelete + ".delete"));
+                boolean renamed = fileToDelete.renameTo(new File(fileToDelete + ".delete"));
+                if (!renamed){
+                    listener.getLogger().print("Failed to rename input file from workspace.  Failed to rename file '" + fileName + "'\n");
+                }
             } catch (Exception e) {
                 if (notInTestMode) {
-                    listener.getLogger().print("Failed to delete input file from workspace.  Failed to delete file '" + fileName + "'\n");
+                    listener.getLogger().print("Failed to rename input file from workspace.  Failed to rename file '" + fileName + "'\n");
 
                 } else {
 
@@ -290,7 +305,9 @@ public class Utils {
 
             throw e;
         } finally {
-            reader.close();
+            if (reader != null){
+                reader.close();
+            }
         }
 
         Iterator<String> iter = listOfNames.iterator();
@@ -299,7 +316,7 @@ public class Utils {
 
         String stringValue = null;
         while (iter.hasNext()) {
-            stringValue = new String(iter.next());
+            stringValue = iter.next();
             output[i++] = stringValue;
         }
 
@@ -309,7 +326,10 @@ public class Utils {
             }
             try {
                 File fileToDelete = new File(fileName);
-                fileToDelete.delete();
+                boolean renamed = fileToDelete.delete();
+                if (!renamed){
+                    listener.getLogger().print("Failed to delete input file from workspace.  Failed to delete file '" + fileName + "'\n");
+                }
             } catch (Exception e) {
                 if (notInTestMode) {
                     listener.getLogger().print("Failed to delete input file from workspace.  Failed to delete file '" + fileName + "'\n");
@@ -365,7 +385,9 @@ public class Utils {
 
             throw e;
         } finally {
-            reader.close();
+            if (reader != null){
+                reader.close();
+            }
         }
 
         return output;
@@ -447,7 +469,9 @@ public class Utils {
 
             throw e;
         } finally {
-            reader.close();
+            if (reader != null){
+                reader.close();
+            }
         }
 
         return output;
@@ -503,7 +527,9 @@ public class Utils {
 
             throw e;
         } finally {
-            reader.close();
+            if (reader != null){
+                reader.close();
+            }
         }
 
         return output;
@@ -640,7 +666,9 @@ public class Utils {
 
             throw e;
         } finally {
-            reader.close();
+            if (reader != null){
+                reader.close();
+            }
         }
 
         output = listOfNames.toString();
@@ -656,10 +684,13 @@ public class Utils {
             }
             try {
                 File fileToDelete = new File(fileName);
-                fileToDelete.renameTo(new File(fileToDelete + ".delete"));
+                boolean renamed = fileToDelete.renameTo(new File(fileToDelete + ".delete"));
+                if (!renamed){
+                    listener.getLogger().print("Failed to rename input file from workspace.  Failed to rename file '" + fileName + "'\n");
+                }
             } catch (Exception e) {
                 if (notInTestMode) {
-                    listener.getLogger().print("Failed to delete input file from workspace.  Failed to delete file '" + fileName + "'\n");
+                    listener.getLogger().print("Failed to rename input file from workspace.  Failed to rename file '" + fileName + "'\n");
 
                 } else {
 
@@ -675,6 +706,9 @@ public class Utils {
     public String checkVAPIConnection(String url, boolean requireAuth, String user, String password) throws Exception {
 
         String textOut = null;
+        HttpURLConnection conn = null;
+        OutputStream os = null;
+        BufferedReader br = null;
         try {
 
             System.out.println("Trying to connect with Verisium Manager vAPI " + url);
@@ -682,8 +716,8 @@ public class Utils {
 
             String apiURL = url + "/rest/sessions/count";
 
-            HttpURLConnection conn = getVAPIConnection(apiURL, requireAuth, user, password, "POST", false, "", 0, null, null, 0, 0, false);
-            OutputStream os = null;
+            conn = getVAPIConnection(apiURL, requireAuth, user, password, "POST", false, "", 0, null, null, 0, 0, false);
+            os = null;
             try {
                 os = conn.getOutputStream();
             } catch (java.net.UnknownHostException e) {
@@ -691,7 +725,7 @@ public class Utils {
                 throw new Exception("Failed to connect to host " + e.getMessage() + ".  Host is unknown.");
 
             }
-            os.write(input.getBytes());
+            os.write(input.getBytes(Charset.forName("UTF-8")));
             os.flush();
 
             if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
@@ -710,7 +744,7 @@ public class Utils {
                 return errorMessage;
             }
 
-            BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+            br = new BufferedReader(new InputStreamReader(conn.getInputStream(),Charset.forName("UTF-8")));
 
             StringBuilder result = new StringBuilder();
             String output;
@@ -719,8 +753,7 @@ public class Utils {
                 result.append(output);
             }
 
-            conn.disconnect();
-
+            
             JSONObject tmp = JSONObject.fromObject(result.toString());
 
             textOut = " The current number of sessions held on this Verisium Manager server are: " + tmp.getString("count");
@@ -735,6 +768,18 @@ public class Utils {
 
             System.out.println(errorMessage);
             textOut = errorMessage;
+        } finally {
+            if (conn != null){
+                conn.disconnect();
+            }
+            
+            if (os != null){
+                os.close();
+            }
+            
+            if (br != null){
+                br.close();
+            }
         }
 
         return textOut;
@@ -743,6 +788,8 @@ public class Utils {
     public String checkExtraStaticAttr(String url, boolean requireAuth, String user, String password, String listOfAttr) throws Exception {
 
         String textOut = null;
+        BufferedReader br = null;
+        HttpURLConnection conn = null;
         try {
             List<String> items = Arrays.asList(listOfAttr.split("\\s*,\\s*"));
 
@@ -750,7 +797,7 @@ public class Utils {
             //String input = "{}";
             String apiURL = url + "/rest/$schema/response?action=list&component=runs&extended=true";
 
-            HttpURLConnection conn = getVAPIConnection(apiURL, requireAuth, user, password, "GET", false, "", 0, null, null, 0, 0, false);
+            conn = getVAPIConnection(apiURL, requireAuth, user, password, "GET", false, "", 0, null, null, 0, 0, false);
 
             if (conn.getResponseCode() != HttpURLConnection.HTTP_OK) {
                 String reason = "";
@@ -765,7 +812,7 @@ public class Utils {
                 return errorMessage;
             }
 
-            BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+            br = new BufferedReader(new InputStreamReader(conn.getInputStream(),Charset.forName("UTF-8")));
 
             StringBuilder result = new StringBuilder();
 
@@ -775,7 +822,7 @@ public class Utils {
                 result.append(output);
             }
 
-            conn.disconnect();
+            
 
             JSONObject tmp = JSONObject.fromObject(result.toString());
 
@@ -817,6 +864,14 @@ public class Utils {
 
             System.out.println(errorMessage);
             textOut = errorMessage;
+        } finally {
+            if (br != null){
+                br.close();
+            }
+            
+            if (conn != null){
+                conn.disconnect();
+            }
         }
 
         return textOut;
@@ -883,15 +938,18 @@ public class Utils {
 
                     throw e;
                 } finally {
-                    reader.close();
+                    if (reader != null){
+                        reader.close();
+                    }
+                    
                 }
             }
 
             String authString = user + ":" + password;
             UserUsedForLogin = user;
             PasswordUsedForLogin = password;
-            byte[] authEncBytes = Base64.encodeBase64(authString.getBytes());
-            String authStringEnc = new String(authEncBytes);
+            byte[] authEncBytes = Base64.encodeBase64(authString.getBytes(Charset.forName("UTF-8")));
+            String authStringEnc = new String(authEncBytes,Charset.forName("UTF-8"));
             conn.setRequestProperty("Authorization", "Basic " + authStringEnc);
             // ----------------------------------------------------------------------------------------
         }
@@ -908,7 +966,7 @@ public class Utils {
         }
 
         String apiURL = url + "/rest/sessions/launch";
-        String apiSessionURL = url + "/rest/sessions/list";
+        
 
         List<String> listOfSessions = new ArrayList<String>();
 
@@ -967,7 +1025,10 @@ public class Utils {
 
                                 throw e;
                             } finally {
-                                reader.close();
+                                if (reader != null){
+                                    reader.close();
+                                }
+                                
                             }
                         }
                     } else if (!userPrivateSSHKey) {
@@ -988,53 +1049,71 @@ public class Utils {
 
                 }
                 input = input + "}";
+                
+                HttpURLConnection conn = null;
+                OutputStream os = null;
+                BufferedReader br = null;
+                try{
+                    //listener.getLogger().print("Verisium Manager vAPI input: '" + input + "' with user/password: "+ user + "/" + password +"\n");
+                    conn = getVAPIConnection(apiURL, requireAuth, user, password, "POST", dynamicUserId, buildID, buildNumber, workPlacePath, listener, connConnTimeOut, connReadTimeout, advConfig);
+                    os = conn.getOutputStream();
+                    os.write(input.getBytes(Charset.forName("UTF-8")));
+                    os.flush();
 
-                //listener.getLogger().print("Verisium Manager vAPI input: '" + input + "' with user/password: "+ user + "/" + password +"\n");
-                HttpURLConnection conn = getVAPIConnection(apiURL, requireAuth, user, password, "POST", dynamicUserId, buildID, buildNumber, workPlacePath, listener, connConnTimeOut, connReadTimeout, advConfig);
-                OutputStream os = conn.getOutputStream();
-                os.write(input.getBytes());
-                os.flush();
+                    if (conn.getResponseCode() != HttpURLConnection.HTTP_OK && conn.getResponseCode() != HttpURLConnection.HTTP_NO_CONTENT && conn.getResponseCode() != HttpURLConnection.HTTP_ACCEPTED && conn.getResponseCode() != HttpURLConnection.HTTP_CREATED && conn.getResponseCode() != HttpURLConnection.HTTP_PARTIAL && conn.getResponseCode() != HttpURLConnection.HTTP_RESET) {
+                        String reason = "";
+                        if (conn.getResponseCode() == 503) {
+                            reason = "vAPI process failed to connect to remote Verisium Manager server.";
+                        }
+                        if (conn.getResponseCode() == 401) {
+                            reason = "Authentication Error";
+                        }
+                        if (conn.getResponseCode() == 412) {
+                            reason = "vAPI requires Verisium Manager 'Integration Server' license.";
+                        }
+                        if (conn.getResponseCode() == 406) {
+                            reason = "VSIF file '" + vsifs[i] + "' was not found on file system, or is not accessed by the vAPI process.\n";
+                        }
 
-                if (conn.getResponseCode() != HttpURLConnection.HTTP_OK && conn.getResponseCode() != HttpURLConnection.HTTP_NO_CONTENT && conn.getResponseCode() != HttpURLConnection.HTTP_ACCEPTED && conn.getResponseCode() != HttpURLConnection.HTTP_CREATED && conn.getResponseCode() != HttpURLConnection.HTTP_PARTIAL && conn.getResponseCode() != HttpURLConnection.HTTP_RESET) {
-                    String reason = "";
-                    if (conn.getResponseCode() == 503) {
-                        reason = "vAPI process failed to connect to remote Verisium Manager server.";
+                        String errorMessage = processErrorFromRespone(conn, listener, notInTestMode);
+
+                        return errorMessage;
                     }
-                    if (conn.getResponseCode() == 401) {
-                        reason = "Authentication Error";
+
+                    br = new BufferedReader(new InputStreamReader(conn.getInputStream(),Charset.forName("UTF-8")));
+
+                    StringBuilder result = new StringBuilder();
+                    String output;
+                    while ((output = br.readLine()) != null) {
+                        result.append(output);
                     }
-                    if (conn.getResponseCode() == 412) {
-                        reason = "vAPI requires Verisium Manager 'Integration Server' license.";
+
+                    
+                    JSONObject tmp = JSONObject.fromObject(result.toString());
+
+                    String textOut = "Session Launch Success: Session ID: " + tmp.getString("value") + "\n";
+                    listOfSessions.add(tmp.getString("value"));
+
+                    if (notInTestMode) {
+                        listener.getLogger().print(textOut);
+                    } else {
+
+                        System.out.println(textOut);
                     }
-                    if (conn.getResponseCode() == 406) {
-                        reason = "VSIF file '" + vsifs[i] + "' was not found on file system, or is not accessed by the vAPI process.\n";
+                } catch (Exception e){
+                    e.printStackTrace();
+                } finally{
+                    if (conn != null){
+                        conn.disconnect();
                     }
-
-                    String errorMessage = processErrorFromRespone(conn, listener, notInTestMode);
-
-                    return errorMessage;
-                }
-
-                BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
-
-                StringBuilder result = new StringBuilder();
-                String output;
-                while ((output = br.readLine()) != null) {
-                    result.append(output);
-                }
-
-                conn.disconnect();
-
-                JSONObject tmp = JSONObject.fromObject(result.toString());
-
-                String textOut = "Session Launch Success: Session ID: " + tmp.getString("value") + "\n";
-                listOfSessions.add(tmp.getString("value"));
-
-                if (notInTestMode) {
-                    listener.getLogger().print(textOut);
-                } else {
-
-                    System.out.println(textOut);
+                    
+                    if (os != null){
+                        os.close();
+                    }
+                    
+                    if (br != null){
+                        br.close();
+                    }
                 }
 
             }
@@ -1074,6 +1153,9 @@ public class Utils {
     public String executeAPI(String jSON, String apiUrl, String url, boolean requireAuth, String user, String password, String requestMethod, TaskListener listener, boolean dynamicUserId, String buildID, int buildNumber,
             String workPlacePath, int connConnTimeOut, int connReadTimeout, boolean advConfig) throws Exception {
 
+        HttpURLConnection conn = null;
+        BufferedReader br = null;
+        OutputStream os = null;
         try {
 
             boolean notInTestMode = true;
@@ -1087,11 +1169,11 @@ public class Utils {
                 listener.getLogger().print("Verisium Manager vAPI - Trying to call vAPI '" + "/rest" + apiUrl + "'\n");
             }
             String input = jSON;
-            HttpURLConnection conn = getVAPIConnection(apiURL, requireAuth, user, password, requestMethod, dynamicUserId, buildID, buildNumber, workPlacePath, listener, connConnTimeOut, connReadTimeout, advConfig);
+            conn = getVAPIConnection(apiURL, requireAuth, user, password, requestMethod, dynamicUserId, buildID, buildNumber, workPlacePath, listener, connConnTimeOut, connReadTimeout, advConfig);
 
             if ("PUT".equals(requestMethod) || "POST".equals(requestMethod)) {
-                OutputStream os = conn.getOutputStream();
-                os.write(input.getBytes());
+                os = conn.getOutputStream();
+                os.write(input.getBytes(Charset.forName("UTF-8")));
                 os.flush();
             }
 
@@ -1123,7 +1205,7 @@ public class Utils {
                 return errorMessage;
             }
 
-            BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+            br = new BufferedReader(new InputStreamReader(conn.getInputStream(),Charset.forName("UTF-8")));
 
             StringBuilder result = new StringBuilder();
             String output;
@@ -1131,8 +1213,7 @@ public class Utils {
                 result.append(output);
             }
 
-            conn.disconnect();
-
+            
             // Flush the output into workspace
             String fileOutput = buildNumber + "." + buildID + ".vapi.output";
             if (filePath == null) {
@@ -1155,6 +1236,18 @@ public class Utils {
         } catch (Exception e) {
             listener.getLogger().print("Filed: Error: " + e.getMessage());
             return e.getMessage();
+        } finally{
+            if (conn != null){
+                conn.disconnect();
+            } 
+            
+            if (os != null){
+                os.close();
+            }
+            
+            if (br != null){
+                br.close();
+            }
         }
     }
 
@@ -1201,14 +1294,15 @@ public class Utils {
     }
 
     @SuppressWarnings("finally")
-    public String processErrorFromRespone(HttpURLConnection conn, TaskListener listener, boolean notInTestMode) {
+    public String processErrorFromRespone(HttpURLConnection conn, TaskListener listener, boolean notInTestMode) throws IOException {
         String errorMessage = "";
         StringBuilder resultFromError = null;
         int responseCode = 0;
+        BufferedReader br = null;
         try {
             resultFromError = new StringBuilder(conn.getResponseMessage());
             responseCode = conn.getResponseCode();
-            BufferedReader br = new BufferedReader(new InputStreamReader((conn.getErrorStream())));
+            br = new BufferedReader(new InputStreamReader(conn.getErrorStream(),Charset.forName("UTF-8")));
 
             String output;
             while ((output = br.readLine()) != null) {
@@ -1217,6 +1311,11 @@ public class Utils {
         } catch (Exception e) {
 
         } finally {
+            
+            if (br != null){
+                br.close();
+            }
+            
             errorMessage = "Failed : HTTP error code : " + responseCode + " (" + resultFromError + ")\n";
             if (notInTestMode) {
                 listener.getLogger().print(errorMessage);
@@ -1243,7 +1342,7 @@ public class Utils {
 
     }
 
-    public BufferedReader readFileOnDisk(String fileOnDiskPath) throws FileNotFoundException {
+    public BufferedReader readFileOnDisk(String fileOnDiskPath) throws IOException {
 
         if (filePath != null) {
             try {
@@ -1261,20 +1360,29 @@ public class Utils {
     }
 
     public void standardWriteToDisk(String fileOnDiskPath, String output) throws IOException {
-        FileWriter writer = new FileWriter(fileOnDiskPath);
-        writer.append(output);
-        writer.flush();
-        writer.close();
+        FileWriter writer = null;
+        try{
+            writer = new FileWriter(fileOnDiskPath,Charset.forName("UTF-8"));
+            writer.append(output);
+            writer.flush();
+            writer.close();
+        } catch (IOException e){
+            e.printStackTrace();
+        } finally {
+            if (writer != null){
+                writer.close();
+            }
+        }
     }
 
-    public BufferedReader standardReadFromDisk(String fileOnDiskPath) throws FileNotFoundException {
-        return new BufferedReader(new FileReader(fileOnDiskPath));
+    public BufferedReader standardReadFromDisk(String fileOnDiskPath) throws IOException {
+        return new BufferedReader(new FileReader(fileOnDiskPath,Charset.forName("UTF-8")));
     }
 
     public void moveFromNodeToMaster(String fileName, Launcher launcher, String content) throws IOException, InterruptedException {
 
         //Get master FilePath
-        String buildDir = build.getRootDir().getAbsolutePath();
+        
         FilePath masterDirectory = new FilePath(build.getRootDir()).child(fileName);
         //this.jobListener.getLogger().print("About to copy " + fileName + " from Slave location to Master location: \n");
         //this.jobListener.getLogger().print("From Slave location: " + this.filePath.getRemote() + "\n");
@@ -1292,7 +1400,8 @@ public class Utils {
         jobListener.getLogger().print("Select shell type for this execution is " + executionShellLocation + "\n");
         jobListener.getLogger().print("Select vsif for this execution is " + executionVsifFile + "\n");
         boolean foundGoodVSIF = false;
-
+        BufferedReader in = null;
+        BufferedReader inError = null;
         try {
             Launcher.ProcStarter ps = launcher.new ProcStarter();
         
@@ -1303,34 +1412,42 @@ public class Utils {
             Proc proc = launcher.launch(ps);
             
             
-            BufferedReader in = new BufferedReader(new InputStreamReader(proc.getStdout()));
-            BufferedReader inError = new BufferedReader(new InputStreamReader(proc.getStdout()));
+            InputStream procInputStream = proc.getStdout();
+           
+            if (procInputStream != null){
+                in = new BufferedReader(new InputStreamReader(procInputStream,Charset.forName("UTF-8")));
+                inError = new BufferedReader(new InputStreamReader(procInputStream,Charset.forName("UTF-8")));
+            }
+            
             String s = null;
+            if (in != null){
+                while ((s = in.readLine()) != null) {
 
-            while ((s = in.readLine()) != null) {
+                    jobListener.getLogger().print(s + "\n");
+                    if (s.indexOf("*I,runner.sessionStarted: Session") > -1) {
+                        foundGoodVSIF = true;
+                        sessionNameToMonitor = s.substring(34, s.indexOf(" started."));
 
-                jobListener.getLogger().print(s + "\n");
-                if (s.indexOf("*I,runner.sessionStarted: Session") > -1) {
-                    foundGoodVSIF = true;
-                    sessionNameToMonitor = s.substring(34, s.indexOf(" started."));
+                        //Now creates the file of sessions.input
+                        String fileOutput = buildNumber + "." + buildId + ".sessions.input";
+                        StringBuffer writer = new StringBuffer();
+                        writer.append(sessionNameToMonitor);
+                        hudson.FilePath newFile = filePath.child(fileOutput);
+                        newFile.write(writer.toString(), StandardCharsets.UTF_8.name());
 
-                    //Now creates the file of sessions.input
-                    String fileOutput = buildNumber + "." + buildId + ".sessions.input";
-                    StringBuffer writer = new StringBuffer();
-                    writer.append(sessionNameToMonitor);
-                    hudson.FilePath newFile = filePath.child(fileOutput);
-                    newFile.write(writer.toString(), StandardCharsets.UTF_8.name());
+                    }
 
                 }
-
             }
 
             String sError = null;
+            
+            if (inError != null){
+                while ((sError = inError.readLine()) != null) {
 
-            while ((sError = inError.readLine()) != null) {
+                    jobListener.getLogger().print(sError + "\n");
 
-                jobListener.getLogger().print(sError + "\n");
-
+                }
             }
 
         } catch (IOException e) {
@@ -1347,6 +1464,14 @@ public class Utils {
             }
 
             jobListener.getLogger().println(ExceptionUtils.getFullStackTrace(ex));
+        } finally {
+            if (inError != null){
+                inError.close();
+            }
+            
+            if (in != null){
+                in.close();
+            }
         }
 
         if (foundGoodVSIF) {

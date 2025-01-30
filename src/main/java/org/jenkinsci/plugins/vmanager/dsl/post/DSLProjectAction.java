@@ -14,6 +14,7 @@ import org.jenkinsci.plugins.vmanager.VMGRRun;
 
 public class DSLProjectAction extends PostActionBase implements Serializable, Action {
 
+    private static final long serialVersionUID = 3000009076155338045L;
     private transient  Job<?, ?> project;
 
     @Override
@@ -55,7 +56,7 @@ public class DSLProjectAction extends PostActionBase implements Serializable, Ac
         }
         
         List<? extends Run<?, ?>> builds = project.getBuilds();
-        final Class<DSLBuildAction> buildClass = DSLBuildAction.class;
+        
         VMGRRun tmpVMGRRun = null;
         Job job = null;
         String workingDir = null;
@@ -70,8 +71,9 @@ public class DSLProjectAction extends PostActionBase implements Serializable, Ac
                 tmpVMGRRun = new VMGRRun(currentBuild,workingDir,job.getBuildDir().getAbsolutePath());
                 recentBuilds.add(tmpVMGRRun);
                 counter++;
-            }catch (NullPointerException e){
+            }catch (Exception e){
                 //Some old build don't have the action yet
+                System.out.println("Some old build don't have the action yet, hence can't get the list");
             }
         }
         

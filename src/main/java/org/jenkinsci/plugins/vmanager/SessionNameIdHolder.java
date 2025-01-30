@@ -11,6 +11,7 @@ import java.util.List;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import hudson.model.TaskListener;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 
 public class SessionNameIdHolder {
@@ -50,7 +51,7 @@ public class SessionNameIdHolder {
                 List<String> sessionList = new ArrayList<String>();
                 
                 
-		
+		BufferedReader br = null;
 		try {
 			conn = utils.getVAPIConnection(apiURL, requireAuth, user, password, "POST", dynamicUserId, buildID, buildNumber, workPlacePath, listener, connConnTimeOut, connReadTimeout, advConfig);
 
@@ -60,11 +61,11 @@ public class SessionNameIdHolder {
                         
                         //listener.getLogger().print("Post is: " + postData); 
                                                
-			os.write(postData.getBytes());
+			os.write(postData.getBytes(Charset.forName("UTF-8")));
 			os.flush();
 
 			if (checkResponseCode(conn)) {
-				BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+				br = new BufferedReader(new InputStreamReader(conn.getInputStream(),Charset.forName("UTF-8")));
 				StringBuilder result = new StringBuilder();
 				String output;
 				while ((output = br.readLine()) != null) {
@@ -94,7 +95,13 @@ public class SessionNameIdHolder {
                            e.printStackTrace(); 
 			
 		} finally {
-			conn.disconnect();
+                    if (conn != null){
+                        conn.disconnect();
+                    }
+			                        
+                    if (br != null){
+                        br.close();
+                    }
 		}
                 
                 return sessionList;

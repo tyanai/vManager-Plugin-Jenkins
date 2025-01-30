@@ -485,8 +485,10 @@ public class VMGRLaunch extends Builder {
         if ("credential".equals(credentialType)) {
             //overwrite the plain text with the credentials
             StandardUsernamePasswordCredentials c = CredentialsProvider.findCredentialById(this.vAPICredentials, StandardUsernamePasswordCredentials.class, build, Collections.<DomainRequirement>emptyList());
-            tempUser = c.getUsername();
-            tempPassword = c.getPassword().getPlainText();
+            if (c != null){
+                tempUser = c.getUsername();
+                tempPassword = c.getPassword().getPlainText();
+            }
             listener.getLogger().println("Credentials set with ID " + this.vAPICredentials);
         }
         listener.getLogger().println("The vAPIUser for vAPI is: " + tempUser);
@@ -959,27 +961,28 @@ public class VMGRLaunch extends Builder {
                 } else if (value.indexOf(".") > 0) {
                     return FormValidation.error("(.) is not allowed for seperation.  Please use only comma as a seperator.");
                 }
-            }
+            
 
-            List<String> items = Arrays.asList(value.split("\\s*,\\s*"));
+                List<String> items = Arrays.asList(value.split("\\s*,\\s*"));
 
-            Iterator<String> iter = items.iterator();
+                Iterator<String> iter = items.iterator();
 
-            String tmpAttr = null;
-            while (iter.hasNext()) {
-                tmpAttr = iter.next();
-                if (tmpAttr.indexOf(" ") > 0) {
-                    return FormValidation.error("'" + tmpAttr + "' is not a valid option for Verisium Manager attribute code name. Attribute code names can't have space.  Try using underscore instaed.");
-                } else if (tmpAttr.equals("first_failure_name")) {
-                    return FormValidation.warning("'" + tmpAttr + "' is already included as part of the stack error message by default.");
-                } else if (tmpAttr.equals("first_failure_description")) {
-                    return FormValidation.warning("'" + tmpAttr + "' is already included as part of the stack error message by default.");
-                } else if (tmpAttr.equals("computed_seed")) {
-                    return FormValidation.warning("'" + tmpAttr + "' is already included as part of the stack error message by default.");
-                } else if (tmpAttr.equals("test_group")) {
-                    return FormValidation.warning("'" + tmpAttr + "' is already included as part of the stack error message by default.");
-                } else if (tmpAttr.equals("test_name")) {
-                    return FormValidation.warning("'" + tmpAttr + "' is already included as part of the stack error message by default.");
+                String tmpAttr = null;
+                while (iter.hasNext()) {
+                    tmpAttr = iter.next();
+                    if (tmpAttr.indexOf(" ") > 0) {
+                        return FormValidation.error("'" + tmpAttr + "' is not a valid option for Verisium Manager attribute code name. Attribute code names can't have space.  Try using underscore instaed.");
+                    } else if (tmpAttr.equals("first_failure_name")) {
+                        return FormValidation.warning("'" + tmpAttr + "' is already included as part of the stack error message by default.");
+                    } else if (tmpAttr.equals("first_failure_description")) {
+                        return FormValidation.warning("'" + tmpAttr + "' is already included as part of the stack error message by default.");
+                    } else if (tmpAttr.equals("computed_seed")) {
+                        return FormValidation.warning("'" + tmpAttr + "' is already included as part of the stack error message by default.");
+                    } else if (tmpAttr.equals("test_group")) {
+                        return FormValidation.warning("'" + tmpAttr + "' is already included as part of the stack error message by default.");
+                    } else if (tmpAttr.equals("test_name")) {
+                        return FormValidation.warning("'" + tmpAttr + "' is already included as part of the stack error message by default.");
+                    }
                 }
             }
 

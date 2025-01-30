@@ -726,7 +726,7 @@ public class VMGRLaunchStep extends Step {
         }
 
         public FormValidation doCheckStaticAttributeList(@QueryParameter String value) throws IOException, ServletException {
-            if (value != null) {
+            if (value != null) { 
                 if (value.indexOf(";") > 0) {
                     return FormValidation.error("(;) is not allowed for seperation.  Please use only comma as a seperator.");
                 } else if (value.indexOf("|") > 0) {
@@ -734,30 +734,30 @@ public class VMGRLaunchStep extends Step {
                 } else if (value.indexOf(".") > 0) {
                     return FormValidation.error("(.) is not allowed for seperation.  Please use only comma as a seperator.");
                 }
-            }
+            
 
-            List<String> items = Arrays.asList(value.split("\\s*,\\s*"));
+                List<String> items = Arrays.asList(value.split("\\s*,\\s*"));
 
-            Iterator<String> iter = items.iterator();
+                Iterator<String> iter = items.iterator();
 
-            String tmpAttr = null;
-            while (iter.hasNext()) {
-                tmpAttr = iter.next();
-                if (tmpAttr.indexOf(" ") > 0) {
-                    return FormValidation.error("'" + tmpAttr + "' is not a valid option for Verisium Manager attribute code name. Attribute code names can't have space.  Try using underscore instaed.");
-                } else if (tmpAttr.equals("first_failure_name")) {
-                    return FormValidation.warning("'" + tmpAttr + "' is already included as part of the stack error message by default.");
-                } else if (tmpAttr.equals("first_failure_description")) {
-                    return FormValidation.warning("'" + tmpAttr + "' is already included as part of the stack error message by default.");
-                } else if (tmpAttr.equals("computed_seed")) {
-                    return FormValidation.warning("'" + tmpAttr + "' is already included as part of the stack error message by default.");
-                } else if (tmpAttr.equals("test_group")) {
-                    return FormValidation.warning("'" + tmpAttr + "' is already included as part of the stack error message by default.");
-                } else if (tmpAttr.equals("test_name")) {
-                    return FormValidation.warning("'" + tmpAttr + "' is already included as part of the stack error message by default.");
+                String tmpAttr = null;
+                while (iter.hasNext()) {
+                    tmpAttr = iter.next();
+                    if (tmpAttr.indexOf(" ") > 0) {
+                        return FormValidation.error("'" + tmpAttr + "' is not a valid option for Verisium Manager attribute code name. Attribute code names can't have space.  Try using underscore instaed.");
+                    } else if (tmpAttr.equals("first_failure_name")) {
+                        return FormValidation.warning("'" + tmpAttr + "' is already included as part of the stack error message by default.");
+                    } else if (tmpAttr.equals("first_failure_description")) {
+                        return FormValidation.warning("'" + tmpAttr + "' is already included as part of the stack error message by default.");
+                    } else if (tmpAttr.equals("computed_seed")) {
+                        return FormValidation.warning("'" + tmpAttr + "' is already included as part of the stack error message by default.");
+                    } else if (tmpAttr.equals("test_group")) {
+                        return FormValidation.warning("'" + tmpAttr + "' is already included as part of the stack error message by default.");
+                    } else if (tmpAttr.equals("test_name")) {
+                        return FormValidation.warning("'" + tmpAttr + "' is already included as part of the stack error message by default.");
+                    }
                 }
             }
-
             return FormValidation.ok();
         }
 

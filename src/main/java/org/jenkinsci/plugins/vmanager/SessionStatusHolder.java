@@ -16,6 +16,7 @@ import java.util.Properties;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import hudson.model.TaskListener;
+import java.nio.charset.Charset;
 import java.util.Map;
 
 public class SessionStatusHolder {
@@ -37,7 +38,7 @@ public class SessionStatusHolder {
 	int connConnTimeOut;
 	int connReadTimeout;
 	boolean advConfig;
-	boolean notInTestMode; 
+	
 	boolean markBuildAsFailedIfAllRunFailed = false;
         boolean failJobIfAllRunFailed = false;
         boolean markBuildAsPassedIfAllRunPassed = false;
@@ -91,15 +92,16 @@ public class SessionStatusHolder {
                 HttpURLConnection conn = null;		
 		String apiURL = url + "/rest/sessions/list";
 		
+                BufferedReader br = null;
 		try {
 			conn = utils.getVAPIConnection(apiURL, requireAuth, user, password, "POST", dynamicUserId, buildId, buildNumber, workPlacePath, listener, connConnTimeOut, connReadTimeout, advConfig);
 
 			OutputStream os = conn.getOutputStream();
-			os.write(postSessionData.getBytes());
+			os.write(postSessionData.getBytes(Charset.forName("UTF-8")));
 			os.flush();
 
 			if (checkResponseCode(conn)) {
-				BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+				br = new BufferedReader(new InputStreamReader(conn.getInputStream(),Charset.forName("UTF-8")));
 				StringBuilder result = new StringBuilder();
 				String output;
 				while ((output = br.readLine()) != null) {
@@ -115,7 +117,10 @@ public class SessionStatusHolder {
 				}
 				
 				//Retrive all the session params
-				writeSessionIntoFile(sessionObject,postSession,sessionIdName,utils,launcher);
+                                if (sessionObject != null){
+                                    writeSessionIntoFile(sessionObject,postSession,sessionIdName,utils,launcher);
+                                } 
+                                    
 				
 				
 				
@@ -132,7 +137,14 @@ public class SessionStatusHolder {
 			
 			
 		} finally {
-			conn.disconnect();
+                    if (conn != null){
+                        conn.disconnect();
+                    }
+                    
+                    if (br != null){
+                        br.close();
+                    }
+			
 
 		}
 	}
@@ -240,26 +252,15 @@ public class SessionStatusHolder {
 		writer.append("url=" + sessionData.getServerUrl() + "\n");
                 writer.append("idNames=" + idNameResult + "\n");
 		 
-                //utils.standardWriteToDisk(fileOutput, writer.toString());
-                
-                
-                
-                try{
-                    String fileOutput = buildNumber + "." + buildId + ".session_status.properties";
-                    if (utils.getFilePath() == null){
-                        //Pipeline always run on master
-                        fileOutput = this.workPlacePath + File.separator + fileOutput;            
-                    }
-                    utils.saveFileOnDisk(fileOutput, writer.toString());
-                    utils.moveFromNodeToMaster(buildNumber + "." + buildId + ".session_status.properties", launcher,writer.toString());
-                }catch (Exception e){
-                    this.listener.getLogger().println("Info - Failed to dump session status for workspace dir for backward compatibility.  This is not a must.");
+
+                String fileOutput = buildNumber + "." + buildId + ".session_status.properties";
+                if (utils.getFilePath() == null){
+                    //Pipeline always run on master
+                    fileOutput = this.workPlacePath + File.separator + fileOutput;            
                 }
-                /*
-                Path copyFrom = FileSystems.getDefault().getPath(fileOutput);
-                Path copyTo = FileSystems.getDefault().getPath(copyToWorkspace);
-                Files.copy(copyFrom, copyTo, StandardCopyOption.REPLACE_EXISTING);
-                */
+                utils.saveFileOnDisk(fileOutput, writer.toString());
+                utils.moveFromNodeToMaster(buildNumber + "." + buildId + ".session_status.properties", launcher,writer.toString());
+               
                
                 if (postSession){
                     //Just before continue to the next Jenkins step, check if the user choose to fail the entire Job in case all runs failed
@@ -378,7 +379,7 @@ public class SessionStatusHolder {
 		
 	
 	public SessionStatusHolder(String url, boolean requireAuth, String user, String password, TaskListener listener, boolean dynamicUserId, int buildNumber, String workPlacePath, String buildId,
-			int connConnTimeOut, int connReadTimeout, boolean advConfig, boolean notInTestMode,List<String> listOfSessions, boolean markBuildAsFailedIfAllRunFailed, boolean failJobIfAllRunFailed,String workingJobDir, boolean markBuildAsPassedIfAllRunPassed, boolean failJobUnlessAllRunPassed) {
+			int connConnTimeOut, int connReadTimeout, boolean advConfig, List<String> listOfSessions, boolean markBuildAsFailedIfAllRunFailed, boolean failJobIfAllRunFailed,String workingJobDir, boolean markBuildAsPassedIfAllRunPassed, boolean failJobUnlessAllRunPassed) {
 		
 		super();
 		this.url = url;
@@ -393,7 +394,6 @@ public class SessionStatusHolder {
 		this.connConnTimeOut = connConnTimeOut;
 		this.connReadTimeout = connReadTimeout;
 		this.advConfig = advConfig;
-		this.notInTestMode = notInTestMode;
 		this.listOfSessions = listOfSessions;
 		this.markBuildAsFailedIfAllRunFailed = markBuildAsFailedIfAllRunFailed;
 		this.failJobIfAllRunFailed = failJobIfAllRunFailed;

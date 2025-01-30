@@ -40,6 +40,7 @@ import org.kohsuke.stapler.QueryParameter;
 
 public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializable {
 
+    private static final long serialVersionUID = 4000009076155338045L;
     private transient Run<?, ?> build;
 
     private String vAPIUrl;
@@ -356,8 +357,10 @@ public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializa
             if ("credential".equals(credentialType)) {
                 //overwrite the plain text with the credentials
                 StandardUsernamePasswordCredentials c = CredentialsProvider.findCredentialById(this.vAPICredentials, StandardUsernamePasswordCredentials.class, run, Collections.<DomainRequirement>emptyList());
-                vAPIConnectionParam.vAPIUser = c.getUsername();
-                vAPIConnectionParam.vAPIPassword = c.getPassword().getPlainText();
+                if (c != null){
+                    vAPIConnectionParam.vAPIUser = c.getUsername();
+                    vAPIConnectionParam.vAPIPassword = c.getPassword().getPlainText();
+                }
             }
 
             if (retrieveSummaryReport) {
