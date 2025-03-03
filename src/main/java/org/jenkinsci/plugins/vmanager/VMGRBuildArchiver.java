@@ -154,7 +154,7 @@ public class VMGRBuildArchiver {
             }
             writer.append("sessions=" + sessions + "\n");
             utils.saveFileOnDisk(fileOutput, writer.toString());
-            utils.moveFromNodeToMaster(fileOutput, launcher,writer.toString());
+            utils.moveFromNodeToMaster(fileOutput);
             
 
         } catch (IOException ex) {

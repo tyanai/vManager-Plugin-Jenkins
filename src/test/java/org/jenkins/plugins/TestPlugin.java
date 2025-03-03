@@ -1,13 +1,21 @@
 package org.jenkins.plugins;
 
+import hudson.model.TaskListener;
+import java.io.BufferedReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.Charset;
+import javax.net.ssl.HttpsURLConnection;
+import org.apache.commons.codec.binary.Base64;
 import org.jenkinsci.plugins.vmanager.ReportManager;
 import org.jenkinsci.plugins.vmanager.Utils;
 import org.jenkinsci.plugins.vmanager.SummaryReportParams;
+import static org.jenkinsci.plugins.vmanager.Utils.configureAllowAll;
 import org.jenkinsci.plugins.vmanager.VAPIConnectionParam;
 
 public class TestPlugin {
 
-    final String vAPIUrl = "https://vlnx488:50500/vmgr/vapi";
+    final String vAPIUrl = "https://ilvmanager08:50500/vmgr/vapi";
     final boolean authRequired = true;
     final String vAPIUser = "root";
     final String vAPIPassword = "letmein";
@@ -35,7 +43,7 @@ public class TestPlugin {
     private final boolean markJobAsFailedIfAllRunFailed = false;
     private final boolean markBuildAsPassedIfAllRunPassed = false;
     private final boolean failJobUnlessAllRunPassed = false;
-
+    
     public static void main(String[] args) throws Exception {
         // TODO Auto-generated method stub
 
@@ -48,8 +56,7 @@ public class TestPlugin {
 
         Utils utils = new Utils();
 
-        //System.out.println(Utils.getRegressionURLFromVAPIURL("https://vlnx488:50500/vmgr/vapi"));
-        //Test Summary Report
+       
         SummaryReportParams summaryReportParams;
         VAPIConnectionParam vAPIConnectionParam;
         vAPIConnectionParam = new VAPIConnectionParam();
@@ -81,7 +88,7 @@ public class TestPlugin {
         summaryReportParams.ctxInput = true;
         summaryReportParams.ctxAdvanceInput = "{\"vplanFile\":\"\\/home\\/segal\\/work\\/vpm\\/APB_UART.vplanx\"}";
         
-        
+        summaryReportParams.summaryMode = "fffff";
        
         
         
@@ -123,6 +130,50 @@ public class TestPlugin {
         //utils.executeAPI("{}", "/runs/get?id=5", vAPIUrl, authRequired, vAPIUser, vAPIPassword, "GET", null, false, buildID+"-2", buildNumber, buildArtifactPath,0,0,false);
 
 */
+    }
+    
+    public HttpURLConnection getVAPIConnection() throws Exception {
+
+       
+        //In case this is an SSL connections
+        String apiUrl = "https://ilvmanager08:50500/vmgr/vapi/rest/sessions/sleep?time=10000";
+        String requestMethod = "GET";
+        int connConnTimeOut = 1;
+        int connReadTimeout = 30;
+        String user = "root";
+        String password = "letmein";
+        
+                
+        URL url = new URL(apiUrl);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
+        conn.setDoOutput(true);
+        conn.setRequestMethod(requestMethod);
+        if ("PUT".equals(requestMethod) || "POST".equals(requestMethod)) {
+            conn.setRequestProperty("Content-Type", "application/json");
+        }
+
+        // set the connection timeouts to one minute and the read timeout to 30 minutes by default
+       
+         conn.setConnectTimeout(connConnTimeOut * 60 * 1000);
+       
+
+        
+        conn.setReadTimeout(connReadTimeout * 60 * 1000);
+       
+        conn.setReadTimeout(1800000);
+        
+        // ----------------------------------------------------------------------------------------
+        // Authentication
+        // ----------------------------------------------------------------------------------------
+
+        String authString = user + ":" + password;
+        
+        byte[] authEncBytes = Base64.encodeBase64(authString.getBytes(Charset.forName("UTF-8")));
+        String authStringEnc = new String(authEncBytes,Charset.forName("UTF-8"));
+        conn.setRequestProperty("Authorization", "Basic " + authStringEnc);
+        // ----------------------------------------------------------------------------------------
+        return conn;
     }
 
 }

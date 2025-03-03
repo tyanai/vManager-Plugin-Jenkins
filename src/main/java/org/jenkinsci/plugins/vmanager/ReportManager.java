@@ -33,7 +33,9 @@ import hudson.plugins.vmanager.BuildStatusMap;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -572,6 +574,7 @@ public class ReportManager {
                 //writer.flush();
 
                 utils.saveFileOnDisk(fileOutput, writer.toString());
+                utils.moveFromNodeToMaster(buildNumber + "." + buildId + ".summary.report");
                 //writer.close();
 
                 if (!this.testMode) {
@@ -619,46 +622,118 @@ public class ReportManager {
             } else {
                 System.out.println(postData);
             }
-
+            //listener.getLogger().println("1");
             os.write(postData.getBytes(Charset.forName("UTF-8")));
+            //listener.getLogger().println("2");
             os.flush();
-
+            //listener.getLogger().println("3");
+            
+                  
+            
             if (checkResponseCode(conn)) {
+                if (isStreamingOn) {
+                    //listener.getLogger().println("4");
+                    InputStream inputStream = conn.getInputStream();
+                    String fileOutput = buildNumber + "." + buildId + ".summary.report";
+                    if (utils.getFilePath() == null){
+                        //Pipeline always run on master
+                        fileOutput = jobWorkingDir + File.separator + fileOutput;            
+                    } else {
+                        hudson.FilePath newFile = utils.getFilePath().child(fileOutput);    
+                        fileOutput = newFile.getRemote();
+                    }
+                    listener.getLogger().println("Full Path of temporary remote report is: " + fileOutput);
+                    
+                    
+                    try (FileOutputStream outputStream = new FileOutputStream(fileOutput)) {
+                        byte[] buffer = new byte[8192]; // Buffer size set to 8192 bytes
+                        int bytesRead;
 
+                        // Read bytes from the InputStream and write them to the FileOutputStream
+                        while ((bytesRead = inputStream.read(buffer)) != -1) {
+                            //listener.getLogger().println("9");
+                            outputStream.write(buffer, 0, bytesRead);
+                        }
+                        //listener.getLogger().println("9.1");
+                        outputStream.flush();
+                        //listener.getLogger().println("9.2");
+                        utils.moveFromNodeToMaster(buildNumber + "." + buildId + ".summary.report");
+                        //listener.getLogger().println("9.3");
+                        if (!this.testMode) {
+                            listener.getLogger().println("Report Summary was created succesfully.");
+                        }
+
+                    } catch (IOException e) {
+                        listener.getLogger().println("Failed to stream the report from the server.");
+                        e.printStackTrace();
+                    } finally {
+                        // Close the InputStream if it was opened
+                        if (inputStream != null) {
+                            try {
+                                inputStream.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                } else {
+                    br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+                    //listener.getLogger().println("5");
+                    StringBuffer sb = new StringBuffer();
+                    //listener.getLogger().println("6");
+                    String output;
+                    while ((output = br.readLine()) != null) {
+                        sb.append(output);
+                        //listener.getLogger().println("7");
+                    }
+                    fetchFromRemoteURL(sb.toString());                   
+                    //listener.getLogger().println("8");
+                }
+                
+                
+                /*
+                listener.getLogger().println("4");
                 br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
-
+                listener.getLogger().println("5");
                 String fileOutput;
                 StringBuffer sb;
                 String output;
                 if (isStreamingOn) {
+                    listener.getLogger().println("6");
                     fileOutput = buildNumber + "." + buildId + ".summary.report";
                     StringBuffer writer = new StringBuffer();
                     while ((output = br.readLine()) != null) {
+                        listener.getLogger().println("9");
                         writer.append(output);
+                        
                     }
                     if (utils.getFilePath() == null){
                         //Pipeline always run on master
                         fileOutput = jobWorkingDir + File.separator + fileOutput;            
                     }
                     utils.saveFileOnDisk(fileOutput, writer.toString());
-                    utils.moveFromNodeToMaster(buildNumber + "." + buildId + ".summary.report", launcher,writer.toString());
+                    utils.moveFromNodeToMaster(buildNumber + "." + buildId + ".summary.report");
 
                     
                     if (!this.testMode) {
                         listener.getLogger().println("Report Summary was created succesfully.");
                     }
                 } else {
+                    listener.getLogger().println("7");
                     sb = new StringBuffer();
                     while ((output = br.readLine()) != null) {
                         sb.append(output);
+                        listener.getLogger().println("8");
                     }
                     fetchFromRemoteURL(sb.toString());
+                    listener.getLogger().println("10");
                 }
+                */
 
             } else {
-
+                //listener.getLogger().println("11");
                 br = new BufferedReader(new InputStreamReader(conn.getErrorStream(), "UTF-8"));
-
+                //listener.getLogger().println("12");
                 String output;
                 String fileOutput = buildNumber + "." + buildId + ".summary.report";
                 if (utils.getFilePath() == null){
@@ -669,10 +744,12 @@ public class ReportManager {
                 writer.append("<div class=\"microAgentWaiting\"><div class=\"spinnerMicroAgentMessage\"><p><img src=\"/plugin/vmanager-plugin/img/support-icon.png\"></img></p><p>");
                 writer.append("Failure to retrieve the report from the Verisium Manager server for this build.  Check your parameters.<br>Below you can find the exception that was thrown during the retrieval process:<br><br><strong>");
                 while ((output = br.readLine()) != null) {
+                    //listener.getLogger().println("13");
                     writer.append(output + "<br>");
                 }
 
                 if (conn.getResponseCode() == 500) {
+                    //listener.getLogger().println("14");
                     //This is an error with the existance of the acctual API call.  Probably because the version is too old
                     if ("stream".equals(summaryReportParams.vManagerVersion)) {
                         writer.append("<br><br>");
@@ -680,16 +757,22 @@ public class ReportManager {
                         writer.append("If that's the case, and if your Verisium Manager server version is below 19.09 - set Verisium Manager Version as \"html\" (if pipeline dsl is used), or \"Lower than 19.09\" for regular post configuration mode.<br>");
                     }
                 }
-
+                //listener.getLogger().println("15");
                 writer.append("</strong></p></div></div>");
+                //listener.getLogger().println("16");
                 utils.saveFileOnDisk(fileOutput, writer.toString());
-                utils.moveFromNodeToMaster(buildNumber + "." + buildId + ".summary.report", launcher,writer.toString());
+                //listener.getLogger().println("17");
+                utils.moveFromNodeToMaster(buildNumber + "." + buildId + ".summary.report");
+                //listener.getLogger().println("18");
 
             }
         } catch (Exception e) {
             if (this.testMode) {
                 e.printStackTrace();
             } else {
+                
+                //listener.getLogger().println("19");
+                e.printStackTrace();
                 if (!this.testMode) {
                     listener.getLogger().println("Failed to retrieve report from the Verisium Manager server.");
 
@@ -704,12 +787,13 @@ public class ReportManager {
                     writer.append(e.getMessage());
                     writer.append("</strong></p></div></div>");
                     utils.saveFileOnDisk(fileOutput, writer.toString());
-                    utils.moveFromNodeToMaster(buildNumber + "." + buildId + ".summary.report", launcher,writer.toString());
+                    utils.moveFromNodeToMaster(buildNumber + "." + buildId + ".summary.report");
                 }
             }
             throw e;
 
         } finally {
+            //listener.getLogger().println("20");
             if (conn != null){
                 conn.disconnect();
             }
@@ -717,7 +801,7 @@ public class ReportManager {
             if (br != null){
                 br.close();
             }
-            
+            //listener.getLogger().println("21");
 
         }
         

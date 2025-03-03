@@ -259,7 +259,7 @@ public class SessionStatusHolder {
                     fileOutput = this.workPlacePath + File.separator + fileOutput;            
                 }
                 utils.saveFileOnDisk(fileOutput, writer.toString());
-                utils.moveFromNodeToMaster(buildNumber + "." + buildId + ".session_status.properties", launcher,writer.toString());
+                utils.moveFromNodeToMaster(buildNumber + "." + buildId + ".session_status.properties");
                
                
                 if (postSession){

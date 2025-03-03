@@ -1379,15 +1379,10 @@ public class Utils {
         return new BufferedReader(new FileReader(fileOnDiskPath,Charset.forName("UTF-8")));
     }
 
-    public void moveFromNodeToMaster(String fileName, Launcher launcher, String content) throws IOException, InterruptedException {
+    public void moveFromNodeToMaster(String fileName) throws IOException, InterruptedException {
 
         //Get master FilePath
-        
         FilePath masterDirectory = new FilePath(build.getRootDir()).child(fileName);
-        //this.jobListener.getLogger().print("About to copy " + fileName + " from Slave location to Master location: \n");
-        //this.jobListener.getLogger().print("From Slave location: " + this.filePath.getRemote() + "\n");
-        //this.jobListener.getLogger().print("To Master location: " + buildDir + "\n\n");
-
         this.filePath.child(fileName).copyTo(masterDirectory);
 
     }

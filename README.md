@@ -554,6 +554,12 @@ the following format within the job working directory: 
 
 ## Change Log
 
+##### Version 4.0.0 (Feb 18, 2025)
+-	Breaking Change - Only compatible with Jenkins version 2.479 and higher
+-	Added Support in Java 17
+-	Resolved the problem where the user password was being reset after every configuration save
+-	Move the PostStep Report to stream directly from the server to the disk
+
 ##### Version 3.2.1.6 (Feb 8, 2024)
 -	Fix - Exit criteria for a single session execution with state \"Failed\" didn\'t trigger when session ended
 
