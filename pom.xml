@@ -9,7 +9,7 @@
   </parent>
 
   <artifactId>vmanager-plugin</artifactId>
-  <version>3.2.1.8-SNAPSHOT</version>
+  <version>4.0.0</version>
   <packaging>hpi</packaging>
   <description>Integrates Jenkins to Cadence vManager</description>
   <url>https://github.com/jenkinsci/vmanager-plugin</url>
@@ -39,7 +39,7 @@
     <connection>scm:git:https://github.com/jenkinsci/vmanager-plugin.git</connection>
     <developerConnection>scm:git:git@github.com:jenkinsci/vmanager-plugin.git</developerConnection>
     <url>https://github.com/jenkinsci/vmanager-plugin</url>
-    <tag>vmanager-plugin-3.1.9</tag>
+    <tag>vmanager-plugin-4.0.0</tag>
   </scm>
   <dependencyManagement>
     <dependencies>
