@@ -9,7 +9,7 @@
   </parent>
 
   <artifactId>vmanager-plugin</artifactId>
-  <version>${revision}${changelist}</version>
+  <version>${revision}-${changelist}</version>
   <packaging>hpi</packaging>
   <description>Integrates Jenkins to Cadence vManager</description>
   <url>https://github.com/jenkinsci/vmanager-plugin</url>
@@ -22,7 +22,7 @@
   
   <properties>
     <revision>4.0.0</revision>
-    <changelist>-SNAPSHOT</changelist>
+    <changelist>999999-SNAPSHOT</changelist>
     <gitHubRepo>jenkinsci/vmanager-plugin</gitHubRepo>
     <findbugs.failOnError>false</findbugs.failOnError>
     <!-- https://www.jenkins.io/doc/developer/plugin-development/choosing-jenkins-baseline/ -->
