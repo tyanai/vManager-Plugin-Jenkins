@@ -559,6 +559,8 @@ the following format within the job working directory: 
 -	Added Support in Java 17
 -	Resolved the problem where the user password was being reset after every configuration save
 -	Move the PostStep Report to stream directly from the server to the disk
+-	Adjusted tables and icons to Jenkins new CSS
+-	Enabled CD (Continuous Delivery)
 
 ##### Version 3.2.1.6 (Feb 8, 2024)
 -	Fix - Exit criteria for a single session execution with state \"Failed\" didn\'t trigger when session ended
