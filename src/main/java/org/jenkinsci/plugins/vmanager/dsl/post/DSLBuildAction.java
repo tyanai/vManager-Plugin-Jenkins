@@ -19,7 +19,7 @@ import org.jenkinsci.plugins.vmanager.VMGRRun;
 
 public class DSLBuildAction extends PostActionBase implements Serializable, RunAction2,  SimpleBuildStep.LastBuildAction  {
 
-    private static final long serialVersionUID = 2000009076155338045L;
+    private static final long serialVersionUID = 2000009076155338046L;
     
     private String message;
     private transient Run<?, ?> build;
@@ -27,7 +27,7 @@ public class DSLBuildAction extends PostActionBase implements Serializable, RunA
 
     @Override
     public String getIconFileName() {
-        return "/plugin/vmanager-plugin/img/weblinks.png";
+        return "symbol-link-outline plugin-ionicons-api";
     }
 
     @Override
