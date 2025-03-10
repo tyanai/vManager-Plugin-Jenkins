@@ -14,12 +14,12 @@ import org.jenkinsci.plugins.vmanager.VMGRRun;
 
 public class DSLProjectAction extends PostActionBase implements Serializable, Action {
 
-    private static final long serialVersionUID = 3000009076155338045L;
+    private static final long serialVersionUID = 3000009076155338046L;
     private transient  Job<?, ?> project;
 
     @Override
     public String getIconFileName() {
-        return "/plugin/vmanager-plugin/img/project_icon.png";
+        return "symbol-list-outline plugin-ionicons-api";
     }
 
     @Override

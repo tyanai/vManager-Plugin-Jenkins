@@ -40,7 +40,7 @@ import org.kohsuke.stapler.QueryParameter;
 
 public class DSLPublisher extends Recorder implements SimpleBuildStep, Serializable {
 
-    private static final long serialVersionUID = 4000009076155338045L;
+    private static final long serialVersionUID = 4000009076155338046L;
     private transient Run<?, ?> build;
 
     private String vAPIUrl;

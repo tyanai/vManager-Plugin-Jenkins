@@ -15,7 +15,7 @@ import org.jenkinsci.plugins.vmanager.VAPIConnectionParam;
 
 public class ReportBuildAction extends PostActionBase implements Serializable, RunAction2 {
     
-    private static final long serialVersionUID = 5000009076155338045L;
+    private static final long serialVersionUID = 5000009076155338046L;
     private transient Run<?, ?> build;
     private transient TaskListener listener;
     private transient ReportManager reportManager;
@@ -28,7 +28,7 @@ public class ReportBuildAction extends PostActionBase implements Serializable, R
     
     @Override 
     public String getIconFileName() {
-        return "/plugin/vmanager-plugin/img/report.png";
+        return "symbol-checkbox-outline plugin-ionicons-api";
     }
 
     @Override

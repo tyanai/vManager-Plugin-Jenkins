@@ -1,7 +1,7 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:d="jelly:define" xmlns:l="/lib/layout"
          xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:i="jelly:fmt">
-    <t:summary icon="/plugin/vmanager-plugin/img/chart_s.png">
+    <t:summary icon="symbol-analytics-outline plugin-ionicons-api">
                 <a target="_blank" href="${it.getvManagerLink(true)}">Verisium Manager Analysis</a>
     </t:summary>
 </j:jelly>
